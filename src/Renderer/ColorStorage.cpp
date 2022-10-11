@@ -1,0 +1,69 @@
+#include "ColorStorage.h"
+
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <cmath>
+
+void ColorStorage::Generate(size_t maxIter, size_t polygons)
+{
+  m_data.resize(polygons * maxIter * SIZE);
+  color_t* ptr = m_data.data();
+
+  m_hue = m_seedHue;
+
+  for (size_t i = 0; i < maxIter; ++i)
+  {
+    assert(ptr < m_data.data() + GetSize() && "Out of range");
+
+    GenerateRandomRGBAColor(ptr, /*1.0f*/0.9f);
+    if (polygons > 1)
+    {
+      if(polygons == 1)
+        std::memcpy(ptr + SIZE, ptr, SIZE * sizeof(color_t));
+      else
+      {
+        for (uint32_t j = 1; j < polygons; ++j)
+          std::memcpy(ptr + (SIZE * j), ptr, SIZE * sizeof(color_t));
+      }
+    }
+    ptr += polygons * SIZE;
+  }
+}
+
+void ColorStorage::GenerateRandomRGBAColor(color_t* dst, color_t alpha)
+{
+  //https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+  constexpr float golden_ratio_conjugate = (float) 0.618033988749895;
+
+  m_hue += golden_ratio_conjugate;
+  m_hue = std::fmod(m_hue, 1.0f);
+
+  float r = 0;
+  float g = 0;
+  float b = 0;
+  const float h = m_hue;
+  const float s = m_saturation;
+  const float v = m_brightness;
+
+  int h_i = h * 6;
+  float f = h * 6 - h_i;
+  float p = v * (1 - s);
+  float q = v * (1 - f * s);
+  float t = v * (1 - (1 - f) * s);
+  switch (h_i)
+  {
+  case 0: r = v; g = t; b = p; break;
+  case 1: r = q; g = v; b = p; break;
+  case 2: r = p; g = v; b = t; break;
+  case 3: r = p; g = q; b = v; break;
+  case 4: r = t; g = p; b = v; break;
+  case 5: r = v; g = p; b = q; break;
+  default: assert(0 && "Unreachable"); break;
+  }
+
+  dst[0] = r;
+  dst[1] = g;
+  dst[2] = b;
+  dst[3] = alpha;
+}
