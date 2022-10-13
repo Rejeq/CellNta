@@ -102,7 +102,11 @@ void Renderer::Draw()
   {
   case CubeMode::POINTS:
     renderMode = GL_POINTS;
-    //glPointSize(10.0f); //Not available in gles32
+#if defined(CELLNTA_RENDERER_GL)
+    glPointSize(10.0f);
+#else
+#error "Add support for glPointSize"
+#endif
     break;
   case CubeMode::WIREFRAME: renderMode = GL_LINES; break;
   case CubeMode::POLYGON: renderMode = GL_TRIANGLES; break;
@@ -230,11 +234,6 @@ void Renderer::ProjectBuffers()
   UpdateCellBuffer();
 }
 
-size_t Renderer::GetDimensionsMaxSize()
-{
-  return 5;
-}
-
 void Renderer::InitBuffers()
 {
   ProfileScope;
@@ -334,10 +333,6 @@ void Renderer::UpdateCubeBuffer()
     dst[0] = pnt[GetCollatingX()]; //x
     dst[1] = pnt[GetCollatingY()]; //y
     dst[2] = pnt[GetCollatingZ()]; //z
-
-    //dst[0] = pnt[0] + offset; //x
-    //dst[1] = pnt[1] + offset; //y
-    //dst[2] = pnt[2] + offset; //z
 
     pnt += m_cube.GetVertexSize(); dst += 3;
   }

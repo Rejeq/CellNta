@@ -19,18 +19,11 @@ void Ui::RendererWindow::Draw()
 {
   ProfileScope;
 
-  static bool AlwaysShowTabs = false;
-  static bool ShowCellsTab = false;
-  static bool ShowChunksTab = false;
-
   constexpr ImGuiWindowFlags WinFlags = ImGuiWindowFlags_HorizontalScrollbar;
   Renderer& ren = GetContext()->GetCanvas();
 
   if (ImGui::Begin(p_name, &p_open, WinFlags))
   {
-    const size_t maxDimensions = ren.GetDimensionsMaxSize();
-    ImGui::Text("Max dimensions: %zu", maxDimensions);
-
     uint32_t dimensions = ren.GetDimensions();
     if (Widget::Input("Cube dimensions", &dimensions, 1, ImGuiInputTextFlags_CharsDecimal))
     {
@@ -43,11 +36,11 @@ void Ui::RendererWindow::Draw()
     if (Widget::Input("Render distance", &renderDistance, 1, ImGuiInputTextFlags_CharsDecimal))
       ren.SetRenderDistance(renderDistance);
 
-    static const std::array<Widget::ComboData<CubeMode>, 3> CubeModeData = {{
-      {CubeMode::POINTS,    "Points"},
-      {CubeMode::WIREFRAME, "Wireframe"},
-      {CubeMode::POLYGON,   "Polygon (not work from 6d)"},
-    }};
+    static const std::array<ComboData<CubeMode>, 3> CubeModeData = {
+      ComboData(CubeMode::POINTS,    "Points"),
+      ComboData(CubeMode::WIREFRAME, "Wireframe"),
+      ComboData(CubeMode::POLYGON,   "Polygon (gives errors from 6d)"),
+    };
 
     CubeMode res;
     if (Widget::ComboEnum("Cube mode", ren.GetCubeMode(), CubeModeData, res))
@@ -63,8 +56,6 @@ void Ui::RendererWindow::Draw()
 
     ImGui::Spacing();
 
-    ImGui::Checkbox("Always show tabs", &AlwaysShowTabs);
-
     if (ImGui::BeginTabBar("RendererTabBar"))
     {
       if (ImGui::BeginTabItem("Dimensions cameras"))
@@ -75,17 +66,14 @@ void Ui::RendererWindow::Draw()
       }
 
       {
-        char* CellsTabStr = nullptr;
         const size_t cellsSize = ren.GetCells().size();
-
-        if (AlwaysShowTabs) ShowCellsTab = true;
-        if (cellsSize != 0) ShowCellsTab = true;
+        if (cellsSize != 0) m_showCellsTab = true;
 
         size_t size = 28 + 9;
-        CellsTabStr = GetContext()->GetTmpBuffer(size);
+        char* CellsTabStr = GetContext()->GetTmpBuffer(size);
         snprintf(CellsTabStr, size, "Loaded Cells(%zu)###LoadedCells", cellsSize);
 
-        if (ShowCellsTab)
+        if (m_showCellsTab)
         {
           if (ImGui::BeginTabItem(CellsTabStr))
           {

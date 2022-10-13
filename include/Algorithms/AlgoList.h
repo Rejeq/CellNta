@@ -6,7 +6,6 @@
 
 #define CELLNTA_ALGO_RANDOM (CELLNTA_ALL_ALGOS || 1)
 #define CELLNTA_ALGO_SIMPLE (CELLNTA_ALL_ALGOS || 1)
-#define CELLNTA_ALGO_OTHER  (CELLNTA_ALL_ALGOS || 0)
 
 #include "AlgoBase.h"
 
@@ -30,14 +29,8 @@ namespace Lf
 #if CELLNTA_ALGO_SIMPLE
     case AlgoType::SIMPLE: return std::make_unique<AlgoSimple>(); break;
 #endif
-#if CELLNTA_ALGO_OTHER
-		case AlgoType::OTHER: return nullptr; break;
-#endif
-		default: break;
 		}
 		return nullptr;
 	}
 }
 
-//#undef CELLNTA_ALGO_RANDOM
-//#undef CELLNTA_ALGO_OTHER

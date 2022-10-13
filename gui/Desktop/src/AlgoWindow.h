@@ -14,5 +14,7 @@ namespace Ui
 
   private:
     void DrawBaseAlgoInfo(Lf::AlgoBase* algo);
+
+    Lf::Cell m_setCell;
   };
 }

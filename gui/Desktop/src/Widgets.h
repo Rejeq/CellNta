@@ -11,7 +11,7 @@
 
 #include "AlgoBase.h"
 
-namespace Ui { namespace Widget
+namespace Ui
 {
   template<typename E>
   struct ComboData
@@ -19,10 +19,13 @@ namespace Ui { namespace Widget
     E index;
     const char* name = nullptr;
 
+    ComboData(E index, const char* name): index{index}, name(name) {}
     bool operator==(const E& l) const { return index == l; }
     bool operator==(const ComboData<E>& l) const { return index == l.index; }
   };
 
+namespace Widget
+{
   template<typename T>
   constexpr ImGuiDataType GetImGuiDataType();
 
@@ -168,4 +171,5 @@ namespace Ui { namespace Widget
   template<> constexpr ImGuiDataType GetImGuiDataType<int16_t>()  { return ImGuiDataType_S16; }
   template<> constexpr ImGuiDataType GetImGuiDataType<int32_t>()  { return ImGuiDataType_S32; }
   template<> constexpr ImGuiDataType GetImGuiDataType<int64_t>()  { return ImGuiDataType_S64; }
-}}
+}
+}

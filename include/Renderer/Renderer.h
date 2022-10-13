@@ -14,12 +14,6 @@
 #include "ColorStorage.h"
 #include "RenderData.h"
 
-enum class RenderMode
-{
-  Projection,
-  Collating,
-};
-
 class Renderer
 {
 public:
@@ -69,8 +63,6 @@ public:
 	const std::vector<CameraNd>& GetNdCameras() const { return p_Ncameras; }
 	std::vector<CameraNd>& GetNdCameras() { return p_Ncameras; }
   const NCellStorage& GetCells() const { return m_cells; }
-
-	size_t GetDimensionsMaxSize();
 
   const RenderData& GetData() const { return m_renderData; }
   RenderData& GetData() { return m_renderData; }

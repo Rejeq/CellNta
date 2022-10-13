@@ -49,30 +49,6 @@ namespace Lf
     if (data == nullptr || GetWorld() == nullptr)
       return;
 
-    //if (data->DesireArea())
-    //{
-    //  const std::vector<Area>& areaList = data->GetDesireArea();
-    //  bool valid = false;
-    //  for (const auto& area: areaList)
-    //  {
-    //    for (size_t i = 0; i < std::min(m_size.size(), area.GetSize()); ++i)
-    //    {
-    //      if (((area.min(i) <= m_size[i]) && (m_size[i] <= area.max(i))))
-    //      {
-    //        valid = true;
-    //        break;
-    //      }
-    //    }
-    //    if (valid)
-    //      break;
-    //  }
-    //  if (!valid)
-    //  {
-    //    data->DesireAreaProcessed();
-    //    return;
-    //  }
-    //}
-
     state_t* world = GetWorld();
     Cell::Vec pos = Cell::Vec::Zero(GetDimensions());
 
@@ -80,11 +56,7 @@ namespace Lf
     for (size_t cellPos = 0; cellPos < GetTotalArea(); ++cellPos)
     {
       if (world[cellPos] != 0)
-      {
-        //Maybe faster:
-        //CalculatePositionFromIdx(cellPos, pos);
         data->SetCell(pos, world[cellPos]);
-      }
 
       for (int i = pos.size() - 1; i >= 0; --i)
       {
@@ -138,16 +110,16 @@ namespace Lf
     //SetCell(stair);
 
     //constexpr int a = 15;
-    const int a = GetSize()[0] / 2;
-    std::vector<Cell> blinker(7, Cell(Eigen::VectorXi::Zero(p_dim), 1));
-    blinker[0].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a    );
-    blinker[1].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a - 1, a    , a    );
-    blinker[2].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a + 1, a    , a    );
-    blinker[3].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a - 1, a    );
-    blinker[4].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a + 1, a    );
-    blinker[5].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a - 1);
-    blinker[6].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a + 1);
-    SetCell(blinker);
+    //const int a = GetSize()[0] / 2;
+    //std::vector<Cell> blinker(7, Cell(Eigen::VectorXi::Zero(p_dim), 1));
+    //blinker[0].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a    );
+    //blinker[1].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a - 1, a    , a    );
+    //blinker[2].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a + 1, a    , a    );
+    //blinker[3].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a - 1, a    );
+    //blinker[4].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a + 1, a    );
+    //blinker[5].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a - 1);
+    //blinker[6].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a + 1);
+    //SetCell(blinker);
 
     //constexpr int a = 15;
     //std::vector<Cell> line(3, Cell(Eigen::VectorXi::Zero(p_dim), 1));
@@ -231,12 +203,7 @@ namespace Lf
     size_t out = 0;
     for (size_t i = 0; i < m_neighbors.size(); ++i)
     {
-      //size_t neiPos = (m_worldRepeated)
-      //  ? FindCellInRepeatedWorld(x, y, m_neighbors[i][0], m_neighbors[i][1])
-      //  : FindCellInRangedWorld(cellPos, m_neighbors[i][0], m_neighbors[i][1]);
-
       size_t neiPos = FindIdxInRangedWorld(idx, m_neighbors[i]);
-
 
       if (neiPos < GetTotalArea())
         if (world[neiPos] != 0)
@@ -256,7 +223,6 @@ namespace Lf
     //Cartesian product
     //https://stackoverflow.com/a/5279601
     using Vi = std::vector<cell_t>;
-    //using Vvi = std::vector<Vi>;
     std::vector<Vi::const_iterator> vd;
     vd.reserve(NDimNei.size());
 
@@ -269,10 +235,6 @@ namespace Lf
       for (int i = vd.size() - 1; i >= 0; --i)
         result[result.size() - i - 1] = (*(vd[i]));
       m_neighbors.push_back(CalculateIdxFromPos(result));
-
-      //for (auto i : result)
-      //  std::cout << i << " ";
-      //std::cout << std::endl;
 
       std::vector<Vi::const_iterator>::iterator it = vd.begin();
       int i = 0;
@@ -294,9 +256,6 @@ namespace Lf
     //Erase position where all coordinates == 0
     int zeroPosIdx = m_neighbors.size() / 2;
     m_neighbors.erase(m_neighbors.begin() + zeroPosIdx);
-
-    //for (auto i : m_neighbors)
-    //  std::cout << i << std::endl;
   }
 
   size_t AlgoSimple::FindIdxInRangedWorld(const size_t& cellIdx, const size_t& neighborIdx)

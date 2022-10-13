@@ -3,7 +3,7 @@
 #include <cfloat>
 
 #include <string>
-#include <iomanip> // std::setprecision()
+#include <iomanip>
 #include <vector>
 
 #include <Eigen/Core>

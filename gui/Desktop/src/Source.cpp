@@ -236,35 +236,6 @@ void CreateSceneFramebuffer(Ui::Context& ctx, uint32_t& fb, uint32_t& texColor, 
   ctx.SceneTextureId = texColor;
 }
 
-#ifdef __ANDROID__
-#include <SDL2/SDL_android_log.h>
-#include <spdlog/sinks/base_sink.h>
-#include <spdlog/sinks/basic_file_sink.h>
-
-template<typename Mutex>
-class sdl_android_sink final : public spdlog::sinks::base_sink<Mutex>
-{
-public:
-    sdl_android_sink(){}
-
-protected:
-    void sink_it_(const spdlog::details::log_msg &msg) override
-    {
-      spdlog::memory_buf_t formatted;
-      spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
-      const char* name = msg.logger_name.data();
-
-      if(msg.level == spdlog::level::err)
-        SDL_AndroidLogPrint(LOG_ERROR, name, formatted.data());
-      else
-        SDL_AndroidLogPrint(LOG_INFO, name, formatted.data());
-      //SDL_Delay(1000);
-    }
-    void flush_() override {}
-
-private:
-};
-#endif
 
 int main(int, char**)
 {
@@ -273,15 +244,7 @@ int main(int, char**)
 
   SDL_Delay(1000);
 
-#ifdef __ANDROID__
-  std::vector<spdlog::sink_ptr> sinks;
-  sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/CellNta.log", true));
-  sinks.push_back(std::make_shared<sdl_android_sink<std::mutex>>());
-  Log::InitCustom(sinks);
-  Log::GetLogger()->flush_on(spdlog::level::trace);
-#else
   Log::InitDefault();
-#endif
   Log::GetLogger()->set_level(spdlog::level::debug);
 
   if (int ret = InitSdlAndCreateGlWindow(win, glCtx) != 0)

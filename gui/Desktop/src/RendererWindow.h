@@ -16,12 +16,6 @@ namespace Ui
     void Draw() override;
 
   private:
-    enum ObservedChunksColumn
-    {
-      CHUNK_POSITION,
-      CHUNK_CELLS_QUANTITY,
-    };
-
     enum CameraMatUpdated
     {
       CameraUpdated_None,
@@ -40,7 +34,9 @@ namespace Ui
 
     void PrintCamera3d(Camera3d& camera);
     void PrintCameraNd(CameraNd& camera);
-    int PrintCameraMatrices(bool* perspectiveState, Eigen::MatrixXf* upMat, Eigen::MatrixXf* viewMat,
-        Eigen::MatrixXf* projMat);
+    int PrintCameraMatrices(bool* perspectiveState, Eigen::MatrixXf* upMat,
+        Eigen::MatrixXf* viewMat, Eigen::MatrixXf* projMat);
+
+    bool m_showCellsTab = false;
   };
 }

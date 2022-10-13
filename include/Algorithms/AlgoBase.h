@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Config.h"
-#include "Types.h"
 
 #include "RenderData.h"
 
@@ -11,7 +10,6 @@ namespace Lf
   {
     RANDOM,
     SIMPLE,
-    OTHER,
 
     COUNT,
   };

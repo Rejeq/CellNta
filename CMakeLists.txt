@@ -12,7 +12,6 @@ set(CELLNTA_DIR "${CMAKE_CURRENT_LIST_DIR}")
 set(CELLNTA_THIRD_PARTY "${CELLNTA_DIR}/third_party")
 
 # Libraries directories
-#TODO: when target gles - glew not used
 list(APPEND CELLNTA_INC
   "${CELLNTA_THIRD_PARTY}/glew/include"
   "${CELLNTA_THIRD_PARTY}/Eigen"
@@ -50,9 +49,11 @@ foreach(FOLDER ${CELLNTA_FOLDERS})
 endforeach()
 
 if(MSVC)
-  target_compile_options(CellNta PRIVATE /W4 /wd4244 /wd4267 /wd4127)
+  target_compile_options(CellNta PRIVATE
+    $<$<CONFIG:DEBUG>:/W4 /wd4244 /wd4267 /wd4127>)
 else()
-  target_compile_options(CellNta PRIVATE -Wall -Wextra -Wpedantic -Wno-sign-compare)
+  target_compile_options(CellNta PRIVATE
+    $<$<CONFIG:DEBUG>:-Wall -Wextra -Wpedantic -Wno-sign-compare>)
 endif()
 
 target_sources(CellNta PRIVATE ${CELLNTA_SRC})

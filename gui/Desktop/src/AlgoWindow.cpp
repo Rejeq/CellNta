@@ -37,11 +37,10 @@ namespace Ui
   {
     ProfileScope;
 
-    static const std::array<Widget::ComboData<Lf::AlgoType>, 3> AlgoTypeData = {{
-      {Lf::AlgoType::RANDOM, "Random"},
-      {Lf::AlgoType::SIMPLE, "Simple"},
-      {Lf::AlgoType::OTHER,  "Other"},
-    }};
+    static const std::array<ComboData<Lf::AlgoType>, 2> AlgoTypeData = {
+      ComboData(Lf::AlgoType::RANDOM, "Random"),
+      ComboData(Lf::AlgoType::SIMPLE, "Simple"),
+    };
 
     if (algo == nullptr)
       return;
@@ -53,13 +52,7 @@ namespace Ui
     {
       if (!canvas.ChangeAlgoType(res))
         algo = canvas.GetAlgo();
-      else
-      {
-        assert(0 && "Unable to change algorithm type");
-        //PushNotification("Unable to change algorithm type", NotificationSeverity::LOW, []() {
-        //ImGui::TextUnformatted("Out of memory");
-        //  });
-      }
+      else assert(0 && "Unable to change algorithm type");
     }
 
     size_t dim = algo->GetDimensions();
@@ -87,10 +80,9 @@ namespace Ui
 
     ImGui::Spacing();
 
-    static Lf::Cell SetCell;
-    Widget::CellSelector(algo->GetDimensions(), SetCell);
-    //ImGui::SameLine();
+    Widget::CellSelector(algo->GetDimensions(), m_setCell);
+
     if (ImGui::Button("Set cell"))
-      algo->SetCell(SetCell);
+      algo->SetCell(m_setCell);
   }
 }
