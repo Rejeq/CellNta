@@ -6,11 +6,18 @@ namespace Ui
 {
   class Context;
 
+  struct WindowProperties
+  {
+    const char* Name = nullptr;
+    bool Opened = true;
+    bool VisibleInMenubar = true;
+  };
+
   class Window
   {
   public:
-    Window(const char* name)
-      : p_name(name) {}
+    Window(const WindowProperties& properties)
+      : p_prop(properties) {}
     virtual ~Window() {}
 
     virtual void Draw() = 0;
@@ -18,12 +25,12 @@ namespace Ui
     {
       int opened;
       if (sscanf(line, "Opened=%i", &opened) == 1)
-        p_open = opened;
+        p_prop.Opened = opened;
     }
 
     virtual void WriteProperties(ImGuiTextBuffer* buf) const
     {
-      buf->appendf("Opened=%i\n", p_open);
+      buf->appendf("Opened=%i\n", p_prop.Opened);
     }
 
     void SetContext(Context* ctx)
@@ -31,17 +38,14 @@ namespace Ui
       m_ctx = ctx;
     }
 
-    void SetOpened(bool opened) { p_open = opened; }
-    bool& GetOpened() { return p_open; }
-    bool GetOpened() const { return p_open; }
+    const WindowProperties& GetProperties() const { return p_prop; }
+    WindowProperties& GetProperties() { return p_prop; }
 
-    const char* GetName() const { return p_name; }
     Context* GetContext() { return m_ctx; }
     const Context* GetContext() const { return m_ctx; }
 
   protected:
-    const char* p_name = nullptr;
-    bool p_open = true;
+    WindowProperties p_prop;
 
   private:
     Context* m_ctx = nullptr;

@@ -18,7 +18,7 @@ namespace Ui
     if (algo == nullptr)
       return;
 
-    ImGui::Begin(p_name, &p_open);
+    ImGui::Begin(p_prop.Name, &p_prop.Opened);
 
     DrawBaseAlgoInfo(algo);
 
@@ -33,6 +33,7 @@ namespace Ui
 
     ImGui::End();
   }
+
   void AlgoWindow::DrawBaseAlgoInfo(Lf::AlgoBase* algo)
   {
     ProfileScope;

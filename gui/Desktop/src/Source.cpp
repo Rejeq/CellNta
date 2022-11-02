@@ -11,9 +11,13 @@
 #include "Context.h"
 #include "RendererWindow.h"
 #include "AlgoWindow.h"
+#include "SceneWindow.h"
+#include "MenubarWindow.h"
 
 #ifdef NO_SDL_MAIN
-#undef main
+#	ifdef main
+#	  undef main
+#	endif
 #endif
 
 constexpr size_t WINDOW_WIDTH = 1200;
@@ -79,11 +83,6 @@ int InitSdlAndCreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
     LOG_CRITICAL("Unable to initialize SDL2: {}", SDL_GetError());
     return EXIT_FAILURE;
   }
-  //SDL_SetHintWithPriority(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1", SDL_HINT_OVERRIDE);
-
-#ifdef __ANDROID__
-  SDL_SetHintWithPriority(SDL_HINT_ORIENTATIONS, "LandscapeRight", SDL_HINT_OVERRIDE);
-#endif
 
 #if defined(CELLNTA_RENDERER_GLES3)
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
@@ -134,7 +133,7 @@ int InitImGui(SDL_Window*& win, SDL_GLContext& glCtx)
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  ImGuiIO& io = ImGui::GetIO();
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   ImGui::StyleColorsDark();
@@ -211,17 +210,18 @@ void CreateSceneFramebuffer(Ui::Context& ctx, uint32_t& fb, uint32_t& texColor, 
   glBindFramebuffer(GL_FRAMEBUFFER, fb);
 
   auto size = ctx.GetCanvas().GetCamera3d().GetSizeBase();
-  LOG_INFO("Scene framebuffer resized: ({}; {})", size.x(), size.y());
 
   glGenTextures(1, &texColor);
   glBindTexture(GL_TEXTURE_2D, texColor);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x(), size.y(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x(), size.y(), 0,
+      GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColor, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+      GL_TEXTURE_2D, texColor, 0);
 
   glGenTextures(1, &texDepth);
   glBindTexture(GL_TEXTURE_2D, texDepth);
@@ -231,18 +231,60 @@ void CreateSceneFramebuffer(Ui::Context& ctx, uint32_t& fb, uint32_t& texColor, 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texDepth, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+      GL_TEXTURE_2D, texDepth, 0);
 
   ctx.SceneTextureId = texColor;
+  LOG_INFO("Scene framebuffer resized: ({}; {})", size.x(), size.y());
 }
 
+void ResetContextLayout(const Ui::Context& ctx)
+{
+  ImGuiID dockId = ctx.MainDockspaceId;
+
+  ImGui::DockBuilderRemoveNode(dockId);
+  ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
+  ImGui::DockBuilderGetNode(dockId)->LocalFlags &= ~ImGuiDockNodeFlags_CentralNode;
+
+  constexpr float size = 0.25f;
+  ImGuiID dockIdLeft = ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Left, size, NULL, &dockId);
+  ImGuiID dockIdRem = ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Right, 1.0f - size, NULL, &dockId);
+
+  //TODO:
+  ImGui::DockBuilderDockWindow("Scene", dockIdRem);
+  ImGui::DockBuilderDockWindow("Dear ImGui Demo", dockIdRem); //TODO: Delete this
+
+  ImGui::DockBuilderDockWindow("Renderer", dockIdLeft);
+  ImGui::DockBuilderDockWindow("Algorithm", dockIdLeft);
+
+  ImGui::DockBuilderFinish(dockId);
+}
+
+Ui::Context CreateContextLayout(int width, int height)
+{
+	std::unique_ptr<Canvas> canvasPtr = std::make_unique<Canvas>(Lf::AlgoType::SIMPLE, 2);
+	canvasPtr->GetCamera3d().SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
+	canvasPtr->GetCamera3d().Resize(Eigen::Vector2f(width, height));
+
+  auto onFirstStartup = [](const Ui::Context& ctx){
+    ResetContextLayout(ctx);
+  };
+
+  Ui::Context ctx(std::move(canvasPtr));
+  ctx.SetOnFirstStartup(onFirstStartup);
+
+  ctx.AddWindow(std::make_unique<Ui::RendererWindow>());
+  ctx.AddWindow(std::make_unique<Ui::AlgoWindow>());
+  ctx.AddWindow(std::make_unique<Ui::SceneWindow>());
+  ctx.AddWindow(std::make_unique<Ui::MenubarWindow>(ResetContextLayout));
+
+  return ctx;
+}
 
 int main(int, char**)
 {
   SDL_Window* win = nullptr;
   SDL_GLContext glCtx;
-
-  SDL_Delay(1000);
 
   Log::InitDefault();
   Log::GetLogger()->set_level(spdlog::level::debug);
@@ -253,27 +295,22 @@ int main(int, char**)
     return ret;
 
   SDL_GL_SetSwapInterval(1); // Enable vsync
-//#if !LF_TARGET_GLES3
+
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(GlMessageCallback, 0);
-//#endif
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 
   int winWidth = 0;
   int winHeight = 0;
+  //Not used size macro, because sometimes window manager
+  //cannot create the right size and used the default size
   SDL_GetWindowSize(win, &winWidth, &winHeight);
 
-	std::unique_ptr<Canvas> canvasPtr = std::make_unique<Canvas>(Lf::AlgoType::RANDOM, 3);
-	canvasPtr->GetCamera3d().SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
-	canvasPtr->GetCamera3d().Resize(Eigen::Vector2f(winWidth, winHeight));
-
-  Ui::Context ctx(std::move(canvasPtr));
-  ctx.AddWindow(std::make_unique<Ui::RendererWindow>());
-  ctx.AddWindow(std::make_unique<Ui::AlgoWindow>());
-
+  Ui::Context ctx = CreateContextLayout(winWidth, winHeight);
   Canvas& canvas = ctx.GetCanvas();
 
   uint32_t sceneFb = 0;
@@ -288,6 +325,9 @@ int main(int, char**)
 
   ImGuiIO& io = ImGui::GetIO();
 
+  //Necessary because when window minimized
+  //imgui frames are disabled
+  //so io.DeltaTime gives wrong result
   size_t timeFrequency = SDL_GetPerformanceFrequency();
   size_t frameStart = 0;
   size_t frameEnd = 0;
@@ -351,13 +391,13 @@ int main(int, char**)
 				case SDL_WINDOWEVENT_CLOSE:
 					done = true;
 					break;
-				default:
-					break;
+				default: break;
 				}
 				break;
 			default: break;
 			}
 		}
+
 
     if (ImGui::IsKeyPressed(ImGuiKey_Escape))
     {
@@ -378,7 +418,8 @@ int main(int, char**)
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplSDL2_NewFrame();
       ImGui::NewFrame();
-      ctx.MainDockspaceId = ImGui::DockSpaceOverViewport(nullptr, ImGuiDockNodeFlags_PassthruCentralNode);
+      ctx.MainDockspaceId = ImGui::DockSpaceOverViewport(nullptr,
+          ImGuiDockNodeFlags_PassthruCentralNode);
 
       ImGui::ShowDemoWindow();
       ctx.Draw();

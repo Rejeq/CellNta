@@ -5,16 +5,6 @@
 #include "Widgets.h"
 #include "Context.h"
 
-void Ui::RendererWindow::ReadProperties(const char* line)
-{
-  Window::ReadProperties(line);
-}
-
-void Ui::RendererWindow::WriteProperties(ImGuiTextBuffer* buf) const
-{
-  Window::WriteProperties(buf);
-}
-
 void Ui::RendererWindow::Draw()
 {
   ProfileScope;
@@ -22,7 +12,7 @@ void Ui::RendererWindow::Draw()
   constexpr ImGuiWindowFlags WinFlags = ImGuiWindowFlags_HorizontalScrollbar;
   Renderer& ren = GetContext()->GetCanvas();
 
-  if (ImGui::Begin(p_name, &p_open, WinFlags))
+  if (ImGui::Begin(p_prop.Name, &p_prop.Opened, WinFlags))
   {
     uint32_t dimensions = ren.GetDimensions();
     if (Widget::Input("Cube dimensions", &dimensions, 1, ImGuiInputTextFlags_CharsDecimal))

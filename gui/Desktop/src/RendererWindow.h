@@ -1,6 +1,8 @@
-#include <Renderer.h>
+#pragma once
 
 #include <vector>
+
+#include <Renderer.h>
 
 #include "Window.h"
 
@@ -8,11 +10,12 @@ namespace Ui
 {
   class RendererWindow : public Window
   {
+    static constexpr WindowProperties DefaultProperties = {
+      .Name = "Renderer",
+    };
   public:
-    RendererWindow() : Window("Renderer") {}
+    RendererWindow() : Window(DefaultProperties) {}
 
-    void ReadProperties(const char* line) override;
-    void WriteProperties(ImGuiTextBuffer* buf) const override;
     void Draw() override;
 
   private:

@@ -29,6 +29,7 @@ namespace Lf
 #if CELLNTA_ALGO_SIMPLE
     case AlgoType::SIMPLE: return std::make_unique<AlgoSimple>(); break;
 #endif
+		default: break;
 		}
 		return nullptr;
 	}

@@ -18,7 +18,7 @@ namespace Ui{ namespace Widget
     const bool lastV = v;
     bool out = false;
 
-    if (lastV == true)
+    if (lastV)
     {
       ImVec4& activeColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonActive];
       ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
@@ -30,7 +30,7 @@ namespace Ui{ namespace Widget
       out = true;
     }
 
-    if (lastV == true)
+    if (lastV)
       ImGui::PopStyleColor();
     return out;
   }

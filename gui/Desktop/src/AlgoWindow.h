@@ -7,8 +7,12 @@ namespace Ui
 {
   class AlgoWindow : public Window
   {
+    static constexpr WindowProperties DefaultProperties = {
+      .Name = "Algorithm",
+    };
+
   public:
-    AlgoWindow() : Window("Algorithm") {}
+    AlgoWindow() : Window(DefaultProperties) {}
 
     void Draw() override;
 
