@@ -1,7 +1,7 @@
-#include "HypercubeStorage.h"
+#include "Cellnta/Renderer/HypercubeStorage.h"
 
-//TODO: Delete, used for test indices
-#include <Eigen/Core>
+#include "Cellnta/Config.h"
+#include "Cellnta/Log.h"
 
 #define HYPERCUBE_DEBUG_PRINT
 
@@ -23,6 +23,8 @@
 #else
 #define HYPERCUBE_VALIDATE_POLYGONS(data, dim, polygonsCount)
 #endif // HYPERCUBE_DEBUG_PRINT
+
+using namespace Cellnta;
 
 uint32_t HypercubeStorage::GenerateCube(size_t dim, point_t a, CubeMode mode)
 {

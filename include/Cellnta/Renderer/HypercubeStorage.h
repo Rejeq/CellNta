@@ -1,9 +1,11 @@
 #pragma once
 
-#include <vector>
+#include <cstddef>
+#include <cstdint>
 #include <cassert>
+#include <vector>
 
-#include "Config.h"
+namespace Cellnta {
 
 enum class CubeMode
 {
@@ -84,3 +86,5 @@ private:
 	size_t m_d = 0;
 	float m_cubeSize = 0.5f;
 };
+
+} //namespace Cellnta

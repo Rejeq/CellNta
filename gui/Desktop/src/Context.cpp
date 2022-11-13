@@ -5,117 +5,116 @@
 
 #include "Widgets.h"
 
-namespace Ui
+using namespace Ui;
+
+static std::unique_ptr<Context> s_ctx;
+
+Context::Context()
 {
-  static std::unique_ptr<Context> s_ctx;
+  ImGuiContext* imguiCtx = ImGui::GetCurrentContext();
+  ImGuiSettingsHandler contextHandler;
+  contextHandler.TypeName = "CellNta";
+  contextHandler.TypeHash = ImHashStr("CellNta");
+  contextHandler.UserData = (void*)this;
+  contextHandler.ReadOpenFn = SettingsHandler_ReadOpen;
+  contextHandler.ReadLineFn = SettingsHandler_ReadLine;
+  contextHandler.WriteAllFn = SettingsHandler_WriteAll;
+  imguiCtx->SettingsHandlers.push_back(contextHandler);
+}
 
-  Context::Context()
+void Context::AddWindow(std::unique_ptr<Window>&& window)
+{
+  window->SetContext(this);
+  m_windowsData.push_back(std::move(window));
+}
+
+void Context::Draw()
+{
+  ProfileScope;
+
+  ImGui::PushID("Context name"); //TODO
+
+  if (m_firstStartup)
   {
-    ImGuiContext* imguiCtx = ImGui::GetCurrentContext();
-    ImGuiSettingsHandler contextHandler;
-    contextHandler.TypeName = "CellNta";
-    contextHandler.TypeHash = ImHashStr("CellNta");
-    contextHandler.UserData = (void*)this;
-    contextHandler.ReadOpenFn = SettingsHandler_ReadOpen;
-    contextHandler.ReadLineFn = SettingsHandler_ReadLine;
-    contextHandler.WriteAllFn = SettingsHandler_WriteAll;
-    imguiCtx->SettingsHandlers.push_back(contextHandler);
+    if(m_OnFirstStartup)
+      m_OnFirstStartup(*this);
+    m_firstStartup = false;
   }
 
-  void Context::AddWindow(std::unique_ptr<Window>&& window)
+  for (auto& window : m_windowsData)
+    if (window->GetProperties().Opened)
+      window->Draw();
+
+  ImGui::PopID();
+}
+
+void* Context::SettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler* handler, const char* name)
+{
+  Context* ctx = (Context*) handler->UserData;
+  ctx->m_firstStartup = false;
+  ctx->m_currentWindow.clear();
+  return (void*)ctx;
+}
+
+void Context::SettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler* handler, void* entry, const char* line)
+{
+  Context* ctx = (Context*)entry;
+
+  if (line[0] == '(')
   {
-    window->SetContext(this);
-    m_windowsData.push_back(std::move(window));
-  }
-
-  void Context::Draw()
-  {
-    ProfileScope;
-
-    ImGui::PushID("Context name"); //TODO
-
-    if (m_firstStartup)
+    size_t size = std::strlen(line);
+    if (line[size - 1] == ')')
     {
-      if(m_OnFirstStartup)
-        m_OnFirstStartup(*this);
-      m_firstStartup = false;
+      ctx->m_currentWindow = std::string(line + 1, size - 2);
     }
-
-    for (auto& window : m_windowsData)
-      if (window->GetProperties().Opened)
-        window->Draw();
-
-    ImGui::PopID();
   }
-
-  void* Context::SettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler* handler, const char* name)
+  else if(!ctx->m_currentWindow.empty())
   {
-    Context* ctx = (Context*) handler->UserData;
-    ctx->m_firstStartup = false;
-    ctx->m_currentWindow.clear();
-    return (void*)ctx;
-  }
-
-  void Context::SettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler* handler, void* entry, const char* line)
-  {
-    Context* ctx = (Context*)entry;
-
-    if (line[0] == '(')
+    for (auto& window: ctx->m_windowsData)
     {
-      size_t size = std::strlen(line);
-      if (line[size - 1] == ')')
+      if (ctx->m_currentWindow == window->GetProperties().Name)
       {
-        ctx->m_currentWindow = std::string(line + 1, size - 2);
-      }
-    }
-    else if(!ctx->m_currentWindow.empty())
-    {
-      for (auto& window: ctx->m_windowsData)
-      {
-        if (ctx->m_currentWindow == window->GetProperties().Name)
-        {
-          window->ReadProperties(line);
-        }
+        window->ReadProperties(line);
       }
     }
   }
+}
 
-  void Context::SettingsHandler_WriteAll(ImGuiContext*, ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf)
+void Context::SettingsHandler_WriteAll(ImGuiContext*, ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf)
+{
+  if (handler->UserData == nullptr)
+    return;
+
+  Context* ctx = (Context*)handler->UserData;
+  buf->reserve(buf->size() + 6 * 6);
+  buf->appendf("[%s][%s]\n", "CellNta", "Context");
+  ctx->WriteWindowProperties(handler, buf);
+  buf->append("\n");
+}
+
+char* Context::GetTmpBuffer()
+{
+  ImGuiContext& g = *GImGui;
+  return g.TempBuffer.Data;
+}
+
+char* Context::GetTmpBuffer(size_t& size)
+{
+  ImGuiContext& g = *GImGui;
+  //Need return specified size
+  //if (size != 0)
+  //  if (size > g.TempBuffer.Capacity)
+  //    g.TempBuffer.resize(size);
+  size = g.TempBuffer.Size;
+  return g.TempBuffer.Data;
+}
+
+void Context::WriteWindowProperties(ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf)
+{
+  for (auto& window : m_windowsData)
   {
-    if (handler->UserData == nullptr)
-      return;
-
-    Context* ctx = (Context*)handler->UserData;
-    buf->reserve(buf->size() + 6 * 6);
-    buf->appendf("[%s][%s]\n", "CellNta", "Context");
-    ctx->WriteWindowProperties(handler, buf);
-    buf->append("\n");
-  }
-
-  char* Context::GetTmpBuffer()
-  {
-    ImGuiContext& g = *GImGui;
-    return g.TempBuffer.Data;
-  }
-
-  char* Context::GetTmpBuffer(size_t& size)
-  {
-    ImGuiContext& g = *GImGui;
-    //Need return specified size
-    //if (size != 0)
-    //  if (size > g.TempBuffer.Capacity)
-    //    g.TempBuffer.resize(size);
-    size = g.TempBuffer.Size;
-    return g.TempBuffer.Data;
-  }
-
-  void Context::WriteWindowProperties(ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf)
-  {
-    for (auto& window : m_windowsData)
-    {
-      buf->appendf("(%s)\n", window->GetProperties().Name);
-      window->WriteProperties(buf);
-      buf->appendf("\n");
-    }
+    buf->appendf("(%s)\n", window->GetProperties().Name);
+    window->WriteProperties(buf);
+    buf->appendf("\n");
   }
 }

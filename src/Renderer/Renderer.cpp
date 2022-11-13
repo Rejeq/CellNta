@@ -1,8 +1,12 @@
-#include "Renderer.h"
+#include "Cellnta/Renderer/Renderer.h"
 
 #include <type_traits>
 
-#include "Transform.h"
+#include "Cellnta/Config.h"
+#include "Cellnta/Log.h"
+#include "Cellnta/Renderer/Transform.h"
+
+using namespace Cellnta;
 
 Renderer::~Renderer()
 {

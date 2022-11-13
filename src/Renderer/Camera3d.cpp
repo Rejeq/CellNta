@@ -1,6 +1,9 @@
-#include "Camera3d.h"
+#include "Cellnta/Renderer/Camera3d.h"
 
-#include "Config.h"
+#include "Cellnta/Config.h"
+#include "Cellnta/Log.h"
+
+using namespace Cellnta;
 
 void Camera3d::Move(MoveDirection dir, float delta)
 {

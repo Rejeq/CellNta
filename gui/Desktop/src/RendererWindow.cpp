@@ -10,7 +10,7 @@ void Ui::RendererWindow::Draw()
   ProfileScope;
 
   constexpr ImGuiWindowFlags WinFlags = ImGuiWindowFlags_HorizontalScrollbar;
-  Renderer& ren = GetContext()->GetCanvas();
+  Cellnta::Renderer& ren = GetContext()->GetCanvas();
 
   if (ImGui::Begin(p_prop.Name, &p_prop.Opened, WinFlags))
   {
@@ -26,17 +26,17 @@ void Ui::RendererWindow::Draw()
     if (Widget::Input("Render distance", &renderDistance, 1, ImGuiInputTextFlags_CharsDecimal))
       ren.SetRenderDistance(renderDistance);
 
-    static const std::array<ComboData<CubeMode>, 3> CubeModeData = {
-      ComboData(CubeMode::POINTS,    "Points"),
-      ComboData(CubeMode::WIREFRAME, "Wireframe"),
-      ComboData(CubeMode::POLYGON,   "Polygon (gives errors from 6d)"),
+    static const std::array<ComboData<Cellnta::CubeMode>, 3> CubeModeData = {
+      ComboData(Cellnta::CubeMode::POINTS,    "Points"),
+      ComboData(Cellnta::CubeMode::WIREFRAME, "Wireframe"),
+      ComboData(Cellnta::CubeMode::POLYGON,   "Polygon (gives errors from 6d)"),
     };
 
-    CubeMode res;
+    Cellnta::CubeMode res;
     if (Widget::ComboEnum("Cube mode", ren.GetCubeMode(), CubeModeData, res))
       ren.SetCubeMode(res);
 
-    static Lf::Cell cell;
+    static Cellnta::Cell cell;
     Widget::CellSelector<true>(ren.GetDimensions(), cell);
     ImGui::Spacing();
     if (ImGui::Button("Add cell (Only for renderer)"))
@@ -83,7 +83,7 @@ void Ui::RendererWindow::Draw()
 
 void Ui::RendererWindow::ShowCollatingInfo()
 {
-  Renderer& ren = GetContext()->GetCanvas();
+  Cellnta::Renderer& ren = GetContext()->GetCanvas();
 
   int x = ren.GetCollatingX();
   int y = ren.GetCollatingY();
@@ -100,8 +100,8 @@ void Ui::RendererWindow::DrawCameras()
 {
   ProfileScope;
 
-  Renderer& ren = GetContext()->GetCanvas();
-  Camera3d& camera3d = ren.GetCamera3d();
+  Cellnta::Renderer& ren = GetContext()->GetCanvas();
+  Cellnta::Camera3d& camera3d = ren.GetCamera3d();
 
   float mouseSpeed = camera3d.GetMouseSpeed();
   if (ImGui::DragFloat("Mouse sensitivity", &mouseSpeed, 0.001f, 0.0f, 100.0f))
@@ -111,7 +111,7 @@ void Ui::RendererWindow::DrawCameras()
   if (ImGui::DragFloat("Move speed", &moveSpeed, 0.001f, 0.0f, 100.0f))
     camera3d.SetMoveSpeed(moveSpeed);
 
-  for (CameraNd& cam : ren.GetNdCameras())
+  for (Cellnta::CameraNd& cam : ren.GetNdCameras())
   {
     size_t size = 8 + 3;
     char* fmt = GetContext()->GetTmpBuffer(size);
@@ -135,14 +135,14 @@ void Ui::RendererWindow::DrawLoadedCells()
 {
   ProfileScope;
 
-  Renderer& ren = GetContext()->GetCanvas();
-  const NCellStorage& cells = ren.GetCells();
+  Cellnta::Renderer& ren = GetContext()->GetCanvas();
+  const Cellnta::NCellStorage& cells = ren.GetCells();
   ImGui::Text("Loaded: %zu", cells.size());
 
   DrawCells(cells);
 }
 
-void Ui::RendererWindow::DrawCells(const NCellStorage& cells)
+void Ui::RendererWindow::DrawCells(const Cellnta::NCellStorage& cells)
 {
   constexpr ImGuiTableFlags TableFlags = 0
     | ImGuiTableFlags_Borders | ImGuiTableFlags_Reorderable
@@ -168,8 +168,8 @@ void Ui::RendererWindow::DrawCells(const NCellStorage& cells)
     {
       for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i)
       {
-        const NCellStorage::Vec& OrigCell = cells.OriginalAt(i);
-        const NCellStorage::Vec& cell = cells.at(i);
+        const Cellnta::NCellStorage::Vec& OrigCell = cells.OriginalAt(i);
+        const Cellnta::NCellStorage::Vec& cell = cells.at(i);
 
         ImGui::PushID(i);
 
@@ -193,7 +193,7 @@ void Ui::RendererWindow::DrawCells(const NCellStorage& cells)
   }
 }
 
-void Ui::RendererWindow::PrintCamera3d(Camera3d& camera)
+void Ui::RendererWindow::PrintCamera3d(Cellnta::Camera3d& camera)
 {
   ImGui::PushID(camera.GetDimensions());
 
@@ -236,7 +236,7 @@ void Ui::RendererWindow::PrintCamera3d(Camera3d& camera)
   ImGui::PopID();
 }
 
-void Ui::RendererWindow::PrintCameraNd(CameraNd& camera)
+void Ui::RendererWindow::PrintCameraNd(Cellnta::CameraNd& camera)
 {
   ImGui::PushID(camera.GetDimensions());
 

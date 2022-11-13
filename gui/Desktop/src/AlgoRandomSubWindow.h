@@ -1,7 +1,7 @@
-#include <AlgoRandom.h>
+#include <Cellnta/Algorithms/AlgoRandom.h>
 
+namespace Ui {
 
-namespace Ui
-{
-	void DrawAlgoRandom(Lf::AlgoRandom* algo);
+	void DrawAlgoRandom(Cellnta::AlgoRandom* algo);
+
 }

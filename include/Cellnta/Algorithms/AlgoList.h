@@ -17,21 +17,22 @@
 #include "AlgoSimple.h"
 #endif
 
-namespace Lf
+namespace Cellnta {
+
+inline std::unique_ptr<AlgoBase> CreateAlgoInstance(const AlgoType algoType)
 {
-	inline std::unique_ptr<AlgoBase> CreateAlgoInstance(const AlgoType algoType)
+	switch (algoType)
 	{
-		switch (algoType)
-		{
 #if CELLNTA_ALGO_RANDOM
-    case AlgoType::RANDOM: return std::make_unique<AlgoRandom>(); break;
+  case AlgoType::RANDOM: return std::make_unique<AlgoRandom>(); break;
 #endif
 #if CELLNTA_ALGO_SIMPLE
-    case AlgoType::SIMPLE: return std::make_unique<AlgoSimple>(); break;
+  case AlgoType::SIMPLE: return std::make_unique<AlgoSimple>(); break;
 #endif
-		default: break;
-		}
-		return nullptr;
+	default: break;
 	}
+	return nullptr;
 }
+
+} //namespace Cellnta
 

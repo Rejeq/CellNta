@@ -1,9 +1,10 @@
-#include "CameraNd.h"
+#include "Cellnta/Renderer/CameraNd.h"
 
-#include "Renderer/Transform.h"
-#include "Config.h"
+#include "Cellnta/Renderer/Transform.h"
+#include "Cellnta/Config.h"
 
-#include <iostream>
+using namespace Cellnta;
+
 void CameraNd::SetDimensions(size_t dim)
 {
   ProfileScope;

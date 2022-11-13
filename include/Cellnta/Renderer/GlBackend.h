@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Cellnta/Config.h"
+
 #if defined(CELLNTA_RENDERER_GLES3)
 #  include <GLES3/gl32.h>
 #elif defined(CELLNTA_RENDERER_GL)

@@ -1,4 +1,8 @@
-#include "AlgoRandom.h"
+#include "Cellnta/Algorithms/AlgoRandom.h"
+
+#include "Cellnta/Config.h"
+
+using namespace Cellnta;
 
 namespace
 {
@@ -12,78 +16,76 @@ namespace
   };
 }
 
-namespace Lf
+
+void AlgoRandom::Update()
 {
-  void AlgoRandom::Update()
+  ProfileScope;
+
+  if (p_dim == 0)
+    return;
+
+  for (size_t i = 0; i < GetStep(); ++i)
   {
-    ProfileScope;
-
-    if (p_dim == 0)
-      return;
-
-    for (size_t i = 0; i < GetStep(); ++i)
-    {
-      Eigen::VectorXi pos = Eigen::VectorXi::NullaryExpr(p_dim, RandomRange<int>(m_rangeMin, m_rangeMax, m_gen));
-      m_data.push_back(pos);
-    }
-    p_needLoadInRenderer = true;
+    Eigen::VectorXi pos = Eigen::VectorXi::NullaryExpr(p_dim, RandomRange<int>(m_rangeMin, m_rangeMax, m_gen));
+    m_data.push_back(pos);
   }
+  p_needLoadInRenderer = true;
+}
 
-  void AlgoRandom::LoadWorld(RenderData* data)
+void AlgoRandom::LoadWorld(RenderData* data)
+{
+  ProfileScope;
+
+  if (data == nullptr)
+    return;
+
+  if (p_needLoadInRenderer)
   {
-    ProfileScope;
+    for (size_t i = 0; i < m_data.size(); ++i)
+      data->SetCell(m_data[i], 1);
+    p_needLoadInRenderer = false;
+    data->DesireAreaProcessed();
+  }
+  else if (data->DesireArea())
+  {
+    const std::vector<Area>& rects = data->GetDesireArea();
 
-    if (data == nullptr)
-      return;
-
-    if (p_needLoadInRenderer)
+    for (size_t i = 0; i < m_data.size(); ++i)
     {
-      for (size_t i = 0; i < m_data.size(); ++i)
-        data->SetCell(m_data[i], 1);
-      p_needLoadInRenderer = false;
-      data->DesireAreaProcessed();
-    }
-    else if (data->DesireArea())
-    {
-      const std::vector<Area>& rects = data->GetDesireArea();
-
-      for (size_t i = 0; i < m_data.size(); ++i)
+      for (auto& rect : rects)
       {
-        for (auto& rect : rects)
+        if (rect.CellValid(m_data[i]))
         {
-          if (rect.CellValid(m_data[i]))
-          {
-            data->SetCell(m_data[i], 1);
-            break;
-          }
+          data->SetCell(m_data[i], 1);
+          break;
         }
       }
-      data->DesireAreaProcessed();
     }
+    data->DesireAreaProcessed();
   }
+}
 
-  void AlgoRandom::SetDimension(size_t dim)
-  {
-    ProfileScope;
+void AlgoRandom::SetDimension(size_t dim)
+{
+  ProfileScope;
 
-    if (dim == p_dim)
-      return;
-    p_dim = dim;
+  if (dim == p_dim)
+    return;
+  p_dim = dim;
 
-    m_data.clear();
-  }
+  m_data.clear();
+}
 
-  void AlgoRandom::SetRangeMin(int min)
-  {
-    if (min > m_rangeMax)
-      return;
-    m_rangeMin = min;
-  }
+void AlgoRandom::SetRangeMin(int min)
+{
+  if (min > m_rangeMax)
+    return;
+  m_rangeMin = min;
+}
 
-  void AlgoRandom::SetRangeMax(int max)
-  {
-    if (max < m_rangeMin)
-      return;
-    m_rangeMax = max;
-  }
+void AlgoRandom::SetRangeMax(int max)
+{
+  if (max < m_rangeMin)
+    return;
+  m_rangeMax = max;
 }

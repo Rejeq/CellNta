@@ -3,7 +3,10 @@
 #include <Eigen/Core>
 #include <vector>
 
-#include "RenderData.h"
+#include "Cellnta/Config.h"
+#include "Cellnta/Renderer/RenderData.h"
+
+namespace Cellnta {
 
 class NCellStorage
 {
@@ -78,3 +81,5 @@ bool NCellStorage::Add(const Derived& pos)
 
   return (oldCapacity != m_cells.capacity());
 }
+
+} //namespace Cellnta

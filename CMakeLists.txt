@@ -34,13 +34,14 @@ set(CELLNTA_FOLDERS
 add_library(CellNta STATIC)
 target_compile_features(CellNta PRIVATE ${CXX_ACTIVE_STANDART})
 
+list(APPEND CELLNTA_INC "${CELLNTA_DIR}/include")
+
 foreach(FOLDER ${CELLNTA_FOLDERS})
   file(GLOB FOLDER_SRC
-    "${CELLNTA_DIR}/include/${FOLDER}/*.h"
+    "${CELLNTA_DIR}/include/Cellnta/${FOLDER}/*.h"
     "${CELLNTA_DIR}/src/${FOLDER}/*.cpp"
   )
   list(APPEND CELLNTA_SRC ${FOLDER_SRC})
-  list(APPEND CELLNTA_INC "${CELLNTA_DIR}/include/${FOLDER}")
 
   if(FOLDER STREQUAL  ".")
     set(FOLDER "Base")

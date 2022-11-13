@@ -4,25 +4,26 @@
 
 #include "Window.h"
 
-namespace Ui
+namespace Ui {
+
+class MenubarWindow : public Window
 {
-  class MenubarWindow : public Window
-  {
-    static constexpr WindowProperties DefaultProperties = {
-      .Name = "Menubar",
-      .Opened = true,
-      .VisibleInMenubar = false,
-    };
-
-  public:
-    MenubarWindow(const std::function<void(const Context&)>& onResetLayout)
-      : Window(DefaultProperties), m_OnResetLayout(onResetLayout) {}
-
-    void Draw() override;
-
-  private:
-    float DrawFramerate(const float& offset);
-
-    std::function<void(const Context&)> m_OnResetLayout;
+  static constexpr WindowProperties DefaultProperties = {
+    .Name = "Menubar",
+    .Opened = true,
+    .VisibleInMenubar = false,
   };
-}
+
+public:
+  MenubarWindow(const std::function<void(const Context&)>& onResetLayout)
+    : Window(DefaultProperties), m_OnResetLayout(onResetLayout) {}
+
+  void Draw() override;
+
+private:
+  float DrawFramerate(const float& offset);
+
+  std::function<void(const Context&)> m_OnResetLayout;
+};
+
+} //namespace Ui

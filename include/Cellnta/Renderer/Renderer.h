@@ -4,15 +4,16 @@
 
 #include <Eigen/Dense>
 
-#include "Config.h"
-#include "GlBackend.h"
-#include "Shader.h"
-#include "Camera3d.h"
-#include "CameraNd.h"
-#include "HypercubeStorage.h"
-#include "NCellStorage.h"
-#include "ColorStorage.h"
-#include "RenderData.h"
+#include "Cellnta/Renderer/GlBackend.h"
+#include "Cellnta/Renderer/Shader.h"
+#include "Cellnta/Renderer/Camera3d.h"
+#include "Cellnta/Renderer/CameraNd.h"
+#include "Cellnta/Renderer/HypercubeStorage.h"
+#include "Cellnta/Renderer/NCellStorage.h"
+#include "Cellnta/Renderer/ColorStorage.h"
+#include "Cellnta/Renderer/RenderData.h"
+
+namespace Cellnta {
 
 class Renderer
 {
@@ -113,3 +114,4 @@ private:
   bool m_wantDraw = false;
 };
 
+} //namespace Cellnta

@@ -1,14 +1,27 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <unordered_map>
 #include <vector>
 
 #include <Eigen/Core>
 
-#include "Config.h"
-
 #define CHUNK_SIZE ((size_t) 16)
+
+namespace Cellnta {
+
+typedef int32_t cell_t;
+typedef uint8_t state_t;
+
+struct Cell
+{
+  using Vec = Eigen::Vector<cell_t, Eigen::Dynamic>;
+  Cell() = default;
+  Cell(const Vec& pos, state_t state) : pos(pos), state(state) {}
+  Vec pos;
+  state_t state;
+};
 
 template<typename T>
 struct EigeneHasher
@@ -206,3 +219,6 @@ private:
   int m_collY = 1;
   int m_collZ = 2;
 };
+
+} //namespace Cellnta
+

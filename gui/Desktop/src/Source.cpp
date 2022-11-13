@@ -4,9 +4,10 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 
-#include <Config.h>
-#include <GlBackend.h>
-#include <Canvas.h>
+#include <Cellnta/Config.h>
+#include <Cellnta/Log.h>
+#include <Cellnta/Renderer/GlBackend.h>
+#include <Cellnta/Canvas.h>
 
 #include "Context.h"
 #include "RendererWindow.h"
@@ -83,6 +84,8 @@ void GlMessageCallback(
 void Shutdown(SDL_Window* win, SDL_GLContext glCtx)
 {
   ProfileScope;
+
+  LOG_INFO("Shutting down the application");
 
   if(ImGui::GetCurrentContext())
   {
@@ -171,7 +174,7 @@ bool InitImGui(SDL_Window*& win, SDL_GLContext& glCtx)
   return false;
 }
 
-void CanvasProcessMouseEvents(SDL_Event& event, Canvas& canvas)
+void CanvasProcessMouseEvents(SDL_Event& event, Cellnta::Canvas& canvas)
 {
   ImGuiIO& io = ImGui::GetIO();
   float& delta = io.DeltaTime;
@@ -185,12 +188,12 @@ void CanvasProcessMouseEvents(SDL_Event& event, Canvas& canvas)
         canvas.OnMouseMotion(event.motion.xrel, event.motion.yrel, delta);
 
       if (event.type == SDL_MOUSEWHEEL)
-        canvas.OnMove(MoveDirection::FORWARD, event.wheel.y / 4.0f);
+        canvas.OnMove(Cellnta::MoveDirection::FORWARD, event.wheel.y / 4.0f);
     }
   }
 }
 
-void CanvasProcessKeyEvents(Canvas& canvas)
+void CanvasProcessKeyEvents(Cellnta::Canvas& canvas)
 {
   ImGuiIO& io = ImGui::GetIO();
   float& delta = io.DeltaTime;
@@ -202,18 +205,18 @@ void CanvasProcessKeyEvents(Canvas& canvas)
     if (state != nullptr)
     {
       if (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W])
-        canvas.OnMove(MoveDirection::FORWARD, delta);
+        canvas.OnMove(Cellnta::MoveDirection::FORWARD, delta);
       if (state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A])
-        canvas.OnMove(MoveDirection::LEFT, delta);
+        canvas.OnMove(Cellnta::MoveDirection::LEFT, delta);
       if (state[SDL_SCANCODE_DOWN] || state[SDL_SCANCODE_S])
-        canvas.OnMove(MoveDirection::BACKWARD, delta);
+        canvas.OnMove(Cellnta::MoveDirection::BACKWARD, delta);
       if (state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D])
-        canvas.OnMove(MoveDirection::RIGHT, delta);
+        canvas.OnMove(Cellnta::MoveDirection::RIGHT, delta);
 
       if (state[SDL_SCANCODE_SPACE])
-        canvas.OnMove(MoveDirection::WORLD_UP, delta);
+        canvas.OnMove(Cellnta::MoveDirection::WORLD_UP, delta);
       if (state[SDL_SCANCODE_LSHIFT])
-        canvas.OnMove(MoveDirection::WORLD_DOWN, delta);
+        canvas.OnMove(Cellnta::MoveDirection::WORLD_DOWN, delta);
     }
   }
 }
@@ -283,7 +286,8 @@ void ResetContextLayout(const Ui::Context& ctx)
 
 bool CreateContextLayout(int width, int height, Ui::Context& ctx)
 {
-	std::unique_ptr<Canvas> canvas = std::make_unique<Canvas>(Lf::AlgoType::SIMPLE, 2);
+	auto canvas = std::make_unique<Cellnta::Canvas>(
+      Cellnta::AlgoType::SIMPLE, 2);
 
   if(canvas->CreateShaders(
       RESOURCE_DIR "Shaders/Grid.glsl",
@@ -297,12 +301,8 @@ bool CreateContextLayout(int width, int height, Ui::Context& ctx)
 	canvas->GetCamera3d().Resize(Eigen::Vector2f(width, height));
   canvas->SetRenderDistance(16);
 
-  auto onFirstStartup = [](const Ui::Context& ctx){
-    ResetContextLayout(ctx);
-  };
-
   ctx.SetCanvas(std::move(canvas));
-  ctx.SetOnFirstStartup(onFirstStartup);
+  ctx.SetOnFirstStartup(ResetContextLayout);
 
   ctx.AddWindow(std::make_unique<Ui::RendererWindow>());
   ctx.AddWindow(std::make_unique<Ui::AlgoWindow>());
@@ -317,8 +317,8 @@ int main(int, char**)
   SDL_Window* win = nullptr;
   SDL_GLContext glCtx;
 
-  Log::InitDefault();
-  Log::GetLogger()->set_level(spdlog::level::debug);
+  Cellnta::Log::InitDefault();
+  Cellnta::Log::GetLogger()->set_level(spdlog::level::debug);
 
   if (InitSdlAndCreateGlWindow(win, glCtx))
   {
@@ -355,7 +355,7 @@ int main(int, char**)
     return EXIT_FAILURE;
   }
 
-  Canvas& canvas = ctx.GetCanvas();
+  Cellnta::Canvas& canvas = ctx.GetCanvas();
 
   uint32_t sceneFb = 0;
   uint32_t sceneTextColor = 0;

@@ -1,14 +1,16 @@
-#include "Canvas.h"
+#include "Cellnta/Canvas.h"
 
-#include <stdexcept>
+//#include <stdexcept>
 
-Canvas::Canvas(const Lf::AlgoType algo, const uint32_t dimensions)
+using namespace Cellnta;
+
+Canvas::Canvas(const AlgoType algo, const uint32_t dimensions)
 {
   ProfileScope;
 
   const size_t D = dimensions;
 
-  m_algo = Lf::CreateAlgoInstance(algo);
+  m_algo = CreateAlgoInstance(algo);
   if (m_algo == nullptr)
     assert(0);
 
@@ -58,9 +60,9 @@ void Canvas::DisableTimer()
   m_nextGenTimerInit = FLT_MAX;
 }
 
-bool Canvas::ChangeAlgoType(const Lf::AlgoType type)
+bool Canvas::ChangeAlgoType(const AlgoType type)
 {
-  std::unique_ptr<Lf::AlgoBase> tmp = Lf::CreateAlgoInstance(type);
+  std::unique_ptr<AlgoBase> tmp = CreateAlgoInstance(type);
   if (tmp == nullptr)
     return 1;
   tmp->SetupFrom(*m_algo);

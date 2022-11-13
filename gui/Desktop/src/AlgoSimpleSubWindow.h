@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Algorithms/AlgoSimple.h"
+#include <Cellnta/Algorithms/AlgoSimple.h>
 
 namespace Ui
 {
-  void DrawAlgoSimple(Lf::AlgoSimple* algo);
+  void DrawAlgoSimple(Cellnta::AlgoSimple* algo);
 }

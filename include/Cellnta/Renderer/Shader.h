@@ -5,8 +5,10 @@
 
 #include <Eigen/Core>
 
-#include "Config.h"
-#include "GlBackend.h"
+#include "Cellnta/Config.h"
+#include "Cellnta/Renderer/GlBackend.h"
+
+namespace Cellnta {
 
 class Shader
 {
@@ -89,3 +91,5 @@ private:
   std::string m_version = "#version 330 core\n";
 #endif
 };
+
+} //namespace Cellnta

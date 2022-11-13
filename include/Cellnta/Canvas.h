@@ -3,22 +3,24 @@
 #include <cfloat>
 #include <memory>
 
-#include "AlgoBase.h"
-#include "AlgoList.h"
+#include "Algorithms/AlgoBase.h"
+#include "Algorithms/AlgoList.h"
 
-#include "Shader.h"
-#include "Camera3d.h"
-#include "Renderer.h"
+//#include "Shader.h"
+//#include "Camera3d.h"
+#include "Renderer/Renderer.h"
+
+namespace Cellnta {
 
 class Canvas: public Renderer
 {
 public:
-	Canvas(const Lf::AlgoType algo, const uint32_t dimensions);
+	Canvas(const AlgoType algo, const uint32_t dimensions);
 	~Canvas();
 
 	void Update(float delta);
 	void NextGeneration();
-  bool ChangeAlgoType(const Lf::AlgoType type);
+  bool ChangeAlgoType(const AlgoType type);
 
 	void RenderGrid();
 	void RenderWorld();
@@ -32,14 +34,15 @@ public:
 
 	void SetDimension(uint32_t dim);
 
-	Lf::AlgoBase* GetAlgo() { return m_algo.get(); }
+	AlgoBase* GetAlgo() { return m_algo.get(); }
 
 	void OnMove(MoveDirection dir, float delta);
 	void OnMouseMotion(int32_t xrel, int32_t yrel, float delta);
 	void OnResize(uint32_t width, uint32_t height);
 
 private:
-	std::unique_ptr<Lf::AlgoBase> m_algo = nullptr;
+	std::unique_ptr<AlgoBase> m_algo = nullptr;
   float m_nextGenTimer = FLT_MAX;
   float m_nextGenTimerInit = FLT_MAX;
 };
+}

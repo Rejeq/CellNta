@@ -2,7 +2,9 @@
 
 #include <Eigen/Dense>
 
-#include "CameraBase.h"
+#include "Cellnta/Renderer/CameraBase.h"
+
+namespace Cellnta {
 
 enum class MoveDirection
 {
@@ -82,3 +84,5 @@ private:
   Eigen::Matrix4f m_view;
   Eigen::Matrix4f m_proj;
 };
+
+} //namespace Cellnta

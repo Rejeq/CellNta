@@ -1,24 +1,25 @@
 #pragma once
 
-#include <AlgoBase.h>
+#include <Cellnta/Algorithms/AlgoBase.h>
 #include "Window.h"
 
-namespace Ui
+namespace Ui {
+
+class AlgoWindow : public Window
 {
-  class AlgoWindow : public Window
-  {
-    static constexpr WindowProperties DefaultProperties = {
-      .Name = "Algorithm",
-    };
-
-  public:
-    AlgoWindow() : Window(DefaultProperties) {}
-
-    void Draw() override;
-
-  private:
-    void DrawBaseAlgoInfo(Lf::AlgoBase* algo);
-
-    Lf::Cell m_setCell;
+  static constexpr WindowProperties DefaultProperties = {
+    .Name = "Algorithm",
   };
-}
+
+public:
+  AlgoWindow() : Window(DefaultProperties) {}
+
+  void Draw() override;
+
+private:
+  void DrawBaseAlgoInfo(Cellnta::AlgoBase* algo);
+
+  Cellnta::Cell m_setCell;
+};
+
+} //namespace Ui

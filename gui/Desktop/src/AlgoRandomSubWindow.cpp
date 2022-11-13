@@ -1,7 +1,9 @@
 #include "AlgoRandomSubWindow.h"
 #include "Context.h"
 
-void Ui::DrawAlgoRandom(Lf::AlgoRandom* algo)
+using namespace Ui;
+
+void Ui::DrawAlgoRandom(Cellnta::AlgoRandom* algo)
 {
   if (algo == nullptr)
     return;

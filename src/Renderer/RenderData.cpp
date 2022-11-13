@@ -1,4 +1,8 @@
-#include "RenderData.h"
+#include "Cellnta/Renderer/RenderData.h"
+
+#include "Cellnta/Config.h"
+
+using namespace Cellnta;
 
 RenderData::RenderData()
 {

@@ -1,8 +1,13 @@
-#include "Shader.h"
+#include "Cellnta/Renderer/Shader.h"
 
 #include <fstream>
 #include <sstream>
 #include <string>
+
+#include "Cellnta/Config.h"
+#include "Cellnta/Log.h"
+
+using namespace Cellnta;
 
 Shader::~Shader()
 {
@@ -12,17 +17,21 @@ Shader::~Shader()
 
 void Shader::Delete()
 {
+  ProfileScope;
 	glDeleteProgram(m_id);
   m_id = 0;
 }
 
 void Shader::Use()
 {
+  ProfileScope;
 	glUseProgram(m_id);
 }
 
 bool Shader::CreateFromMemory(std::string& src)
 {
+  ProfileScope;
+
   constexpr std::string_view DirectiveVertex = "#shader vertex\n";
   constexpr std::string_view DirectiveFragment = "#shader fragment\n";
 
@@ -61,6 +70,8 @@ bool Shader::CreateFromMemory(std::string& src)
 
 bool Shader::Create(const std::string& path)
 {
+  ProfileScope;
+
   try
   {
     std::string src = ReadFile(path);

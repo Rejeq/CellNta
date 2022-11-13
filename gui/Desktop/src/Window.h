@@ -1,53 +1,55 @@
 #pragma once
 
+#include <cstdio>
 #include <imgui.h>
 
-namespace Ui
+namespace Ui {
+
+class Context;
+
+struct WindowProperties
 {
-  class Context;
+  const char* Name = nullptr;
+  bool Opened = true;
+  bool VisibleInMenubar = true;
+};
 
-  struct WindowProperties
+class Window
+{
+public:
+  Window(const WindowProperties& properties)
+    : p_prop(properties) {}
+  virtual ~Window() {}
+
+  virtual void Draw() = 0;
+  virtual void ReadProperties(const char* line)
   {
-    const char* Name = nullptr;
-    bool Opened = true;
-    bool VisibleInMenubar = true;
-  };
+    int opened;
+    if (sscanf(line, "Opened=%i", &opened) == 1)
+      p_prop.Opened = opened;
+  }
 
-  class Window
+  virtual void WriteProperties(ImGuiTextBuffer* buf) const
   {
-  public:
-    Window(const WindowProperties& properties)
-      : p_prop(properties) {}
-    virtual ~Window() {}
+    buf->appendf("Opened=%i\n", p_prop.Opened);
+  }
 
-    virtual void Draw() = 0;
-    virtual void ReadProperties(const char* line)
-    {
-      int opened;
-      if (sscanf(line, "Opened=%i", &opened) == 1)
-        p_prop.Opened = opened;
-    }
+  void SetContext(Context* ctx)
+  {
+    m_ctx = ctx;
+  }
 
-    virtual void WriteProperties(ImGuiTextBuffer* buf) const
-    {
-      buf->appendf("Opened=%i\n", p_prop.Opened);
-    }
+  const WindowProperties& GetProperties() const { return p_prop; }
+  WindowProperties& GetProperties() { return p_prop; }
 
-    void SetContext(Context* ctx)
-    {
-      m_ctx = ctx;
-    }
+  Context* GetContext() { return m_ctx; }
+  const Context* GetContext() const { return m_ctx; }
 
-    const WindowProperties& GetProperties() const { return p_prop; }
-    WindowProperties& GetProperties() { return p_prop; }
+protected:
+  WindowProperties p_prop;
 
-    Context* GetContext() { return m_ctx; }
-    const Context* GetContext() const { return m_ctx; }
+private:
+  Context* m_ctx = nullptr;
+};
 
-  protected:
-    WindowProperties p_prop;
-
-  private:
-    Context* m_ctx = nullptr;
-  };
-}
+} //namespace Ui

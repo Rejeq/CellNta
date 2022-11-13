@@ -1,12 +1,18 @@
-#include "ColorStorage.h"
+#include "Cellnta/Renderer/ColorStorage.h"
 
 #include <cassert>
 #include <cstdint>
 #include <cstring>
 #include <cmath>
 
+#include "Cellnta/Config.h"
+
+using namespace Cellnta;
+
 void ColorStorage::Generate(size_t maxIter, size_t polygons)
 {
+  ProfileScope;
+
   m_data.resize(polygons * maxIter * SIZE);
   color_t* ptr = m_data.data();
 
@@ -33,6 +39,8 @@ void ColorStorage::Generate(size_t maxIter, size_t polygons)
 
 void ColorStorage::GenerateRandomRGBAColor(color_t* dst, color_t alpha)
 {
+  ProfileScope;
+
   //https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
   constexpr float golden_ratio_conjugate = (float) 0.618033988749895;
 

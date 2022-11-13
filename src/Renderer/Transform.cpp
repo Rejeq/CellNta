@@ -1,10 +1,13 @@
-#include "Transform.h"
+#include "Cellnta/Renderer/Transform.h"
 
 #include <cfloat>
 
-#include "Config.h"
+#include "Cellnta/Config.h"
 
-Eigen::VectorXf getNormalVector(Eigen::MatrixXf vectors) {
+using namespace Cellnta;
+
+static Eigen::VectorXf getNormalVector(Eigen::MatrixXf vectors)
+{
   ProfileScope;
 
 	assert(vectors.rows() == vectors.cols() + 1);
@@ -33,7 +36,7 @@ Eigen::VectorXf getNormalVector(Eigen::MatrixXf vectors) {
 	return result;
 }
 
-Eigen::MatrixXf LookAt(const size_t N, const Eigen::VectorXf& from, const Eigen::VectorXf& to, const Eigen::MatrixXf& ups)
+Eigen::MatrixXf Cellnta::LookAt(const size_t N, const Eigen::VectorXf& from, const Eigen::VectorXf& to, const Eigen::MatrixXf& ups)
 {
   ProfileScope;
 
@@ -78,7 +81,7 @@ Eigen::MatrixXf LookAt(const size_t N, const Eigen::VectorXf& from, const Eigen:
 	return temp.transpose() * translate;
 }
 
-Eigen::MatrixXf Perspective(const size_t N, double eyeAngle, double nearPlane, double farPlane, double aspect)
+Eigen::MatrixXf Cellnta::Perspective(const size_t N, double eyeAngle, double nearPlane, double farPlane, double aspect)
 {
   ProfileScope;
 
@@ -102,7 +105,7 @@ Eigen::MatrixXf Perspective(const size_t N, double eyeAngle, double nearPlane, d
 	return m;
 }
 
-void NProject(NCellStorage& cells, const size_t cameraDim, const Eigen::MatrixXf& viewProj, bool perspective)
+void Cellnta::NProject(NCellStorage& cells, const size_t cameraDim, const Eigen::MatrixXf& viewProj, bool perspective)
 {
   ProfileScope;
 
@@ -120,7 +123,7 @@ void NProject(NCellStorage& cells, const size_t cameraDim, const Eigen::MatrixXf
   }
 }
 
-void NProject(HypercubeStorage& cube, const size_t cameraDim, const Eigen::MatrixXf& viewProj, bool perspective)
+void Cellnta::NProject(HypercubeStorage& cube, const size_t cameraDim, const Eigen::MatrixXf& viewProj, bool perspective)
 {
   ProfileScope;
 
@@ -141,7 +144,7 @@ void NProject(HypercubeStorage& cube, const size_t cameraDim, const Eigen::Matri
 	}
 }
 
-Eigen::MatrixXf NRotate(size_t N, size_t axis1, size_t axis2, float angle)
+Eigen::MatrixXf Cellnta::NRotate(size_t N, size_t axis1, size_t axis2, float angle)
 {
   assert(axis1 != axis2);
   assert(axis1 < N);

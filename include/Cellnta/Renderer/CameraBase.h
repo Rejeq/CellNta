@@ -2,6 +2,8 @@
 
 #include <Eigen/Dense>
 
+namespace Cellnta {
+
 static float radians(float degrees)
 {
 	return degrees * static_cast<float>(0.01745329251994329576923690768489);
@@ -70,3 +72,5 @@ protected:
 private:
 	size_t m_dim = 0;
 };
+
+} //namespace Cellnta

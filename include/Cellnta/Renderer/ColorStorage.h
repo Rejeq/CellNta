@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <vector>
 
+namespace Cellnta {
+
 class ColorStorage
 {
 public:
@@ -29,3 +31,5 @@ private:
 
   std::vector<color_t> m_data;
 };
+
+} //namespace Cellnta

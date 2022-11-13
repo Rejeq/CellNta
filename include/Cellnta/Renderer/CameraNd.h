@@ -2,10 +2,12 @@
 
 #include <Eigen/Dense>
 
-#include "CameraBase.h"
+#include "Cellnta/Renderer/CameraBase.h"
 
 //TODO: Delete this
-#include "Transform.h"
+#include "Cellnta/Renderer/Transform.h"
+
+namespace Cellnta {
 
 class CameraNd : public CameraBase
 {
@@ -49,3 +51,5 @@ private:
   Eigen::MatrixXf m_view;
   Eigen::MatrixXf m_proj;
 };
+
+} //namespace Cellnta

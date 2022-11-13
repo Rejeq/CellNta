@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Profiling.h"
-#include "Log.h"
+#include "Cellnta/Profiling.h"
+//#include "Log.h"
 
 #define CELLNTA_RENDERER_GL
 #ifndef CELLNTA_RENDERER_GL
@@ -15,5 +15,5 @@
 #endif
 
 //TODO: Move
-#include <cstdint>
-typedef uint8_t state_t;
+//#include <cstdint>
+//typedef uint8_t state_t;
