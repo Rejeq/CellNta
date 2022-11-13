@@ -9,9 +9,8 @@ namespace Ui
 {
   static std::unique_ptr<Context> s_ctx;
 
-  Context::Context(std::unique_ptr<Canvas>&& canvas)
+  Context::Context()
   {
-    m_canvas = std::move(canvas);
     ImGuiContext* imguiCtx = ImGui::GetCurrentContext();
     ImGuiSettingsHandler contextHandler;
     contextHandler.TypeName = "CellNta";

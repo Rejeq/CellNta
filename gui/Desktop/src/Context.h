@@ -21,7 +21,7 @@ namespace Ui
     using WindowsDataType = std::vector<std::unique_ptr<Window>>;
 
   public:
-    Context(std::unique_ptr<Canvas>&& canvas);
+    Context();
 
     void AddWindow(std::unique_ptr<Window>&& window);
 
@@ -35,6 +35,8 @@ namespace Ui
 
     const WindowsDataType& GetWindows() const { return m_windowsData; }
     Window* GetWindowByName(const char* name);
+
+    void SetCanvas(std::unique_ptr<Canvas>&& canvas) { m_canvas = std::move(canvas); }
     Canvas& GetCanvas() { return *m_canvas; }
     const Canvas& GetCanvas() const { return *m_canvas; }
 

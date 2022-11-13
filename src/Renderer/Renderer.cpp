@@ -24,21 +24,33 @@ void Renderer::Init(uint32_t D)
 {
   ProfileScope;
 
-  if (m_gridShader.Create(CELLNTA_RESOURCE_DIR "Shaders/Grid.glsl"))
+  InitBuffers();
+  SetDimension(D);
+
+  m_color.SetSeed(std::rand()/*123456.789f*/);
+  UpdateColorTexture();
+}
+
+bool Renderer::CreateShaders(const std::string& gridPath, const std::string& cellPath)
+{
+  ProfileScope;
+
+  if(m_cellShader.GetID() != 0)
+    m_cellShader.Delete();
+
+  if(m_gridShader.GetID() != 0)
+    m_gridShader.Delete();
+
+  if (m_gridShader.Create(gridPath))
   {
-    LOG_ERROR("Unable to load grid shader\n");
-    assert(0 && "Unable to load grid shader");
+    LOG_ERROR("Unable to load grid shader");
+    return true;
   }
 
-  if(m_cellShader.Create(CELLNTA_RESOURCE_DIR "Shaders/Cell.glsl"))
+  if(m_cellShader.Create(cellPath))
   {
-    LOG_ERROR("Unable to load cell shader\n");
-    assert(0 && "Unable to load cell shader");
-  }
-
-  if (m_gridShader.GetID() == 0 || m_cellShader.GetID() == 0)
-  {
-    assert(0 && "Unable to load shader");
+    LOG_ERROR("Unable to load cell shader");
+    return true;
   }
 
   const Eigen::Vector4f gridColor(0.2f, 0.2f, 0.2f, 0.8f);
@@ -53,12 +65,8 @@ void Renderer::Init(uint32_t D)
   m_cellShader.Use();
   m_cellShader.Set("u_facesColorTex", 0);
 
-  InitBuffers();
-  SetDimension(D);
-  SetRenderDistance(16);
-
-  m_color.SetSeed(std::rand()/*123456.789f*/);
-  UpdateColorTexture();
+  UpdateRenderDistanceUniform();
+  return false;
 }
 
 void Renderer::Update()
@@ -82,6 +90,8 @@ void Renderer::Update()
 
 void Renderer::DrawGrid()
 {
+  ProfileScope;
+
   m_gridShader.Use();
   glDrawArrays(GL_TRIANGLES, 0, 12);
 }
@@ -202,12 +212,8 @@ void Renderer::SetRenderDistance(uint32_t distance)
 {
   ProfileScope;
 
-  constexpr float farPlane = 6.25f * CHUNK_SIZE;
-
   m_renderData.SetDistance(distance);
-  m_gridShader.Use();
-  m_gridShader.Set("u_near", 0.01f);
-  m_gridShader.Set("u_far", (float) distance * farPlane);
+  UpdateRenderDistanceUniform();
 }
 
 void Renderer::ProjectBuffers()
@@ -281,7 +287,7 @@ void Renderer::EndArrayBufferSource()
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
-void Renderer::UpdateOnlyCameraMatrix()
+void Renderer::UpdateCameraUniform()
 {
   ProfileScope;
 
@@ -298,6 +304,17 @@ void Renderer::UpdateOnlyCameraMatrix()
   m_wantDraw = true;
 }
 
+void Renderer::UpdateRenderDistanceUniform()
+{
+  ProfileScope;
+
+  constexpr float FarPlane = 6.25f * CHUNK_SIZE;
+
+  m_gridShader.Use();
+  m_gridShader.Set("u_near", 0.01f);
+  m_gridShader.Set("u_far", (float) m_renderData.GetDistance() * FarPlane);
+}
+
 void Renderer::UpdateCamera()
 {
   ProfileScope;
@@ -305,7 +322,7 @@ void Renderer::UpdateCamera()
   if (p_camera.Update())
   {
     m_renderData.SetPosition(Chunk::GetPosFromGlobalPos(p_camera.GetPosition()));
-    UpdateOnlyCameraMatrix();
+    UpdateCameraUniform();
   }
 
   bool camUpdated = false;
@@ -395,13 +412,17 @@ void Renderer::UpdateColorTexture()
 {
   switch (m_cube.GetMode())
   {
-  case CubeMode::POINTS: m_color.Generate(m_cube.GetVerticesCount(), 1); break;
+  case CubeMode::POINTS:
+    m_color.Generate(m_cube.GetVerticesCount(), 1);
+    break;
   case CubeMode::WIREFRAME:
     if(m_cube.GetDimensions() == 1)
       m_color.Generate(1, 1);
     else m_color.Generate(m_cube.GetFacesCount() * 2, 1);
     break;
-  case CubeMode::POLYGON: m_color.Generate(m_cube.GetFacesCount(), 2); break;
+  case CubeMode::POLYGON:
+    m_color.Generate(m_cube.GetFacesCount(), 2);
+    break;
   default: assert(0 && "Unreachable"); break;
   }
 

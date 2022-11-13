@@ -20,6 +20,11 @@
 #	endif
 #endif
 
+#ifndef RESOURCE_DIR
+#error "Not provided resource directory"
+#define RESOURCE_DIR
+#endif
+
 constexpr size_t WINDOW_WIDTH = 1200;
 constexpr size_t WINDOW_HEIGHT = 700;
 
@@ -75,13 +80,29 @@ void GlMessageCallback(
 #undef MESSAGE_ARGS
 }
 
-int InitSdlAndCreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
+void Shutdown(SDL_Window* win, SDL_GLContext glCtx)
+{
+  ProfileScope;
+
+  if(ImGui::GetCurrentContext())
+  {
+    ImGui_ImplOpenGL3_Shutdown();
+	  ImGui_ImplSDL2_Shutdown();
+	  ImGui::DestroyContext();
+  }
+
+	SDL_GL_DeleteContext(glCtx);
+	SDL_DestroyWindow(win);
+	SDL_Quit();
+}
+
+bool InitSdlAndCreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
 {
   ProfileScope;
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     LOG_CRITICAL("Unable to initialize SDL2: {}", SDL_GetError());
-    return EXIT_FAILURE;
+    return true;
   }
 
 #if defined(CELLNTA_RENDERER_GLES3)
@@ -109,7 +130,7 @@ int InitSdlAndCreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
   win = SDL_CreateWindow("CellNta", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, winFlags);
   if (win == nullptr) {
     LOG_CRITICAL("Unable to create window: {}", SDL_GetError());
-    return EXIT_FAILURE;
+    return true;
   }
 
   glCtx = SDL_GL_CreateContext(win);
@@ -120,14 +141,14 @@ int InitSdlAndCreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
   {
     LOG_CRITICAL("Unable to initialize GLEW: {}",
         (const char*) glewGetErrorString(glewError));
-    return EXIT_FAILURE;
+    return true;
   }
 #endif
   SDL_GL_MakeCurrent(win, glCtx);
-  return 0;
+  return false;
 }
 
-int InitImGui(SDL_Window*& win, SDL_GLContext& glCtx)
+bool InitImGui(SDL_Window*& win, SDL_GLContext& glCtx)
 {
   ProfileScope;
 
@@ -147,7 +168,7 @@ int InitImGui(SDL_Window*& win, SDL_GLContext& glCtx)
 #else
 #error "Renderer not provided"
 #endif
-  return 0;
+  return false;
 }
 
 void CanvasProcessMouseEvents(SDL_Event& event, Canvas& canvas)
@@ -260,17 +281,27 @@ void ResetContextLayout(const Ui::Context& ctx)
   ImGui::DockBuilderFinish(dockId);
 }
 
-Ui::Context CreateContextLayout(int width, int height)
+bool CreateContextLayout(int width, int height, Ui::Context& ctx)
 {
-	std::unique_ptr<Canvas> canvasPtr = std::make_unique<Canvas>(Lf::AlgoType::SIMPLE, 2);
-	canvasPtr->GetCamera3d().SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
-	canvasPtr->GetCamera3d().Resize(Eigen::Vector2f(width, height));
+	std::unique_ptr<Canvas> canvas = std::make_unique<Canvas>(Lf::AlgoType::SIMPLE, 2);
+
+  if(canvas->CreateShaders(
+      RESOURCE_DIR "Shaders/Grid.glsl",
+      RESOURCE_DIR "Shaders/Cell.glsl"))
+  {
+    LOG_CRITICAL("Unable to load shaders");
+    return true;
+  }
+
+  canvas->GetCamera3d().SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
+	canvas->GetCamera3d().Resize(Eigen::Vector2f(width, height));
+  canvas->SetRenderDistance(16);
 
   auto onFirstStartup = [](const Ui::Context& ctx){
     ResetContextLayout(ctx);
   };
 
-  Ui::Context ctx(std::move(canvasPtr));
+  ctx.SetCanvas(std::move(canvas));
   ctx.SetOnFirstStartup(onFirstStartup);
 
   ctx.AddWindow(std::make_unique<Ui::RendererWindow>());
@@ -278,7 +309,7 @@ Ui::Context CreateContextLayout(int width, int height)
   ctx.AddWindow(std::make_unique<Ui::SceneWindow>());
   ctx.AddWindow(std::make_unique<Ui::MenubarWindow>(ResetContextLayout));
 
-  return ctx;
+  return false;
 }
 
 int main(int, char**)
@@ -289,10 +320,17 @@ int main(int, char**)
   Log::InitDefault();
   Log::GetLogger()->set_level(spdlog::level::debug);
 
-  if (int ret = InitSdlAndCreateGlWindow(win, glCtx) != 0)
-    return ret;
-  if (int ret = InitImGui(win, glCtx) != 0)
-    return ret;
+  if (InitSdlAndCreateGlWindow(win, glCtx))
+  {
+    Shutdown(win, glCtx);
+    return EXIT_FAILURE;
+  }
+
+  if (InitImGui(win, glCtx))
+  {
+    Shutdown(win, glCtx);
+    return EXIT_FAILURE;
+  }
 
   SDL_GL_SetSwapInterval(1); // Enable vsync
 
@@ -310,7 +348,13 @@ int main(int, char**)
   //cannot create the right size and used the default size
   SDL_GetWindowSize(win, &winWidth, &winHeight);
 
-  Ui::Context ctx = CreateContextLayout(winWidth, winHeight);
+  Ui::Context ctx;
+  if(CreateContextLayout(winWidth, winHeight, ctx))
+  {
+    Shutdown(win, glCtx);
+    return EXIT_FAILURE;
+  }
+
   Canvas& canvas = ctx.GetCanvas();
 
   uint32_t sceneFb = 0;
@@ -455,14 +499,6 @@ int main(int, char**)
     ProfileFrame;
 	}
 
-  ProfileScopeN("Shutdown");
-
-  ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplSDL2_Shutdown();
-	ImGui::DestroyContext();
-
-	SDL_GL_DeleteContext(glCtx);
-	SDL_DestroyWindow(win);
-	SDL_Quit();
+  Shutdown(win, glCtx);
 	return 0;
 }

@@ -53,7 +53,7 @@ if(MSVC)
     $<$<CONFIG:DEBUG>:/W4 /wd4244 /wd4267 /wd4127>)
 else()
   target_compile_options(CellNta PRIVATE
-    $<$<CONFIG:DEBUG>:-Wall -Wextra -Wpedantic -Wno-sign-compare>)
+    $<$<CONFIG:DEBUG>:-Wall -Wextra>)
 endif()
 
 target_sources(CellNta PRIVATE ${CELLNTA_SRC})

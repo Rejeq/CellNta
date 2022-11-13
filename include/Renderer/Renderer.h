@@ -21,6 +21,7 @@ public:
 	~Renderer();
 
 	void Init(uint32_t D);
+  bool CreateShaders(const std::string& gridPath, const std::string& cellPath);
 
 	void Update();
 
@@ -72,17 +73,18 @@ protected:
 	std::vector<CameraNd> p_Ncameras;
 
 private:
+	void InitBuffers();
 
-  void UpdateOnlyCameraMatrix();
-	void UpdateCamera();
+  void UpdateCameraUniform();
+	void UpdateRenderDistanceUniform();
+
+  void UpdateCamera();
 
   void UpdateCubeBuffer();
 	void UpdateCellBuffer();
   void UpdateData();
 
   void UpdateColorTexture();
-
-	void InitBuffers();
 
 	void BeginArrayBufferSource(float*& dst, size_t offset, size_t size);
 	void EndArrayBufferSource();

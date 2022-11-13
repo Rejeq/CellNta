@@ -13,6 +13,7 @@ Shader::~Shader()
 void Shader::Delete()
 {
 	glDeleteProgram(m_id);
+  m_id = 0;
 }
 
 void Shader::Use()
@@ -31,7 +32,7 @@ bool Shader::CreateFromMemory(std::string& src)
     fragmentStart == std::string::npos)
   {
     LOG_ERROR("Cannot parse shader");
-    return 1;
+    return true;
   }
 
   GLuint vertex = 0;
@@ -51,14 +52,11 @@ bool Shader::CreateFromMemory(std::string& src)
     vertex = LoadShader(src.c_str() + vertexStart, src.size() - vertexStart, GL_VERTEX_SHADER);
   }
 
-  bool out = false;
-  if (vertex != 0 && fragment != 0)
-    SetID(LinkShaders(vertex, fragment));
-  else out = true;
+  SetID(LinkShaders(vertex, fragment));
 
   glDeleteShader(vertex);
   glDeleteShader(fragment);
-  return out;
+  return GetID() == 0;
 }
 
 bool Shader::Create(const std::string& path)
@@ -71,7 +69,7 @@ bool Shader::Create(const std::string& path)
   catch (const std::exception& err)
   {
     LOG_ERROR("Cannot create shader: {}", err.what());
-    return 1;
+    return true;
   }
 }
 
@@ -85,14 +83,11 @@ bool Shader::CreateFromMemory(std::string& srcVertex, std::string& srcFragment)
 	GLuint vertex   = LoadShader(srcVertex.c_str(), -1, GL_VERTEX_SHADER);
 	GLuint fragment = LoadShader(srcFragment.c_str(), -1, GL_FRAGMENT_SHADER);
 
-	bool out = false;
-	if (vertex != 0 && fragment != 0)
-		SetID(LinkShaders(vertex, fragment));
-	else out = true;
+	SetID(LinkShaders(vertex, fragment));
 
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
-	return out;
+	return GetID() == 0;
 }
 
 bool Shader::Create(const std::string& pathVertex, const std::string& pathFragment)
@@ -108,7 +103,7 @@ bool Shader::Create(const std::string& pathVertex, const std::string& pathFragme
 	catch (const std::exception& err)
 	{
     LOG_ERROR("Cannot create shader: {}", err.what());
-		return 1;
+		return true;
 	}
 }
 
@@ -124,15 +119,12 @@ bool Shader::CreateFromMemory(std::string& srcVertex, std::string& srcFragment, 
 	GLuint fragment = LoadShader(srcFragment.c_str(), -1, GL_FRAGMENT_SHADER);
 	GLuint geometry = LoadShader(srcGeometry.c_str(), -1, GL_GEOMETRY_SHADER);
 
-	bool out = false;
-	if (vertex != 0 && fragment != 0 && geometry != 0)
-		SetID(LinkShaders(vertex, fragment, geometry));
-	else out = true;
+  SetID(LinkShaders(vertex, fragment, geometry));
 
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
 	glDeleteShader(geometry);
-	return out;
+	return GetID() == 0;
 }
 
 bool Shader::Create(const std::string& pathVertex, const std::string& pathFragment, const std::string& pathGeometry)
@@ -149,7 +141,7 @@ bool Shader::Create(const std::string& pathVertex, const std::string& pathFragme
 	catch (const std::exception& err)
 	{
     LOG_ERROR("Cannot create shader: {}", err.what());
-		return 1;
+		return true;
 	}
 }
 #endif //CELLNTA_RENDERER_GLES3
@@ -181,9 +173,8 @@ GLuint Shader::LoadShader(const char* src, GLint length, GLenum type)
 
 	std::string errorData;
   if (GetShaderErrorStatus(shader, errorData))
-  {
-    LOG_ERROR("Error compiling \"{}\", shader: \"{}\"\n{}", GetShaderTypeString(type), m_version, errorData);
-  }
+    LOG_ERROR("Error compiling \"{}\" shader: {}{}",
+        GetShaderTypeString(type), m_version, errorData);
 
 	return shader;
 }
@@ -201,7 +192,11 @@ GLuint Shader::LinkShaders(GLuint vertex, GLuint fragment, GLuint geometry)
 
   std::string errorData;
   if (GetLinkStatusError(program, errorData))
+  {
     LOG_ERROR("Error linking shaders:\n: {}", errorData);
+    glDeleteProgram(program);
+    return 0;
+  }
   return program;
 }
 
