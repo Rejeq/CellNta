@@ -99,14 +99,9 @@ void Shutdown(SDL_Window* win, SDL_GLContext glCtx)
 	SDL_Quit();
 }
 
-bool InitSdlAndCreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
+bool CreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
 {
   ProfileScope;
-
-  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    LOG_CRITICAL("Unable to initialize SDL2: {}", SDL_GetError());
-    return true;
-  }
 
 #if defined(CELLNTA_RENDERER_GLES3)
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
@@ -174,94 +169,6 @@ bool InitImGui(SDL_Window*& win, SDL_GLContext& glCtx)
   return false;
 }
 
-void CanvasProcessMouseEvents(SDL_Event& event, Cellnta::Canvas& canvas)
-{
-  ImGuiIO& io = ImGui::GetIO();
-  float& delta = io.DeltaTime;
-
-  //TODO:
-  //if (Ui::GetContext()->SceneWindowFocused)
-  {
-    if (SDL_GetRelativeMouseMode())
-    {
-      if (event.type == SDL_MOUSEMOTION)
-        canvas.OnMouseMotion(event.motion.xrel, event.motion.yrel, delta);
-
-      if (event.type == SDL_MOUSEWHEEL)
-        canvas.OnMove(Cellnta::MoveDirection::FORWARD, event.wheel.y / 4.0f);
-    }
-  }
-}
-
-void CanvasProcessKeyEvents(Cellnta::Canvas& canvas)
-{
-  ImGuiIO& io = ImGui::GetIO();
-  float& delta = io.DeltaTime;
-
-  //TODO:
-  //if (Ui::GetContext()->SceneWindowFocused)
-  {
-    const uint8_t* state = SDL_GetKeyboardState(nullptr);
-    if (state != nullptr)
-    {
-      if (state[SDL_SCANCODE_UP] || state[SDL_SCANCODE_W])
-        canvas.OnMove(Cellnta::MoveDirection::FORWARD, delta);
-      if (state[SDL_SCANCODE_LEFT] || state[SDL_SCANCODE_A])
-        canvas.OnMove(Cellnta::MoveDirection::LEFT, delta);
-      if (state[SDL_SCANCODE_DOWN] || state[SDL_SCANCODE_S])
-        canvas.OnMove(Cellnta::MoveDirection::BACKWARD, delta);
-      if (state[SDL_SCANCODE_RIGHT] || state[SDL_SCANCODE_D])
-        canvas.OnMove(Cellnta::MoveDirection::RIGHT, delta);
-
-      if (state[SDL_SCANCODE_SPACE])
-        canvas.OnMove(Cellnta::MoveDirection::WORLD_UP, delta);
-      if (state[SDL_SCANCODE_LSHIFT])
-        canvas.OnMove(Cellnta::MoveDirection::WORLD_DOWN, delta);
-    }
-  }
-}
-
-void CreateSceneFramebuffer(Ui::Context& ctx, uint32_t& fb, uint32_t& texColor, uint32_t& texDepth)
-{
-  if (fb != 0)
-    glDeleteFramebuffers(1, &fb);
-  if (texColor != 0)
-    glDeleteTextures(1, &texColor);
-  if (texDepth != 0)
-    glDeleteTextures(1, &texDepth);
-
-  glGenFramebuffers(1, &fb);
-  glBindFramebuffer(GL_FRAMEBUFFER, fb);
-
-  auto size = ctx.GetCanvas().GetCamera3d().GetSizeBase();
-
-  glGenTextures(1, &texColor);
-  glBindTexture(GL_TEXTURE_2D, texColor);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x(), size.y(), 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-      GL_TEXTURE_2D, texColor, 0);
-
-  glGenTextures(1, &texDepth);
-  glBindTexture(GL_TEXTURE_2D, texDepth);
-  glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, size.x(), size.y());
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-      GL_TEXTURE_2D, texDepth, 0);
-
-  ctx.SceneTextureId = texColor;
-  LOG_INFO("Scene framebuffer resized: ({}; {})", size.x(), size.y());
-}
-
 void ResetContextLayout(const Ui::Context& ctx)
 {
   ImGuiID dockId = ctx.MainDockspaceId;
@@ -298,7 +205,6 @@ bool CreateContextLayout(int width, int height, Ui::Context& ctx)
   }
 
   canvas->GetCamera3d().SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
-	canvas->GetCamera3d().Resize(Eigen::Vector2f(width, height));
   canvas->SetRenderDistance(16);
 
   ctx.SetCanvas(std::move(canvas));
@@ -320,7 +226,12 @@ int main(int, char**)
   Cellnta::Log::InitDefault();
   Cellnta::Log::GetLogger()->set_level(spdlog::level::debug);
 
-  if (InitSdlAndCreateGlWindow(win, glCtx))
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    LOG_CRITICAL("Unable to initialize SDL2: {}", SDL_GetError());
+    return EXIT_FAILURE;
+  }
+
+  if (CreateGlWindow(win, glCtx))
   {
     Shutdown(win, glCtx);
     return EXIT_FAILURE;
@@ -357,14 +268,8 @@ int main(int, char**)
 
   Cellnta::Canvas& canvas = ctx.GetCanvas();
 
-  uint32_t sceneFb = 0;
-  uint32_t sceneTextColor = 0;
-  uint32_t sceneTextDepth = 0;
-  CreateSceneFramebuffer(ctx, sceneFb, sceneTextColor, sceneTextDepth);
-
 	SDL_Event event;
 	bool done = false;
-	bool windowFocused = false;
   bool windowMinimized = false;
 
   ImGuiIO& io = ImGui::GetIO();
@@ -384,57 +289,20 @@ int main(int, char**)
 		{
 			ImGui_ImplSDL2_ProcessEvent(&event);
 
-      if (windowFocused && (SDL_GetRelativeMouseMode() == SDL_TRUE))
-        CanvasProcessMouseEvents(event, canvas);
-
-			switch (event.type)
+		  switch (event.type)
 			{
 			case SDL_QUIT:
 				done = true;
 				break;
-			case SDL_MOUSEBUTTONDOWN:
-        //TODO
-				if (windowFocused && io.KeyCtrl)
-				{
-          if (SDL_GetRelativeMouseMode())
-          {
-              SDL_SetRelativeMouseMode(SDL_FALSE);
-              io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-          }
-          else
-          {
-            if (ctx.SceneWindowFocused)
-            {
-              SDL_SetRelativeMouseMode(SDL_TRUE);
-              io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
-            }
-          }
-				}
-				break;
 			case SDL_WINDOWEVENT:
-				if (event.window.windowID != SDL_GetWindowID(win))
-					break;
 				switch (event.window.event)
 				{
-				case SDL_WINDOWEVENT_ENTER:
-					windowFocused = true;
-					break;
-				case SDL_WINDOWEVENT_LEAVE:
-					windowFocused = false;
-					break;
-				case SDL_WINDOWEVENT_RESIZED:
-					canvas.OnResize(event.window.data1, event.window.data2);
-          CreateSceneFramebuffer(ctx, sceneFb, sceneTextColor, sceneTextDepth);
-					break;
         case SDL_WINDOWEVENT_MINIMIZED:
           windowMinimized = true;
           break;
         case SDL_WINDOWEVENT_RESTORED:
           windowMinimized = false;
           break;
-				case SDL_WINDOWEVENT_CLOSE:
-					done = true;
-					break;
 				default: break;
 				}
 				break;
@@ -448,9 +316,6 @@ int main(int, char**)
       done = true;
       continue;
     }
-
-    if (windowFocused && (SDL_GetRelativeMouseMode() == SDL_TRUE))
-      CanvasProcessKeyEvents(canvas);
 
     if (ImGui::IsKeyPressed(ImGuiKey_Q, true))
       canvas.Rotate(0, 0, 0);
@@ -481,12 +346,17 @@ int main(int, char**)
 
       if (canvas.WantDraw())
       {
-        glBindFramebuffer(GL_FRAMEBUFFER, sceneFb);
-        glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        canvas.RenderWorld();
-        canvas.RenderGrid();
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        Ui::SceneWindow* scene = (Ui::SceneWindow*) ctx.GetWindowByName("Scene");
+        if(scene != nullptr)
+        {
+          ImVec2 size = scene->GetFramebufferSize();
+          glBindFramebuffer(GL_FRAMEBUFFER, scene->GetFramebuffer());
+          glViewport(0, 0, size.x, size.y);
+          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+          canvas.RenderWorld();
+          canvas.RenderGrid();
+          glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
       }
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }

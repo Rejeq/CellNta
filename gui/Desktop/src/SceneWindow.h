@@ -12,12 +12,26 @@ class SceneWindow : public Window
   };
 public:
   SceneWindow() : Window(DefaultProperties) {}
+  ~SceneWindow();
 
   void Draw() override;
 
-private:
+  ImVec2 GetFramebufferSize() const { return m_framebufferSize; }
+  uint32_t GetFramebuffer() const { return m_framebuffer; }
+  uint32_t GetTexture() const { return m_texture; }
+  bool GetFocused() const { return m_focused; }
 
-  ImVec2 m_prevWindowSize = ImVec2(0, 0);
+private:
+  void OnEnterFocus();
+  void OnLeaveFocus();
+  void HandleInput();
+  void ResizeFramebuffer(int width, int height);
+
+  ImVec2 m_framebufferSize = ImVec2(0, 0);
+  uint32_t m_framebuffer = 0;
+  uint32_t m_texture = 0;
+  uint32_t m_depthTexture = 0;
+  bool m_focused = false;
 };
 
 } //namespace Ui

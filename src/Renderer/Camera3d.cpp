@@ -1,7 +1,6 @@
 #include "Cellnta/Renderer/Camera3d.h"
 
 #include "Cellnta/Config.h"
-#include "Cellnta/Log.h"
 
 using namespace Cellnta;
 
@@ -28,12 +27,8 @@ void Camera3d::Rotate(float xoffset, float yoffset, float delta)
 
   p_updateView = true;
 
-  LOG_INFO("Rotate = ({}; {}):{}", xoffset, yoffset, delta);
   xoffset *= m_mouseSpeed * delta;
   yoffset *= m_mouseSpeed * delta;
-
-  LOG_INFO("Rotate({}): ({}; {})",
-      m_mouseSpeed, xoffset, yoffset);
 
   m_yaw += radians(xoffset);
   m_pitch -= radians(yoffset);

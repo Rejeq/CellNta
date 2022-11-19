@@ -48,6 +48,19 @@ void Context::Draw()
   ImGui::PopID();
 }
 
+Window* Context::GetWindowByName(const std::string& name)
+{
+  ProfileScope;
+
+  for(const auto& win: m_windowsData)
+  {
+    if(name == win->GetProperties().Name)
+      return win.get();
+  }
+
+  return nullptr;
+}
+
 void* Context::SettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler* handler, const char* name)
 {
   Context* ctx = (Context*) handler->UserData;

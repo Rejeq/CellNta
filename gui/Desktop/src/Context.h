@@ -27,14 +27,10 @@ public:
 
   void Draw();
 
-  //TODO: Move to the SceneWindow class
-  uint32_t SceneTextureId = 0;
-  bool SceneWindowFocused = false;
-
   ImGuiID MainDockspaceId = 0;
 
   const WindowsDataType& GetWindows() const { return m_windowsData; }
-  Window* GetWindowByName(const char* name);
+  Window* GetWindowByName(const std::string& name);
 
   void SetCanvas(std::unique_ptr<Cellnta::Canvas>&& canvas) { m_canvas = std::move(canvas); }
   Cellnta::Canvas& GetCanvas() { return *m_canvas; }
