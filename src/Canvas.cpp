@@ -82,6 +82,8 @@ void Canvas::Update(float delta)
 {
   ProfileScope;
 
+  //TODO: If the delta is large, it is necessary
+  //to make a new generation many times
   if (m_nextGenTimer != FLT_MAX)
   {
     m_nextGenTimer -= delta;

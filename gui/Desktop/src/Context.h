@@ -27,7 +27,8 @@ public:
 
   void Draw();
 
-  ImGuiID MainDockspaceId = 0;
+  void SetupDockspace();
+  ImGuiID GetDockspace() const { return m_dockspaceId; }
 
   const WindowsDataType& GetWindows() const { return m_windowsData; }
   Window* GetWindowByName(const std::string& name);
@@ -59,6 +60,7 @@ private:
   std::function<void(const Context&)> m_OnFirstStartup;
 
   bool m_firstStartup = true;
+  ImGuiID m_dockspaceId = 0;
 };
 
 } //namespace Ui

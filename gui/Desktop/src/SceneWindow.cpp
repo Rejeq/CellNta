@@ -34,14 +34,18 @@ void SceneWindow::Draw()
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
+  Cellnta::Canvas& canvas = GetContext()->GetCanvas();
   ImGuiIO io = ImGui::GetIO();
+
   if (ImGui::Begin(p_prop.Name, nullptr, winFlags))
   {
-    bool clicked = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
-    if(io.KeyCtrl && clicked && m_focused)
-      OnLeaveFocus();
-    else if(io.KeyCtrl && clicked && ImGui::IsWindowFocused())
-      OnEnterFocus();
+    if(ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+    {
+      if(io.KeyCtrl && m_focused)
+        OnLeaveFocus();
+      else if(io.KeyCtrl && ImGui::IsWindowFocused())
+        OnEnterFocus();
+    }
 
     if(m_focused)
       HandleInput();
@@ -50,15 +54,39 @@ void SceneWindow::Draw()
 
     if (size.x != m_framebufferSize.x || size.y != m_framebufferSize.y)
     {
-      GetContext()->GetCanvas().OnResize(size.x, size.y);
+      canvas.OnResize(size.x, size.y);
       ResizeFramebuffer(size.x, size.y);
     }
+
+    if (canvas.WantDraw())
+      DrawGlScene();
 
     ImGui::Image((void*)(intptr_t) m_texture, size,
       ImVec2(0, 1), ImVec2(1, 0));
   }
   ImGui::PopStyleVar(3);
   ImGui::End();
+}
+
+void SceneWindow::DrawGlScene()
+{
+  Cellnta::Canvas& canvas = GetContext()->GetCanvas();
+
+  glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+
+  glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+#if LF_TARGET_GLES3
+  glClearDepthf(1.0f);
+#else
+  glClearDepth(1.0f);
+#endif
+
+  glViewport(0, 0, m_framebufferSize.x, m_framebufferSize.y);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  canvas.RenderWorld();
+  canvas.RenderGrid();
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void SceneWindow::OnEnterFocus()

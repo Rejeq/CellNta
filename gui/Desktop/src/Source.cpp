@@ -171,7 +171,7 @@ bool InitImGui(SDL_Window*& win, SDL_GLContext& glCtx)
 
 void ResetContextLayout(const Ui::Context& ctx)
 {
-  ImGuiID dockId = ctx.MainDockspaceId;
+  ImGuiID dockId = ctx.GetDockspace();
 
   ImGui::DockBuilderRemoveNode(dockId);
   ImGui::DockBuilderAddNode(dockId, ImGuiDockNodeFlags_DockSpace);
@@ -327,37 +327,13 @@ int main(int, char**)
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplSDL2_NewFrame();
       ImGui::NewFrame();
-      ctx.MainDockspaceId = ImGui::DockSpaceOverViewport(nullptr,
-          ImGuiDockNodeFlags_PassthruCentralNode);
 
-      ImGui::ShowDemoWindow();
+      //Add additional windows after ctx.Draw()
+      //because it creates dock space
       ctx.Draw();
 
       ImGui::Render();
 
-      glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-      glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-#if LF_TARGET_GLES3
-      glClearDepthf(1.0f);
-#else
-      glClearDepth(1.0f);
-#endif
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      if (canvas.WantDraw())
-      {
-        Ui::SceneWindow* scene = (Ui::SceneWindow*) ctx.GetWindowByName("Scene");
-        if(scene != nullptr)
-        {
-          ImVec2 size = scene->GetFramebufferSize();
-          glBindFramebuffer(GL_FRAMEBUFFER, scene->GetFramebuffer());
-          glViewport(0, 0, size.x, size.y);
-          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-          canvas.RenderWorld();
-          canvas.RenderGrid();
-          glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
-      }
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
@@ -370,5 +346,5 @@ int main(int, char**)
 	}
 
   Shutdown(win, glCtx);
-	return 0;
+	return EXIT_SUCCESS;
 }

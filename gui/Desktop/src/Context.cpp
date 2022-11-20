@@ -34,6 +34,8 @@ void Context::Draw()
 
   ImGui::PushID("Context name"); //TODO
 
+  SetupDockspace();
+
   if (m_firstStartup)
   {
     if(m_OnFirstStartup)
@@ -41,11 +43,21 @@ void Context::Draw()
     m_firstStartup = false;
   }
 
+  //TODO: Delete this
+  ImGui::ShowDemoWindow();
   for (auto& window : m_windowsData)
     if (window->GetProperties().Opened)
       window->Draw();
 
   ImGui::PopID();
+}
+
+void Context::SetupDockspace()
+{
+  ProfileScope;
+
+  m_dockspaceId = ImGui::DockSpaceOverViewport(nullptr,
+      ImGuiDockNodeFlags_PassthruCentralNode);
 }
 
 Window* Context::GetWindowByName(const std::string& name)

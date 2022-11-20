@@ -15,6 +15,7 @@ public:
   ~SceneWindow();
 
   void Draw() override;
+  void DrawGlScene();
 
   ImVec2 GetFramebufferSize() const { return m_framebufferSize; }
   uint32_t GetFramebuffer() const { return m_framebuffer; }
