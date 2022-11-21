@@ -6,6 +6,6 @@ using namespace Cellnta;
 
 void NCellStorage::Restore()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
   m_cells = m_origCells;
 }

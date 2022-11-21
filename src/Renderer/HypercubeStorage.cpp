@@ -28,9 +28,9 @@ using namespace Cellnta;
 
 uint32_t HypercubeStorage::GenerateCube(size_t dim, point_t a, CubeMode mode)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
-  LOG_DEBUG("Trying to generate hypercube");
+  CELLNTA_LOG_DEBUG("Trying to generate hypercube");
   uint32_t out = Updated::NONE;
 
   if (dim != m_d)
@@ -79,14 +79,14 @@ uint32_t HypercubeStorage::GenerateCube(size_t dim, point_t a, CubeMode mode)
 
 void HypercubeStorage::Restore()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_pnt = m_origPnt;
 }
 
 void HypercubeStorage::SetMode(CubeMode mode)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_mode = mode;
   GenerateCube(m_d, -1, mode);
@@ -94,7 +94,7 @@ void HypercubeStorage::SetMode(CubeMode mode)
 
 void HypercubeStorage::GenerateVertices()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_pnt.resize(GetPointsSize());
 
@@ -124,20 +124,20 @@ void HypercubeStorage::GenerateVertices()
   m_origPnt = m_pnt;
 
 #ifdef HYPERCUBE_DEBUG_PRINT
-  LOG_DEBUG("Points:");
+  CELLNTA_LOG_DEBUG("Points:");
   for (size_t i = 0; i < m_pnt.size() / GetVertexSize(); ++i)
   {
     size_t offset = i * GetVertexSize();
     auto start = m_pnt.begin() + offset;
     auto end = start + GetVertexSize();
-    LOG_DEBUG("{}: {:+f}", i, fmt::join(start, end, ", "));
+    CELLNTA_LOG_DEBUG("{}: {:+f}", i, fmt::join(start, end, ", "));
   }
 #endif // HYPERCUBE_DEBUG_PRINT
 }
 
 void HypercubeStorage::GenerateIndicesPolygon()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   //m_ind.clear();
   m_ind.resize(GetFacesCount() * 6, 0);
@@ -203,16 +203,16 @@ void HypercubeStorage::GenerateIndicesPolygon()
   m_ind.shrink_to_fit();
 
 #ifdef HYPERCUBE_DEBUG_PRINT
-  LOG_DEBUG("Polygon: (faces={})", GetFacesCount());
+  CELLNTA_LOG_DEBUG("Polygon: (faces={})", GetFacesCount());
   for (int i = 0; i < m_ind.size(); i += 6)
   {
-    LOG_DEBUG("Face: {}", i / 6);
+    CELLNTA_LOG_DEBUG("Face: {}", i / 6);
     for (int j = 0; j < 2; ++j)
     {
       constexpr size_t offset = 3;
       auto start = m_ind.begin() + i + j * offset;
       auto end = start + offset;
-      LOG_DEBUG("{}", fmt::join(start, end, ", "));
+      CELLNTA_LOG_DEBUG("{}", fmt::join(start, end, ", "));
     }
   }
 #endif // HYPERCUBE_DEBUG_PRINT
@@ -220,7 +220,7 @@ void HypercubeStorage::GenerateIndicesPolygon()
 
 void HypercubeStorage::GenerateIndicesWireframe()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   //m_ind.clear();
   m_ind.resize(GetVerticesCount() * m_d);
@@ -261,9 +261,9 @@ void HypercubeStorage::GenerateIndicesWireframe()
   m_ind.shrink_to_fit();
 
 #ifdef HYPERCUBE_DEBUG_PRINT
-  LOG_DEBUG("Wire frame:");
+  CELLNTA_LOG_DEBUG("Wire frame:");
   for (size_t i = 0; i < m_ind.size(); i += 2)
-    LOG_DEBUG("{}, {}", m_ind[i + 0], m_ind[i + 1]);
+    CELLNTA_LOG_DEBUG("{}, {}", m_ind[i + 0], m_ind[i + 1]);
 #endif
 }
 

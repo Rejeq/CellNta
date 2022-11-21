@@ -7,7 +7,7 @@
 
 void Ui::RendererWindow::Draw()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   constexpr ImGuiWindowFlags WinFlags = ImGuiWindowFlags_HorizontalScrollbar;
   Cellnta::Renderer& ren = GetContext()->GetCanvas();
@@ -98,7 +98,7 @@ void Ui::RendererWindow::ShowCollatingInfo()
 
 void Ui::RendererWindow::DrawCameras()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   Cellnta::Renderer& ren = GetContext()->GetCanvas();
   Cellnta::Camera3d& camera3d = ren.GetCamera3d();
@@ -133,7 +133,7 @@ void Ui::RendererWindow::DrawCameras()
 
 void Ui::RendererWindow::DrawLoadedCells()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   Cellnta::Renderer& ren = GetContext()->GetCanvas();
   const Cellnta::NCellStorage& cells = ren.GetCells();

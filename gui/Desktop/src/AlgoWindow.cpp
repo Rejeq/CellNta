@@ -11,7 +11,7 @@ using namespace Ui;
 
 void AlgoWindow::Draw()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   Cellnta::Canvas& canvas = GetContext()->GetCanvas();
   Cellnta::AlgoBase* algo = canvas.GetAlgo();
@@ -36,7 +36,7 @@ void AlgoWindow::Draw()
 
 void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase* algo)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   static const std::array<ComboData<Cellnta::AlgoType>, 2> AlgoTypeData = {
     ComboData(Cellnta::AlgoType::RANDOM, "Random"),

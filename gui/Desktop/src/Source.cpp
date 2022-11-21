@@ -73,19 +73,19 @@ void GlMessageCallback(
 #define MESSAGE_ARGS GlDebugSourceToString(source), GlDebugTypeToString(type), id, message
   switch (severity)
   {
-  case GL_DEBUG_SEVERITY_HIGH:         LOG_ERROR(msg, MESSAGE_ARGS); break;
-  case GL_DEBUG_SEVERITY_MEDIUM:       LOG_WARN(msg, MESSAGE_ARGS); break;
-  case GL_DEBUG_SEVERITY_LOW:          LOG_INFO(msg, MESSAGE_ARGS); break;
-  case GL_DEBUG_SEVERITY_NOTIFICATION: LOG_TRACE(msg, MESSAGE_ARGS); break;
+  case GL_DEBUG_SEVERITY_HIGH:         CELLNTA_LOG_ERROR(msg, MESSAGE_ARGS); break;
+  case GL_DEBUG_SEVERITY_MEDIUM:       CELLNTA_LOG_WARN(msg, MESSAGE_ARGS); break;
+  case GL_DEBUG_SEVERITY_LOW:          CELLNTA_LOG_INFO(msg, MESSAGE_ARGS); break;
+  case GL_DEBUG_SEVERITY_NOTIFICATION: CELLNTA_LOG_TRACE(msg, MESSAGE_ARGS); break;
   }
 #undef MESSAGE_ARGS
 }
 
 void Shutdown(SDL_Window* win, SDL_GLContext glCtx)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
-  LOG_INFO("Shutting down the application");
+  CELLNTA_LOG_INFO("Shutting down the application");
 
   if(ImGui::GetCurrentContext())
   {
@@ -101,7 +101,7 @@ void Shutdown(SDL_Window* win, SDL_GLContext glCtx)
 
 bool CreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 #if defined(CELLNTA_RENDERER_GLES3)
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
@@ -127,7 +127,7 @@ bool CreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
 
   win = SDL_CreateWindow("CellNta", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, winFlags);
   if (win == nullptr) {
-    LOG_CRITICAL("Unable to create window: {}", SDL_GetError());
+    CELLNTA_LOG_CRITICAL("Unable to create window: {}", SDL_GetError());
     return true;
   }
 
@@ -137,7 +137,7 @@ bool CreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
   GLint glewError = glewInit();
   if (glewError != GLEW_OK)
   {
-    LOG_CRITICAL("Unable to initialize GLEW: {}",
+    CELLNTA_LOG_CRITICAL("Unable to initialize GLEW: {}",
         (const char*) glewGetErrorString(glewError));
     return true;
   }
@@ -148,7 +148,7 @@ bool CreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
 
 bool InitImGui(SDL_Window*& win, SDL_GLContext& glCtx)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
@@ -200,7 +200,7 @@ bool CreateContextLayout(int width, int height, Ui::Context& ctx)
       RESOURCE_DIR "Shaders/Grid.glsl",
       RESOURCE_DIR "Shaders/Cell.glsl"))
   {
-    LOG_CRITICAL("Unable to load shaders");
+    CELLNTA_LOG_CRITICAL("Unable to load shaders");
     return true;
   }
 
@@ -227,7 +227,7 @@ int main(int, char**)
   Cellnta::Log::GetLogger()->set_level(spdlog::level::debug);
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    LOG_CRITICAL("Unable to initialize SDL2: {}", SDL_GetError());
+    CELLNTA_LOG_CRITICAL("Unable to initialize SDL2: {}", SDL_GetError());
     return EXIT_FAILURE;
   }
 
@@ -342,7 +342,7 @@ int main(int, char**)
     frameEnd = SDL_GetPerformanceCounter();
     frameDelta = ((float) frameEnd - frameStart) / timeFrequency;
 
-    ProfileFrame;
+    CELLNTA_PROFILE_FRAME;
 	}
 
   Shutdown(win, glCtx);

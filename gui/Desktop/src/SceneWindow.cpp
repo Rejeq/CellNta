@@ -22,7 +22,7 @@ SceneWindow::~SceneWindow()
 
 void SceneWindow::Draw()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   constexpr ImGuiWindowFlags winFlags = ImGuiWindowFlags_NoBringToFrontOnFocus
     | ImGuiWindowFlags_NoResize    | ImGuiWindowFlags_NoCollapse
@@ -75,7 +75,7 @@ void SceneWindow::DrawGlScene()
   glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 
   glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-#if LF_TARGET_GLES3
+#if CELLNTA_RENDERER_GLES3
   glClearDepthf(1.0f);
 #else
   glClearDepth(1.0f);
@@ -91,7 +91,7 @@ void SceneWindow::DrawGlScene()
 
 void SceneWindow::OnEnterFocus()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_focused = true;
   SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -100,7 +100,7 @@ void SceneWindow::OnEnterFocus()
 
 void SceneWindow::OnLeaveFocus()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_focused = false;
   SDL_SetRelativeMouseMode(SDL_FALSE);
@@ -109,7 +109,7 @@ void SceneWindow::OnLeaveFocus()
 
 void SceneWindow::HandleInput()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   Cellnta::Canvas& canvas = GetContext()->GetCanvas();
   ImGuiIO& io = ImGui::GetIO();
@@ -137,7 +137,7 @@ void SceneWindow::HandleInput()
 
 void SceneWindow::ResizeFramebuffer(int width, int height)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (m_framebuffer == 0)
     glGenFramebuffers(1, &m_framebuffer);
@@ -146,7 +146,7 @@ void SceneWindow::ResizeFramebuffer(int width, int height)
   if (m_depthTexture == 0)
     glGenTextures(1, &m_depthTexture);
 
-  LOG_INFO("Resizing framebuffer to: ({}; {})", width, height);
+  CELLNTA_LOG_INFO("Resizing framebuffer to: ({}; {})", width, height);
 
   glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 

@@ -17,7 +17,7 @@ AlgoSimple::~AlgoSimple()
 
 void AlgoSimple::Update()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   auto start = std::chrono::steady_clock::now();
 
@@ -42,12 +42,12 @@ void AlgoSimple::Update()
 
   auto end = std::chrono::steady_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-  LOG_INFO("Next generation time: {}", dur);
+  CELLNTA_LOG_INFO("Next generation time: {}", dur);
 }
 
 void AlgoSimple::LoadWorld(RenderData* data)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (data == nullptr || GetWorld() == nullptr)
     return;
@@ -76,7 +76,7 @@ void AlgoSimple::LoadWorld(RenderData* data)
 
 void AlgoSimple::SetDimension(size_t dim)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (dim == p_dim)
     return;
@@ -136,7 +136,7 @@ void AlgoSimple::SetDimension(size_t dim)
 
 void AlgoSimple::SetCell(const Cell& cell)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   state_t* world = GetWorld();
   if (world == nullptr)
@@ -151,7 +151,7 @@ void AlgoSimple::SetCell(const Cell& cell)
 
 void AlgoSimple::SetCell(const std::vector<Cell>& cells)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   state_t* world = GetWorld();
   if (world == nullptr)
@@ -169,7 +169,7 @@ void AlgoSimple::SetCell(const std::vector<Cell>& cells)
 
 state_t AlgoSimple::GetCell(const Cell::Vec& pos)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   state_t* world = GetWorld();
   if (world == nullptr)
@@ -192,7 +192,7 @@ void AlgoSimple::SetSize(const std::vector<size_t>& size)
 
 void AlgoSimple::Step()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_oddGen = !m_oddGen;
   state_t* bufferWorld = GetBufferWorld();
@@ -201,7 +201,7 @@ void AlgoSimple::Step()
 
 size_t AlgoSimple::FindNeighbors(const state_t*& world, const size_t& idx)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   size_t out = 0;
   for (size_t i = 0; i < m_neighbors.size(); ++i)
@@ -217,7 +217,7 @@ size_t AlgoSimple::FindNeighbors(const state_t*& world, const size_t& idx)
 
 void AlgoSimple::GenerateNeigbors(const std::vector<cell_t>& oneDimNei)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   std::vector<std::vector<cell_t>> NDimNei(p_dim, oneDimNei);
   m_neighbors.clear();
@@ -263,13 +263,13 @@ CartesianProductEnd:
 
 size_t AlgoSimple::FindIdxInRangedWorld(const size_t& cellIdx, const size_t& neighborIdx)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
   return cellIdx + neighborIdx;
 }
 
 void AlgoSimple::CalculatePositionFromIdx(size_t idx, Cell::Vec& out)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   for (int i = GetDimensions() - 1; i >= 0; --i)
   {
@@ -282,7 +282,7 @@ void AlgoSimple::CalculatePositionFromIdx(size_t idx, Cell::Vec& out)
 
 Cell::Vec AlgoSimple::CalculatePositionFromIdx(size_t idx)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   Cell::Vec out = Cell::Vec::Zero(GetDimensions());
   CalculatePositionFromIdx(idx, out);
@@ -291,7 +291,7 @@ Cell::Vec AlgoSimple::CalculatePositionFromIdx(size_t idx)
 
 size_t AlgoSimple::CalculateIdxFromPos(const Cell::Vec& pos)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   size_t idx = 0;
   size_t size = 1;
@@ -307,7 +307,7 @@ size_t AlgoSimple::CalculateIdxFromPos(const Cell::Vec& pos)
 
 void AlgoSimple::CreateWorld()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   for (size_t i = 0; i < 2; ++i)
   {
@@ -322,7 +322,7 @@ void AlgoSimple::CreateWorld()
 
 void AlgoSimple::DeleteWorld()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   for (size_t i = 0; i < 2; ++i)
   {

@@ -54,7 +54,7 @@ private:
 template<bool homogeneous, typename Derived>
 bool NCellStorage::Add(const Derived& pos)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   using Scalar = typename Derived::Scalar;
   const size_t oldCapacity = m_cells.capacity();

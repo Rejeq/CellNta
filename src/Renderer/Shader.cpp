@@ -17,20 +17,20 @@ Shader::~Shader()
 
 void Shader::Delete()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 	glDeleteProgram(m_id);
   m_id = 0;
 }
 
 void Shader::Use()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 	glUseProgram(m_id);
 }
 
 bool Shader::CreateFromMemory(std::string& src)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   constexpr std::string_view DirectiveVertex = "#shader vertex\n";
   constexpr std::string_view DirectiveFragment = "#shader fragment\n";
@@ -40,7 +40,7 @@ bool Shader::CreateFromMemory(std::string& src)
   if (vertexStart == std::string::npos ||
     fragmentStart == std::string::npos)
   {
-    LOG_ERROR("Cannot parse shader");
+    CELLNTA_LOG_ERROR("Cannot parse shader");
     return true;
   }
 
@@ -70,7 +70,7 @@ bool Shader::CreateFromMemory(std::string& src)
 
 bool Shader::Create(const std::string& path)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   try
   {
@@ -79,14 +79,14 @@ bool Shader::Create(const std::string& path)
   }
   catch (const std::exception& err)
   {
-    LOG_ERROR("Cannot create shader: {}", err.what());
+    CELLNTA_LOG_ERROR("Cannot create shader: {}", err.what());
     return true;
   }
 }
 
 bool Shader::CreateFromMemory(std::string& srcVertex, std::string& srcFragment)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (m_id != 0)
     glDeleteProgram(m_id);
@@ -103,7 +103,7 @@ bool Shader::CreateFromMemory(std::string& srcVertex, std::string& srcFragment)
 
 bool Shader::Create(const std::string& pathVertex, const std::string& pathFragment)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	try
 	{
@@ -113,7 +113,7 @@ bool Shader::Create(const std::string& pathVertex, const std::string& pathFragme
 	}
 	catch (const std::exception& err)
 	{
-    LOG_ERROR("Cannot create shader: {}", err.what());
+    CELLNTA_LOG_ERROR("Cannot create shader: {}", err.what());
 		return true;
 	}
 }
@@ -121,7 +121,7 @@ bool Shader::Create(const std::string& pathVertex, const std::string& pathFragme
 #ifdef CELLNTA_HAS_GEOMETRY_SHADER
 bool Shader::CreateFromMemory(std::string& srcVertex, std::string& srcFragment, std::string& srcGeometry)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (m_id != 0)
     glDeleteProgram(m_id);
@@ -140,7 +140,7 @@ bool Shader::CreateFromMemory(std::string& srcVertex, std::string& srcFragment, 
 
 bool Shader::Create(const std::string& pathVertex, const std::string& pathFragment, const std::string& pathGeometry)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	try
 	{
@@ -151,7 +151,7 @@ bool Shader::Create(const std::string& pathVertex, const std::string& pathFragme
 	}
 	catch (const std::exception& err)
 	{
-    LOG_ERROR("Cannot create shader: {}", err.what());
+    CELLNTA_LOG_ERROR("Cannot create shader: {}", err.what());
 		return true;
 	}
 }
@@ -159,7 +159,7 @@ bool Shader::Create(const std::string& pathVertex, const std::string& pathFragme
 
 GLuint Shader::LoadShader(const char* src, GLint length, GLenum type)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   std::vector<const char*> data;
   std::vector<GLint> dataLength;
@@ -184,7 +184,7 @@ GLuint Shader::LoadShader(const char* src, GLint length, GLenum type)
 
 	std::string errorData;
   if (GetShaderErrorStatus(shader, errorData))
-    LOG_ERROR("Error compiling \"{}\" shader: {}{}",
+    CELLNTA_LOG_ERROR("Error compiling \"{}\" shader: {}{}",
         GetShaderTypeString(type), m_version, errorData);
 
 	return shader;
@@ -192,7 +192,7 @@ GLuint Shader::LoadShader(const char* src, GLint length, GLenum type)
 
 GLuint Shader::LinkShaders(GLuint vertex, GLuint fragment, GLuint geometry)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   GLuint program = glCreateProgram();
   glAttachShader(program, vertex);
@@ -204,7 +204,7 @@ GLuint Shader::LinkShaders(GLuint vertex, GLuint fragment, GLuint geometry)
   std::string errorData;
   if (GetLinkStatusError(program, errorData))
   {
-    LOG_ERROR("Error linking shaders:\n: {}", errorData);
+    CELLNTA_LOG_ERROR("Error linking shaders:\n: {}", errorData);
     glDeleteProgram(program);
     return 0;
   }
@@ -213,7 +213,7 @@ GLuint Shader::LinkShaders(GLuint vertex, GLuint fragment, GLuint geometry)
 
 bool Shader::GetLinkStatusError(GLuint program, std::string& out)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	GLint status = 0;
 	glGetProgramiv(program, GL_LINK_STATUS, &status);
@@ -231,7 +231,7 @@ bool Shader::GetLinkStatusError(GLuint program, std::string& out)
 
 bool Shader::GetShaderErrorStatus(GLuint shader, std::string& out)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	GLint status = 0;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
@@ -262,16 +262,16 @@ const char* Shader::GetShaderTypeString(GLenum type) const
 
 std::string Shader::ReadFile(const std::string& path)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	std::string out;
 	std::ifstream file;
 
-	LOG_INFO("Reading shader: {}", path);
+	CELLNTA_LOG_INFO("Reading shader: {}", path);
 	file.open(path);
   if (!file.is_open())
   {
-    LOG_ERROR("Cannot create shader: {}", path);
+    CELLNTA_LOG_ERROR("Cannot create shader: {}", path);
     return "";
   }
 
@@ -292,7 +292,7 @@ GLuint Shader::GetID()
 
 GLint Shader::GetUniformLocation(const std::string& location)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	auto res = m_uniforms.find(location);
 	if (res != m_uniforms.end())

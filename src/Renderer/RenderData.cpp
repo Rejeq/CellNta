@@ -23,7 +23,7 @@ void RenderData::SetChunk(const std::shared_ptr<Chunk>& chunk)
 
 void RenderData::SetCell(const Eigen::VectorXi& pos, state_t state)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (state == 0)
     return;
@@ -51,7 +51,7 @@ const RenderData::Map& RenderData::GetData() const
 
 RenderData::ChunkPtr RenderData::GetChunk(const ChunkPos& pos)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   auto res = m_data.find(pos);
   if (res != m_data.end())
@@ -67,7 +67,7 @@ void RenderData::Clear()
 
 void RenderData::SetDistance(size_t distance)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (distance == m_distance)
     return;
@@ -80,7 +80,7 @@ void RenderData::SetDistance(size_t distance)
 
 void RenderData::SetPosition(const ChunkPos& pos)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (m_pos == pos)
     return;
@@ -92,7 +92,7 @@ void RenderData::SetPosition(const ChunkPos& pos)
 
 void RenderData::UpdateVisibleArea(const Eigen::Vector3i& pos)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   const Eigen::Vector3i cellPos = pos.array() * CHUNK_SIZE;
   const Area oldVisibleArea = m_visibleArea;
@@ -109,7 +109,7 @@ void RenderData::UpdateVisibleArea(const Eigen::Vector3i& pos)
 
 void RenderData::EraseUnvisibleArea(const ChunkPos& oldPos, const ChunkPos& newPos)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   Area oldArea = GetDistanceChunkArea() + oldPos.GetPosition();
   Area newArea = GetDistanceChunkArea() + newPos.GetPosition();
@@ -140,7 +140,7 @@ void RenderData::EraseUnvisibleArea(const ChunkPos& oldPos, const ChunkPos& newP
 
 bool RenderData::ChunkValid(const ChunkPos& pos)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   Eigen::Vector3i maxPos = m_pos.GetPosition().array() + m_distance;
   Eigen::Vector3i minPos = m_pos.GetPosition().array() - m_distance;
@@ -156,7 +156,7 @@ bool RenderData::ChunkValid(const ChunkPos& pos)
 
 void Chunk::SetCell(const Eigen::VectorXi& pos, state_t state)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   assert(pos.size() >= m_d);
 
@@ -183,7 +183,7 @@ Area::Area(const int min, const int max)
 
 bool Area::CellValid(const Eigen::VectorXi& cell) const
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (((min.x() <= cell.x()) && (cell.x() <= max.x()))
     && ((min.y() <= cell.y()) && (cell.y() <= max.y()))
@@ -195,7 +195,7 @@ bool Area::CellValid(const Eigen::VectorXi& cell) const
 
 std::vector<Area> Area::InverseClip(const Area& clipper, const Area& subject)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   Area inter = Area::Intersection(clipper, subject);
   if (!inter.Valid())
@@ -239,7 +239,7 @@ std::vector<Area> Area::InverseClip(const Area& clipper, const Area& subject)
 
 Area Area::Intersection(const Area& first, const Area& second)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   Area out;
   out.min.x() = std::max(first.min.x(), second.min.x());
@@ -254,7 +254,7 @@ Area Area::Intersection(const Area& first, const Area& second)
 
 bool Area::Valid() const
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if ( min.x() < max.x()
     && min.y() < max.y()

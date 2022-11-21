@@ -8,7 +8,7 @@ using namespace Cellnta;
 
 static Eigen::VectorXf getNormalVector(Eigen::MatrixXf vectors)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	assert(vectors.rows() == vectors.cols() + 1);
 	const unsigned int N = vectors.rows();
@@ -38,7 +38,7 @@ static Eigen::VectorXf getNormalVector(Eigen::MatrixXf vectors)
 
 Eigen::MatrixXf Cellnta::LookAt(const size_t N, const Eigen::VectorXf& from, const Eigen::VectorXf& to, const Eigen::MatrixXf& ups)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	assert(N > 2);
 	assert(N == (size_t) from.size());
@@ -83,7 +83,7 @@ Eigen::MatrixXf Cellnta::LookAt(const size_t N, const Eigen::VectorXf& from, con
 
 Eigen::MatrixXf Cellnta::Perspective(const size_t N, double eyeAngle, double nearPlane, double farPlane, double aspect)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	assert(N > 2);
 	Eigen::MatrixXf m = Eigen::MatrixXf::Zero(N + 1, N + 1);
@@ -107,7 +107,7 @@ Eigen::MatrixXf Cellnta::Perspective(const size_t N, double eyeAngle, double nea
 
 void Cellnta::NProject(NCellStorage& cells, const size_t cameraDim, const Eigen::MatrixXf& viewProj, bool perspective)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   const uint32_t divPos = ((perspective) ? 2 : 1);
 
@@ -125,7 +125,7 @@ void Cellnta::NProject(NCellStorage& cells, const size_t cameraDim, const Eigen:
 
 void Cellnta::NProject(HypercubeStorage& cube, const size_t cameraDim, const Eigen::MatrixXf& viewProj, bool perspective)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	const size_t   rows = cameraDim + 1;
 	const size_t   cols = cube.GetVerticesCount();

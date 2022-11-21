@@ -7,7 +7,7 @@ using namespace Ui;
 
 void MenubarWindow::Draw()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   ImGui::BeginMainMenuBar();
 

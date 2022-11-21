@@ -6,7 +6,7 @@ using namespace Cellnta;
 
 void Camera3d::Move(MoveDirection dir, float delta)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   p_updateView = true;
   const float velocity = m_moveSpeed * delta;
@@ -23,7 +23,7 @@ void Camera3d::Move(MoveDirection dir, float delta)
 
 void Camera3d::Rotate(float xoffset, float yoffset, float delta)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   p_updateView = true;
 
@@ -42,7 +42,7 @@ void Camera3d::Rotate(float xoffset, float yoffset, float delta)
 
 void Camera3d::UpdateViewMatrix()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   const double cYaw = cos(m_yaw);
   const double cPitch = cos(m_pitch);
@@ -81,7 +81,7 @@ void Camera3d::UpdateViewMatrix()
 
 void Camera3d::UpdateProjMatrix()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (p_usePerspective)
   {

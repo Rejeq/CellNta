@@ -10,7 +10,7 @@ using namespace Cellnta;
 
 Renderer::~Renderer()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -26,7 +26,7 @@ Renderer::~Renderer()
 
 void Renderer::Init(uint32_t D)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   InitBuffers();
   SetDimension(D);
@@ -37,7 +37,7 @@ void Renderer::Init(uint32_t D)
 
 bool Renderer::CreateShaders(const std::string& gridPath, const std::string& cellPath)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if(m_cellShader.GetID() != 0)
     m_cellShader.Delete();
@@ -47,13 +47,13 @@ bool Renderer::CreateShaders(const std::string& gridPath, const std::string& cel
 
   if (m_gridShader.Create(gridPath))
   {
-    LOG_ERROR("Unable to load grid shader");
+    CELLNTA_LOG_ERROR("Unable to load grid shader");
     return true;
   }
 
   if(m_cellShader.Create(cellPath))
   {
-    LOG_ERROR("Unable to load cell shader");
+    CELLNTA_LOG_ERROR("Unable to load cell shader");
     return true;
   }
 
@@ -75,7 +75,7 @@ bool Renderer::CreateShaders(const std::string& gridPath, const std::string& cel
 
 void Renderer::Update()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   UpdateCamera();
 
@@ -94,7 +94,7 @@ void Renderer::Update()
 
 void Renderer::DrawGrid()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_gridShader.Use();
   glDrawArrays(GL_TRIANGLES, 0, 12);
@@ -102,7 +102,7 @@ void Renderer::DrawGrid()
 
 void Renderer::Draw()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (m_cells.size() == 0)
     return;
@@ -135,7 +135,7 @@ void Renderer::Draw()
 
 void Renderer::GenrateHypercube(float a, CubeMode mode)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   uint32_t updated = m_cube.GenerateCube(m_d, a, mode);
 
@@ -167,7 +167,7 @@ void Renderer::Rotate(size_t axis1, size_t axis2, float angle)
 
 void Renderer::SetDimension(uint32_t dim)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_d = dim;
   GenrateHypercube(m_cube.GetScale());
@@ -214,7 +214,7 @@ void Renderer::SetCollatingZ(int z)
 
 void Renderer::SetRenderDistance(uint32_t distance)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_renderData.SetDistance(distance);
   UpdateRenderDistanceUniform();
@@ -222,7 +222,7 @@ void Renderer::SetRenderDistance(uint32_t distance)
 
 void Renderer::ProjectBuffers()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_cube.Restore();
   m_cells.Restore();
@@ -246,7 +246,7 @@ void Renderer::ProjectBuffers()
 
 void Renderer::InitBuffers()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   glGenVertexArrays(1, &m_vao);
   glGenBuffers(1, &m_cubeBuffer);
@@ -277,7 +277,7 @@ void Renderer::InitBuffers()
 
 void Renderer::BeginArrayBufferSource(float*& dst, size_t offset, size_t size)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   dst = (float*)glMapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_WRITE_BIT);
   if (dst == nullptr)
@@ -286,14 +286,14 @@ void Renderer::BeginArrayBufferSource(float*& dst, size_t offset, size_t size)
 
 void Renderer::EndArrayBufferSource()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
 void Renderer::UpdateCameraUniform()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   const Eigen::Matrix4f proj = p_camera.GetProjectionMatrixBase();
   const Eigen::Matrix4f view = p_camera.GetViewMatrixBase();
@@ -310,7 +310,7 @@ void Renderer::UpdateCameraUniform()
 
 void Renderer::UpdateRenderDistanceUniform()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   constexpr float FarPlane = 6.25f * CHUNK_SIZE;
 
@@ -321,7 +321,7 @@ void Renderer::UpdateRenderDistanceUniform()
 
 void Renderer::UpdateCamera()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (p_camera.Update())
   {
@@ -339,7 +339,7 @@ void Renderer::UpdateCamera()
 
 void Renderer::UpdateCubeBuffer()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   float* dst = nullptr;
   glBindBuffer(GL_ARRAY_BUFFER, m_cubeBuffer);
@@ -363,7 +363,7 @@ void Renderer::UpdateCubeBuffer()
 
 void Renderer::UpdateCellBuffer()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (m_cells.size() == 0)
     return;
@@ -392,7 +392,7 @@ void Renderer::UpdateCellBuffer()
 
 void Renderer::UpdateData()
 {
-  LOG_DEBUG("Updating render data");
+  CELLNTA_LOG_DEBUG("Updating render data");
   m_cells.clear();
   for (const auto& data : m_renderData)
   {

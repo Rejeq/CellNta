@@ -6,7 +6,7 @@ using namespace Cellnta;
 
 Canvas::Canvas(const AlgoType algo, const uint32_t dimensions)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   const size_t D = dimensions;
 
@@ -22,24 +22,24 @@ Canvas::Canvas(const AlgoType algo, const uint32_t dimensions)
 
 Canvas::~Canvas()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 }
 
 void Canvas::NextGeneration()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
   m_algo->Update();
 }
 
 void Canvas::RenderGrid()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
   Renderer::DrawGrid();
 }
 
 void Canvas::RenderWorld()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
   Renderer::Draw();
 }
 
@@ -72,7 +72,7 @@ bool Canvas::ChangeAlgoType(const AlgoType type)
 
 void Canvas::SetDimension(uint32_t dim)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
   Renderer::SetDimension(dim);
   if (m_algo != nullptr)
     m_algo->SetDimension(dim);
@@ -80,7 +80,7 @@ void Canvas::SetDimension(uint32_t dim)
 
 void Canvas::Update(float delta)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   //TODO: If the delta is large, it is necessary
   //to make a new generation many times

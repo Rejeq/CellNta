@@ -7,7 +7,7 @@ using namespace Cellnta;
 
 void CameraNd::SetDimensions(size_t dim)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
 	CameraBase::SetDimensions(dim);
 	const size_t currDim = GetDimensions();
@@ -45,7 +45,7 @@ void CameraNd::UpdateProjMatrix()
 
 Eigen::MatrixXf CameraNd::CalculateViewProj() const
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   //std::cout << "View: (" << GetDimensions() << "dim)" << std::endl;
   //std::cout << view << std::endl << std::endl;

@@ -30,7 +30,7 @@ void Context::AddWindow(std::unique_ptr<Window>&& window)
 
 void Context::Draw()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   ImGui::PushID("Context name"); //TODO
 
@@ -54,7 +54,7 @@ void Context::Draw()
 
 void Context::SetupDockspace()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   m_dockspaceId = ImGui::DockSpaceOverViewport(nullptr,
       ImGuiDockNodeFlags_PassthruCentralNode);
@@ -62,7 +62,7 @@ void Context::SetupDockspace()
 
 Window* Context::GetWindowByName(const std::string& name)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   for(const auto& win: m_windowsData)
   {

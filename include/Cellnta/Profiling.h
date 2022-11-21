@@ -1,19 +1,17 @@
 #pragma once
 
-#ifdef PROFILING_ENABLE
+#ifdef CELLNTA_PROFILING_ENABLED
 # ifndef TRACY_ENABLE
 # error "TRACY_ENABLE define not loaded"
 # define TRACY_ENABLE
 # endif
 # include <Tracy.hpp>
 
-# define ProfileScope ZoneScoped
-# define ProfileScopeN(name) ZoneScopedN(name)
-# define ProfileFrame FrameMark
-# define ProfileFrameN(name) FrameMarkN(name)
+# define CELLNTA_PROFILE ZoneScoped
+# define CELLNTA_PROFILE_NAMED(name) ZoneScopedN(name)
+# define CELLNTA_PROFILE_FRAME FrameMark
 #else
-# define ProfileScope
-# define ProfileScopeN(x)
-# define ProfileFrame
-# define ProfileFrameN(x)
-#endif /* PROFILING_ENABLE */
+# define CELLNTA_PROFILE
+# define CELLNTA_PROFILE_NAMED(x)
+# define CELLNTA_PROFILE_FRAME
+#endif /* CELLNTA_PROFILING_ENABLED */

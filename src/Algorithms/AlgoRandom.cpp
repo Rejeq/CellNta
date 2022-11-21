@@ -19,7 +19,7 @@ namespace
 
 void AlgoRandom::Update()
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (p_dim == 0)
     return;
@@ -34,7 +34,7 @@ void AlgoRandom::Update()
 
 void AlgoRandom::LoadWorld(RenderData* data)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (data == nullptr)
     return;
@@ -67,7 +67,7 @@ void AlgoRandom::LoadWorld(RenderData* data)
 
 void AlgoRandom::SetDimension(size_t dim)
 {
-  ProfileScope;
+  CELLNTA_PROFILE;
 
   if (dim == p_dim)
     return;
