@@ -1,41 +1,39 @@
-set(GUI_DIR "${CMAKE_CURRENT_LIST_DIR}")
-set(THIRD_PARTY "${GUI_DIR}/third_party")
+set(GUI_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(RESOURCE_DIR ${CELLNTA_DIR}/Resource/)
 
-set(SDL_DIR   "${THIRD_PARTY}/SDL2/")
 
-set(RESOURCE_DIR "${CELLNTA_DIR}/Resource/")
+set(IMGUI_CONFIG ${GUI_DIR}/src/imgui_config.h)
 
-include("${GUI_DIR}/ImGui.cmake")
+find_package(SDL2 REQUIRED)
+include(${CELLNTA_THIRD_PARTY}/ImGui.cmake)
 
-set(IMGUI_CONFIG "${GUI_DIR}/src/imgui_config.h")
+
+
+
 file(GLOB SOURCE_LIST
   ${GUI_DIR}/src/*.h
   ${GUI_DIR}/src/*.cpp
 )
 
 add_executable(GUI ${SOURCE_LIST})
-
-target_compile_features(GUI PRIVATE ${CXX_ACTIVE_STANDART})
-
+target_compile_features(GUI PRIVATE cxx_std_17)
 add_compile_options("$<$<CONFIG:RELEASE>:-O3>")
-add_compile_options("$<$<CONFIG:DEBUG>:-g3 -O0>")
+add_compile_options("$<$<CONFIG:DEBUG>:-O0 -g3>")
 
 target_compile_definitions(GUI PUBLIC
   RESOURCE_DIR="${RESOURCE_DIR}"
   IMGUI_USER_CONFIG="${IMGUI_CONFIG}"
 )
 
-target_include_directories(GUI PRIVATE
-  ${SDL_DIR}/include
+target_include_directories(GUI PUBLIC
+  ${SDL2_INCLUDE_DIRS}
 )
 
 target_link_libraries(GUI PUBLIC
-  CellNta imgui)
-
-if(WIN32)
-  target_link_libraries(GUI PUBLIC
-    SDL2 SDL2main glew32 opengl32)
-elseif(UNIX)
-  target_link_libraries(GUI PUBLIC
-    SDL2 GL GLEW dl)
-endif()
+  CellNta
+  ImGui::ImGui
+  ImGui::ImplOpenGL3
+  ImGui::ImplSDL2
+  ImGui::MiscCpp
+  ${SDL2_LIBRARIES}
+)
