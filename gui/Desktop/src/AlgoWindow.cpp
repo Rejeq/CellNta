@@ -13,28 +13,26 @@ void AlgoWindow::Draw()
 {
   CELLNTA_PROFILE;
 
-  Cellnta::Canvas& canvas = GetContext()->GetCanvas();
-  Cellnta::AlgoBase* algo = canvas.GetAlgo();
-  if (algo == nullptr)
-    return;
+  Cellnta::AlgoBase* algo = &GetContext()->GetAlgo();
 
-  ImGui::Begin(p_prop.Name, &p_prop.Opened);
-
-  DrawBaseAlgoInfo(algo);
-
-  Widget::Separator();
-
-  switch (algo->GetType())
+  if(ImGui::Begin(p_prop.Name, &p_prop.Opened))
   {
-  case Cellnta::AlgoType::RANDOM: DrawAlgoRandom((Cellnta::AlgoRandom*)algo); break;
-  case Cellnta::AlgoType::SIMPLE: DrawAlgoSimple((Cellnta::AlgoSimple*)algo); break;
-  default: break;
+    DrawBaseAlgoInfo(algo);
+
+    Widget::Separator();
+
+    switch (algo->GetType())
+    {
+    case Cellnta::AlgoType::RANDOM: DrawAlgoRandom((Cellnta::AlgoRandom*) algo); break;
+    case Cellnta::AlgoType::SIMPLE: DrawAlgoSimple((Cellnta::AlgoSimple*) algo); break;
+    default: break;
+    }
   }
 
   ImGui::End();
 }
 
-void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase* algo)
+void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo)
 {
   CELLNTA_PROFILE;
 
@@ -46,14 +44,14 @@ void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase* algo)
   if (algo == nullptr)
     return;
 
-  Cellnta::Canvas& canvas = GetContext()->GetCanvas();
+  Context* ctx = GetContext();
 
   Cellnta::AlgoType res;
   if (Widget::ComboEnum("Algorithm type", algo->GetType(), AlgoTypeData, res))
   {
-    if (!canvas.ChangeAlgoType(res))
-      algo = canvas.GetAlgo();
-    else assert(0 && "Unable to change algorithm type");
+    if (ctx->SetAlgo(res))
+      assert(0 && "Unable to change algorithm type");
+    algo = &ctx->GetAlgo();
   }
 
   size_t dim = algo->GetDimensions();
@@ -71,13 +69,16 @@ void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase* algo)
 
   ImGui::SameLine();
 
-  bool timer = canvas.TimerEnabled();
-  if (ImGui::Checkbox("Auto", &timer))
+  bool enabled = m_timer.Enabled();
+  if (ImGui::Checkbox("Auto", &enabled))
   {
-    if (timer)
-      canvas.SetTimer(1.0f);
-    else canvas.DisableTimer();
+    if (enabled)
+      m_timer.Start(1.0f, [&](){algo->Update();});
+    else m_timer.Stop();
   }
+  if(enabled)
+    m_timer.Update(ImGui::GetIO().DeltaTime);
+
 
   ImGui::Spacing();
 

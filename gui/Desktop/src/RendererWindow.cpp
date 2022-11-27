@@ -10,7 +10,7 @@ void Ui::RendererWindow::Draw()
   CELLNTA_PROFILE;
 
   constexpr ImGuiWindowFlags WinFlags = ImGuiWindowFlags_HorizontalScrollbar;
-  Cellnta::Renderer& ren = GetContext()->GetCanvas();
+  Cellnta::Renderer& ren = GetContext()->GetRenderer();
 
   if (ImGui::Begin(p_prop.Name, &p_prop.Opened, WinFlags))
   {
@@ -83,7 +83,7 @@ void Ui::RendererWindow::Draw()
 
 void Ui::RendererWindow::ShowCollatingInfo()
 {
-  Cellnta::Renderer& ren = GetContext()->GetCanvas();
+  Cellnta::Renderer& ren = GetContext()->GetRenderer();
 
   int x = ren.GetCollatingX();
   int y = ren.GetCollatingY();
@@ -100,7 +100,7 @@ void Ui::RendererWindow::DrawCameras()
 {
   CELLNTA_PROFILE;
 
-  Cellnta::Renderer& ren = GetContext()->GetCanvas();
+  Cellnta::Renderer& ren = GetContext()->GetRenderer();
   Cellnta::Camera3d& camera3d = ren.GetCamera3d();
 
   float mouseSpeed = camera3d.GetMouseSpeed();
@@ -135,7 +135,7 @@ void Ui::RendererWindow::DrawLoadedCells()
 {
   CELLNTA_PROFILE;
 
-  Cellnta::Renderer& ren = GetContext()->GetCanvas();
+  Cellnta::Renderer& ren = GetContext()->GetRenderer();
   const Cellnta::NCellStorage& cells = ren.GetCells();
   ImGui::Text("Loaded: %zu", cells.size());
 

@@ -9,7 +9,7 @@ using namespace Cellnta;
 
 static std::shared_ptr<spdlog::logger> s_logger;
 
-void Log::InitDefault()
+bool Log::InitDefault()
 {
   std::vector<spdlog::sink_ptr> sinks;
 #if defined(__ANDROID__)
@@ -19,11 +19,21 @@ void Log::InitDefault()
 #endif
 
   s_logger = std::make_shared<spdlog::logger>("CellNta", sinks.begin(), sinks.end());
+  if(s_logger == nullptr)
+    return true;
+
+  s_logger->set_pattern("[%H:%M:%S.%e] [%^%l%$] %v");
+
+  return false;
 }
 
-void Log::InitCustom(const std::vector<spdlog::sink_ptr>& sinks)
+bool Log::InitCustom(const std::vector<spdlog::sink_ptr>& sinks)
 {
   s_logger = std::make_shared<spdlog::logger>("CellNta", sinks.begin(), sinks.end());
+  if(s_logger == nullptr)
+    return true;
+
+  return false;
   }
 
 std::shared_ptr<spdlog::logger>& Log::GetLogger()

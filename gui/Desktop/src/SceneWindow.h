@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "Window.h"
 
 namespace Ui {
@@ -26,6 +28,7 @@ private:
   void OnEnterFocus();
   void OnLeaveFocus();
   void HandleInput();
+  void HandleCameraInput();
   void ResizeFramebuffer(int width, int height);
 
   ImVec2 m_framebufferSize = ImVec2(0, 0);

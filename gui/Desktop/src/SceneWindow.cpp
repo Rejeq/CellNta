@@ -34,34 +34,16 @@ void SceneWindow::Draw()
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-  Cellnta::Canvas& canvas = GetContext()->GetCanvas();
-  ImGuiIO io = ImGui::GetIO();
+  Cellnta::Renderer& ren = GetContext()->GetRenderer();
 
   if (ImGui::Begin(p_prop.Name, nullptr, winFlags))
   {
-    if(ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-    {
-      if(io.KeyCtrl && m_focused)
-        OnLeaveFocus();
-      else if(io.KeyCtrl && ImGui::IsWindowFocused())
-        OnEnterFocus();
-    }
+    HandleInput();
 
-    if(m_focused)
-      HandleInput();
-
-    ImVec2 size = ImGui::GetContentRegionAvail();
-
-    if (size.x != m_framebufferSize.x || size.y != m_framebufferSize.y)
-    {
-      canvas.OnResize(size.x, size.y);
-      ResizeFramebuffer(size.x, size.y);
-    }
-
-    if (canvas.WantDraw())
+    if (ren.WantDraw())
       DrawGlScene();
 
-    ImGui::Image((void*)(intptr_t) m_texture, size,
+    ImGui::Image((void*)(intptr_t) m_texture, m_framebufferSize,
       ImVec2(0, 1), ImVec2(1, 0));
   }
   ImGui::PopStyleVar(3);
@@ -70,7 +52,9 @@ void SceneWindow::Draw()
 
 void SceneWindow::DrawGlScene()
 {
-  Cellnta::Canvas& canvas = GetContext()->GetCanvas();
+  CELLNTA_PROFILE;
+
+  Cellnta::Renderer& ren = GetContext()->GetRenderer();
 
   glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 
@@ -83,10 +67,11 @@ void SceneWindow::DrawGlScene()
 
   glViewport(0, 0, m_framebufferSize.x, m_framebufferSize.y);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  canvas.RenderWorld();
-  canvas.RenderGrid();
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  ren.Draw();
+  ren.DrawGrid();
+
+  CELLNTA_LOG_TRACE("Scene drawed");
 }
 
 void SceneWindow::OnEnterFocus()
@@ -111,28 +96,66 @@ void SceneWindow::HandleInput()
 {
   CELLNTA_PROFILE;
 
-  Cellnta::Canvas& canvas = GetContext()->GetCanvas();
+  Cellnta::Renderer& ren = GetContext()->GetRenderer();
+  ImGuiIO io = ImGui::GetIO();
+
+  if(ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+  {
+    if(io.KeyCtrl && m_focused)
+      OnLeaveFocus();
+    else if(io.KeyCtrl && ImGui::IsWindowFocused())
+      OnEnterFocus();
+  }
+
+  if(m_focused)
+    HandleCameraInput();
+
+  ImVec2 size = ImGui::GetContentRegionAvail();
+
+  if (size.x != m_framebufferSize.x || size.y != m_framebufferSize.y)
+  {
+    ren.GetCamera3d().Resize(Eigen::Vector2f(size.x, size.y));
+    ResizeFramebuffer(size.x, size.y);
+  }
+
+  if (ImGui::IsKeyPressed(ImGuiKey_Q, true))
+    ren.Rotate(0, 0, 0);
+}
+
+void SceneWindow::HandleCameraInput()
+{
+  CELLNTA_PROFILE;
+
+  auto IsPressed = []<typename... Args>(Args... keys) -> bool{
+    for(auto key: {keys...})
+      if(ImGui::IsKeyDown(key))
+        return true;
+    return false;
+  };
+
+  Cellnta::Camera3d& cam = GetContext()->GetRenderer().GetCamera3d();
   ImGuiIO& io = ImGui::GetIO();
   float& delta = io.DeltaTime;
 
   if(io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
-    canvas.OnMouseMotion(io.MouseDelta.x, io.MouseDelta.y, delta);
+    cam.Rotate(io.MouseDelta.x, io.MouseDelta.y, delta);
   if(io.MouseWheel != 0)
-    canvas.OnMove(Cellnta::MoveDirection::FORWARD, io.MouseWheel / 4.0f);
+    cam.Move(Cellnta::MoveDirection::FORWARD, io.MouseWheel / 4.0f);
 
-  if(ImGui::IsKeyDown(ImGuiKey_W) || ImGui::IsKeyDown(ImGuiKey_UpArrow))
-    canvas.OnMove(Cellnta::MoveDirection::FORWARD, delta);
-  if(ImGui::IsKeyDown(ImGuiKey_A) || ImGui::IsKeyDown(ImGuiKey_LeftArrow))
-    canvas.OnMove(Cellnta::MoveDirection::LEFT, delta);
-  if(ImGui::IsKeyDown(ImGuiKey_S) || ImGui::IsKeyDown(ImGuiKey_DownArrow))
-    canvas.OnMove(Cellnta::MoveDirection::BACKWARD, delta);
-  if(ImGui::IsKeyDown(ImGuiKey_D) || ImGui::IsKeyDown(ImGuiKey_RightArrow))
-    canvas.OnMove(Cellnta::MoveDirection::RIGHT, delta);
 
-  if(ImGui::IsKeyDown(ImGuiKey_Space))
-    canvas.OnMove(Cellnta::MoveDirection::WORLD_UP, delta);
-  if(ImGui::IsKeyDown(ImGuiKey_LeftShift))
-    canvas.OnMove(Cellnta::MoveDirection::WORLD_DOWN, delta);
+  if(IsPressed(ImGuiKey_W, ImGuiKey_UpArrow))
+    cam.Move(Cellnta::MoveDirection::FORWARD, delta);
+  if(IsPressed(ImGuiKey_A, ImGuiKey_LeftArrow))
+    cam.Move(Cellnta::MoveDirection::LEFT, delta);
+  if(IsPressed(ImGuiKey_S, ImGuiKey_DownArrow))
+    cam.Move(Cellnta::MoveDirection::BACKWARD, delta);
+  if(IsPressed(ImGuiKey_D, ImGuiKey_RightArrow))
+    cam.Move(Cellnta::MoveDirection::RIGHT, delta);
+
+  if(IsPressed(ImGuiKey_Space))
+    cam.Move(Cellnta::MoveDirection::WORLD_UP, delta);
+  if(IsPressed(ImGuiKey_LeftShift))
+    cam.Move(Cellnta::MoveDirection::WORLD_DOWN, delta);
 }
 
 void SceneWindow::ResizeFramebuffer(int width, int height)

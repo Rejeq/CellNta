@@ -9,7 +9,24 @@ void MenubarWindow::Draw()
 {
   CELLNTA_PROFILE;
 
-  ImGui::BeginMainMenuBar();
+  if(ImGui::BeginMainMenuBar())
+  {
+    DrawWindowsButtons();
+
+    //TODO: Create a class for right aligning
+    //This method depends on the previous frame
+    //so do not use it in dynamic places
+    float right = ImGui::GetContentRegionMax().x + ImGui::GetStyle().ItemSpacing.x;
+    right = DrawFramerate(right);
+    DrawResetLayout(right);
+
+    ImGui::EndMainMenuBar();
+  }
+}
+
+void MenubarWindow::DrawWindowsButtons()
+{
+  CELLNTA_PROFILE;
 
   ImVec4 activeColor = ImGui::GetStyle().Colors[ImGuiCol_Button];
   activeColor.y *= 1.5f;
@@ -23,37 +40,41 @@ void MenubarWindow::Draw()
       Widget::ToggleButton(prop.Name, prop.Opened);
   }
   ImGui::PopStyleColor();
+}
 
-  const float maxWidth = ImGui::GetContentRegionMax().x;
-  float framerateWidth = 0;
-  framerateWidth = DrawFramerate(maxWidth);
+float MenubarWindow::DrawFramerate(float right)
+{
+  CELLNTA_PROFILE;
 
-  //TODO:
-  constexpr const char* ResetLayoutStr = "Reset layout";
-  float resetLayoutWidth = ImGui::CalcTextSize(ResetLayoutStr).x;
+  const ImGuiIO& io = ImGui::GetIO();
 
-  const float spacing = ImGui::GetStyle().ItemSpacing.x;
-  ImGui::SetCursorPosX(maxWidth - framerateWidth - resetLayoutWidth - spacing - 10);
-  if (ImGui::Button(ResetLayoutStr))
+  if(m_frameratePos != -1.0f)
+    ImGui::SetCursorPosX(m_frameratePos);
+
+  ImGui::Text("FPS: %i(%.3fms)",
+      (int) io.Framerate, io.DeltaTime * 1000);
+
+  float width = ImGui::GetCursorPosX() - m_frameratePos;
+  m_frameratePos = right - width;
+
+  return m_frameratePos;
+}
+
+float MenubarWindow::DrawResetLayout(float right)
+{
+  CELLNTA_PROFILE;
+
+  const ImGuiIO& io = ImGui::GetIO();
+
+  if(m_layoutPos != -1.0f)
+    ImGui::SetCursorPosX(m_layoutPos);
+
+  if (ImGui::Button("Reset layout"))
     if(m_OnResetLayout)
       m_OnResetLayout(*GetContext());
 
-  ImGui::EndMainMenuBar();
-}
+  float width = ImGui::GetCursorPosX() - m_layoutPos;
+  m_layoutPos = right - width;
 
-float MenubarWindow::DrawFramerate(const float& offset)
-{
-  constexpr const char* FramrateStr = "FPS: %i(%.3fms)";
-
-  const float framerate = ImGui::GetIO().Framerate;
-  size_t size = 0;
-  char* text = GetContext()->GetTmpBuffer(size);
-
-  snprintf(text, size, FramrateStr, (int)framerate, 1000.0f / framerate);
-  const float textWidth = ImGui::CalcTextSize(text).x;
-
-  if (offset > 0)
-    ImGui::SetCursorPosX(offset - textWidth);
-  ImGui::TextUnformatted(text);
-  return textWidth;
+  return m_layoutPos;
 }

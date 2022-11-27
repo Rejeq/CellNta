@@ -34,10 +34,13 @@ public:
   AlgoType GetType() const { return m_type; }
 	bool NeedLoadWorld() const { return p_needLoadInRenderer; }
 
-  void SetupFrom(const AlgoBase& left)
+  void SetupFrom(const AlgoBase* left)
   {
-    m_step = left.m_step;
-    SetDimension(left.p_dim);
+    if(left == nullptr)
+      return;
+
+    m_step = left->m_step;
+    SetDimension(left->p_dim);
   }
 
 protected:

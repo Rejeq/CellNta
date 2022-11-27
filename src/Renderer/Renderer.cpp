@@ -8,6 +8,14 @@
 
 using namespace Cellnta;
 
+Renderer::Renderer()
+{
+  CELLNTA_PROFILE;
+
+  InitBuffers();
+  m_color.SetSeed(std::rand()/*123456.789f*/);
+}
+
 Renderer::~Renderer()
 {
   CELLNTA_PROFILE;
@@ -22,17 +30,6 @@ Renderer::~Renderer()
   if (m_colorBuffer != 0) glDeleteBuffers(1, &m_colorBuffer);
   if (m_colorTexture != 0) glDeleteTextures(1, &m_colorTexture);
   if (m_vao != 0) glDeleteVertexArrays(1, &m_vao);
-}
-
-void Renderer::Init(uint32_t D)
-{
-  CELLNTA_PROFILE;
-
-  InitBuffers();
-  SetDimension(D);
-
-  m_color.SetSeed(std::rand()/*123456.789f*/);
-  UpdateColorTexture();
 }
 
 bool Renderer::CreateShaders(const std::string& gridPath, const std::string& cellPath)
@@ -105,7 +102,10 @@ void Renderer::Draw()
   CELLNTA_PROFILE;
 
   if (m_cells.size() == 0)
+  {
+    m_wantDraw = false;
     return;
+  }
 
   m_cellShader.Use();
   glActiveTexture(GL_TEXTURE0);

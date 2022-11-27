@@ -21,9 +21,13 @@ public:
   void Draw() override;
 
 private:
-  float DrawFramerate(const float& offset);
+  void DrawWindowsButtons();
+  float DrawFramerate(float right);
+  float DrawResetLayout(float right);
 
   std::function<void(const Context&)> m_OnResetLayout;
+  float m_frameratePos = -1.0f;
+  float m_layoutPos = -1.0f;
 };
 
 } //namespace Ui

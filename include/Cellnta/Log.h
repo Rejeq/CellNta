@@ -1,14 +1,16 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/chrono.h>
 
 namespace Cellnta {
 namespace Log {
 
-void InitDefault();
-void InitCustom(const std::vector<spdlog::sink_ptr>& sinks);
+bool InitDefault();
+bool InitCustom(const std::vector<spdlog::sink_ptr>& sinks);
 std::shared_ptr<spdlog::logger>& GetLogger();
 
 }

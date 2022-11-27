@@ -7,19 +7,12 @@
 #include <Cellnta/Config.h>
 #include <Cellnta/Log.h>
 #include <Cellnta/Renderer/GlBackend.h>
-#include <Cellnta/Canvas.h>
 
 #include "Context.h"
 #include "RendererWindow.h"
 #include "AlgoWindow.h"
 #include "SceneWindow.h"
 #include "MenubarWindow.h"
-
-#ifdef NO_SDL_MAIN
-#	ifdef main
-#	  undef main
-#	endif
-#endif
 
 #ifndef RESOURCE_DIR
 #error "Not provided resource directory"
@@ -97,6 +90,15 @@ void Shutdown(SDL_Window* win, SDL_GLContext glCtx)
 	SDL_GL_DeleteContext(glCtx);
 	SDL_DestroyWindow(win);
 	SDL_Quit();
+}
+
+bool InitLogging()
+{
+  if(Cellnta::Log::InitDefault())
+    return true;
+
+  Cellnta::Log::GetLogger()->set_level(spdlog::level::debug);
+  return false;
 }
 
 bool CreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx)
@@ -193,10 +195,12 @@ void ResetContextLayout(const Ui::Context& ctx)
 
 bool CreateContextLayout(int width, int height, Ui::Context& ctx)
 {
-	auto canvas = std::make_unique<Cellnta::Canvas>(
-      Cellnta::AlgoType::SIMPLE, 2);
+  Cellnta::Renderer& ren = ctx.GetRenderer();
 
-  if(canvas->CreateShaders(
+  ctx.SetAlgo(Cellnta::AlgoType::SIMPLE);
+  ctx.SetDimension(2);
+
+  if(ren.CreateShaders(
       RESOURCE_DIR "Shaders/Grid.glsl",
       RESOURCE_DIR "Shaders/Cell.glsl"))
   {
@@ -204,10 +208,10 @@ bool CreateContextLayout(int width, int height, Ui::Context& ctx)
     return true;
   }
 
-  canvas->GetCamera3d().SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
-  canvas->SetRenderDistance(16);
+  ren.GetCamera3d().SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
+  ren.SetRenderDistance(16);
+  ren.GenrateHypercube(0.5f);
 
-  ctx.SetCanvas(std::move(canvas));
   ctx.SetOnFirstStartup(ResetContextLayout);
 
   ctx.AddWindow(std::make_unique<Ui::RendererWindow>());
@@ -223,8 +227,11 @@ int main(int, char**)
   SDL_Window* win = nullptr;
   SDL_GLContext glCtx;
 
-  Cellnta::Log::InitDefault();
-  Cellnta::Log::GetLogger()->set_level(spdlog::level::debug);
+  if(InitLogging())
+  {
+    printf("Unable to initialize logging");
+    return EXIT_FAILURE;
+  }
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     CELLNTA_LOG_CRITICAL("Unable to initialize SDL2: {}", SDL_GetError());
@@ -266,25 +273,14 @@ int main(int, char**)
     return EXIT_FAILURE;
   }
 
-  Cellnta::Canvas& canvas = ctx.GetCanvas();
-
 	SDL_Event event;
 	bool done = false;
   bool windowMinimized = false;
 
   ImGuiIO& io = ImGui::GetIO();
 
-  //Necessary because when window minimized
-  //imgui frames are disabled
-  //so io.DeltaTime gives wrong result
-  size_t timeFrequency = SDL_GetPerformanceFrequency();
-  size_t frameStart = 0;
-  size_t frameEnd = 0;
-  float frameDelta = 0;
-
 	while (!done)
 	{
-    frameStart = SDL_GetPerformanceCounter();
 		while (SDL_PollEvent(&event))
 		{
 			ImGui_ImplSDL2_ProcessEvent(&event);
@@ -317,10 +313,7 @@ int main(int, char**)
       continue;
     }
 
-    if (ImGui::IsKeyPressed(ImGuiKey_Q, true))
-      canvas.Rotate(0, 0, 0);
-
-		canvas.Update(frameDelta);
+		ctx.Update();
 
     if (!windowMinimized)
     {
@@ -334,13 +327,15 @@ int main(int, char**)
 
       ImGui::Render();
 
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
+      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT);
+
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     SDL_GL_SwapWindow(win);
-
-    frameEnd = SDL_GetPerformanceCounter();
-    frameDelta = ((float) frameEnd - frameStart) / timeFrequency;
 
     CELLNTA_PROFILE_FRAME;
 	}

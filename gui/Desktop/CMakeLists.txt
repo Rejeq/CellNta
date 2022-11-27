@@ -8,17 +8,13 @@ find_package(SDL2 REQUIRED)
 include(${CELLNTA_THIRD_PARTY}/ImGui.cmake)
 
 
-
-
 file(GLOB SOURCE_LIST
-  ${GUI_DIR}/src/*.h
-  ${GUI_DIR}/src/*.cpp
+  src/*.h
+  src/*.cpp
 )
 
 add_executable(GUI ${SOURCE_LIST})
-target_compile_features(GUI PRIVATE cxx_std_17)
-add_compile_options("$<$<CONFIG:RELEASE>:-O3>")
-add_compile_options("$<$<CONFIG:DEBUG>:-O0 -g3>")
+target_compile_features(GUI PRIVATE cxx_std_20)
 
 target_compile_definitions(GUI PUBLIC
   RESOURCE_DIR="${RESOURCE_DIR}"
@@ -36,4 +32,5 @@ target_link_libraries(GUI PUBLIC
   ImGui::ImplSDL2
   ImGui::MiscCpp
   ${SDL2_LIBRARIES}
+  ${CMAKE_DL_LIBS}
 )

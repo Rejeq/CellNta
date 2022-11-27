@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 
+#include <Cellnta/Algorithms/AlgoList.h>
+
 #include "Widgets.h"
 
 using namespace Ui;
@@ -26,6 +28,25 @@ void Context::AddWindow(std::unique_ptr<Window>&& window)
 {
   window->SetContext(this);
   m_windowsData.push_back(std::move(window));
+}
+
+void Context::SetDimension(int dim)
+{
+  CELLNTA_PROFILE;
+
+  m_renderer.SetDimension(dim);
+  if (m_algo != nullptr)
+    m_algo->SetDimension(dim);
+}
+
+void Context::Update()
+{
+  CELLNTA_PROFILE;
+
+  if (m_algo->NeedLoadWorld() || m_renderer.GetData().DesireArea())
+    m_algo->LoadWorld(&m_renderer.GetData());
+
+  m_renderer.Update();
 }
 
 void Context::Draw()
@@ -73,8 +94,24 @@ Window* Context::GetWindowByName(const std::string& name)
   return nullptr;
 }
 
+bool Context::SetAlgo(const Cellnta::AlgoType type)
+{
+  CELLNTA_PROFILE;
+
+  std::unique_ptr<Cellnta::AlgoBase> tmp = Cellnta::CreateAlgoInstance(type);
+  if (tmp == nullptr)
+    return true;
+
+  tmp->SetupFrom(m_algo.get());
+  m_algo = std::move(tmp);
+
+  return false;
+}
+
 void* Context::SettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler* handler, const char* name)
 {
+  CELLNTA_PROFILE;
+
   Context* ctx = (Context*) handler->UserData;
   ctx->m_firstStartup = false;
   ctx->m_currentWindow.clear();
@@ -83,6 +120,8 @@ void* Context::SettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler* han
 
 void Context::SettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler* handler, void* entry, const char* line)
 {
+  CELLNTA_PROFILE;
+
   Context* ctx = (Context*)entry;
 
   if (line[0] == '(')
@@ -107,6 +146,8 @@ void Context::SettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler* hand
 
 void Context::SettingsHandler_WriteAll(ImGuiContext*, ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf)
 {
+  CELLNTA_PROFILE;
+
   if (handler->UserData == nullptr)
     return;
 
@@ -115,6 +156,18 @@ void Context::SettingsHandler_WriteAll(ImGuiContext*, ImGuiSettingsHandler* hand
   buf->appendf("[%s][%s]\n", "CellNta", "Context");
   ctx->WriteWindowProperties(handler, buf);
   buf->append("\n");
+}
+
+void Context::WriteWindowProperties(ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf)
+{
+  CELLNTA_PROFILE;
+
+  for (auto& window : m_windowsData)
+  {
+    buf->appendf("(%s)\n", window->GetProperties().Name);
+    window->WriteProperties(buf);
+    buf->appendf("\n");
+  }
 }
 
 char* Context::GetTmpBuffer()
@@ -134,12 +187,3 @@ char* Context::GetTmpBuffer(size_t& size)
   return g.TempBuffer.Data;
 }
 
-void Context::WriteWindowProperties(ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf)
-{
-  for (auto& window : m_windowsData)
-  {
-    buf->appendf("(%s)\n", window->GetProperties().Name);
-    window->WriteProperties(buf);
-    buf->appendf("\n");
-  }
-}

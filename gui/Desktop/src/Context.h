@@ -6,11 +6,11 @@
 #include <iomanip>
 #include <vector>
 
-#include <Eigen/Core>
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include <Cellnta/Canvas.h>
+#include <Cellnta/Algorithms/AlgoBase.h>
+#include <Cellnta/Renderer/Renderer.h>
 
 #include "Window.h"
 
@@ -24,7 +24,9 @@ public:
   Context();
 
   void AddWindow(std::unique_ptr<Window>&& window);
+  void SetDimension(int dim);
 
+  void Update();
   void Draw();
 
   void SetupDockspace();
@@ -33,16 +35,20 @@ public:
   const WindowsDataType& GetWindows() const { return m_windowsData; }
   Window* GetWindowByName(const std::string& name);
 
-  void SetCanvas(std::unique_ptr<Cellnta::Canvas>&& canvas) { m_canvas = std::move(canvas); }
-  Cellnta::Canvas& GetCanvas() { return *m_canvas; }
-  const Cellnta::Canvas& GetCanvas() const { return *m_canvas; }
+  bool SetAlgo(const Cellnta::AlgoType type);
+  const Cellnta::AlgoBase& GetAlgo() const { return *m_algo; }
+  Cellnta::AlgoBase& GetAlgo() { return *m_algo; }
 
-  char* GetTmpBuffer();
-  char* GetTmpBuffer(size_t& size);
+  const Cellnta::Renderer& GetRenderer() const { return m_renderer; }
+  Cellnta::Renderer& GetRenderer() { return m_renderer; }
+
 
   void SetOnFirstStartup(const std::function<void(const Context&)>& onFirstStartup){
     m_OnFirstStartup = onFirstStartup;
   }
+
+  char* GetTmpBuffer();
+  char* GetTmpBuffer(size_t& size);
 
 private:
   void ReadWindowProperties(ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf);
@@ -52,8 +58,10 @@ private:
   static void  SettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler* handler, void* entry, const char* line);
   static void* SettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler*, const char* name);
 
+
   WindowsDataType m_windowsData;
-  std::unique_ptr<Cellnta::Canvas> m_canvas = nullptr;
+	std::unique_ptr<Cellnta::AlgoBase> m_algo;
+  Cellnta::Renderer m_renderer;
 
   std::string m_currentWindow;
 

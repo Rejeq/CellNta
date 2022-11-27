@@ -18,10 +18,9 @@ namespace Cellnta {
 class Renderer
 {
 public:
-	Renderer() = default;
+	Renderer();
 	~Renderer();
 
-	void Init(uint32_t D);
   bool CreateShaders(const std::string& gridPath, const std::string& cellPath);
 
 	void Update();
