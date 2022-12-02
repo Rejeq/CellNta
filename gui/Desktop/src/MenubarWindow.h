@@ -6,21 +6,20 @@
 
 namespace Ui {
 
-class MenubarWindow : public Window
-{
+class MenubarWindow : public Window {
   static constexpr WindowProperties DefaultProperties = {
-    .Name = "Menubar",
-    .Opened = true,
-    .VisibleInMenubar = false,
+      .Name = "Menubar",
+      .Opened = true,
+      .VisibleInMenubar = false,
   };
 
-public:
+ public:
   MenubarWindow(const std::function<void(const Context&)>& onResetLayout)
-    : Window(DefaultProperties), m_OnResetLayout(onResetLayout) {}
+      : Window(DefaultProperties), m_OnResetLayout(onResetLayout) {}
 
   void Draw() override;
 
-private:
+ private:
   void DrawWindowsButtons();
   float DrawFramerate(float right);
   float DrawResetLayout(float right);
@@ -30,4 +29,4 @@ private:
   float m_layoutPos = -1.0f;
 };
 
-} //namespace Ui
+}  // namespace Ui

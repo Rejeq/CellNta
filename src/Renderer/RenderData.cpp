@@ -4,39 +4,32 @@
 
 using namespace Cellnta;
 
-RenderData::RenderData()
-{
-  m_desiredArea.reserve(4);
-}
+RenderData::RenderData() { m_desiredArea.reserve(4); }
 
-RenderData::RenderData(size_t dim)
-{
+RenderData::RenderData(size_t dim) {
   m_d = dim;
   m_desiredArea.reserve(4);
 }
 
-void RenderData::SetChunk(const std::shared_ptr<Chunk>& chunk)
-{
+void RenderData::SetChunk(const std::shared_ptr<Chunk>& chunk) {
   m_data[chunk->GetPosition()] = chunk;
   m_needUpdate = true;
 }
 
-void RenderData::SetCell(const Eigen::VectorXi& pos, state_t state)
-{
+void RenderData::SetCell(const Eigen::VectorXi& pos, state_t state) {
   CELLNTA_PROFILE;
 
   if (state == 0)
     return;
 
-  if (m_visibleArea.CellValid(pos))
-  {
+  if (m_visibleArea.CellValid(pos)) {
     ChunkPos chunkPos = Chunk::GetPosFromGlobalPos(pos.cast<float>());
     auto res = m_data.find(chunkPos);
     if (res != m_data.end())
       res->second->SetCell(pos, state);
-    else
-    {
-      std::shared_ptr<Chunk> chunk = std::make_shared<Chunk>(m_d, chunkPos.GetPosition());
+    else {
+      std::shared_ptr<Chunk> chunk =
+          std::make_shared<Chunk>(m_d, chunkPos.GetPosition());
       chunk->SetCell(pos, state);
       SetChunk(chunk);
     }
@@ -44,13 +37,9 @@ void RenderData::SetCell(const Eigen::VectorXi& pos, state_t state)
   }
 }
 
-const RenderData::Map& RenderData::GetData() const
-{
-  return m_data;
-}
+const RenderData::Map& RenderData::GetData() const { return m_data; }
 
-RenderData::ChunkPtr RenderData::GetChunk(const ChunkPos& pos)
-{
+RenderData::ChunkPtr RenderData::GetChunk(const ChunkPos& pos) {
   CELLNTA_PROFILE;
 
   auto res = m_data.find(pos);
@@ -59,14 +48,12 @@ RenderData::ChunkPtr RenderData::GetChunk(const ChunkPos& pos)
   return nullptr;
 }
 
-void RenderData::Clear()
-{
+void RenderData::Clear() {
   m_data.clear();
   m_needUpdate = true;
 }
 
-void RenderData::SetDistance(size_t distance)
-{
+void RenderData::SetDistance(size_t distance) {
   CELLNTA_PROFILE;
 
   if (distance == m_distance)
@@ -78,8 +65,7 @@ void RenderData::SetDistance(size_t distance)
   m_desiredArea.emplace_back(m_visibleArea);
 }
 
-void RenderData::SetPosition(const ChunkPos& pos)
-{
+void RenderData::SetPosition(const ChunkPos& pos) {
   CELLNTA_PROFILE;
 
   if (m_pos == pos)
@@ -90,8 +76,7 @@ void RenderData::SetPosition(const ChunkPos& pos)
   m_pos = pos;
 }
 
-void RenderData::UpdateVisibleArea(const Eigen::Vector3i& pos)
-{
+void RenderData::UpdateVisibleArea(const Eigen::Vector3i& pos) {
   CELLNTA_PROFILE;
 
   const Eigen::Vector3i cellPos = pos.array() * CHUNK_SIZE;
@@ -99,16 +84,16 @@ void RenderData::UpdateVisibleArea(const Eigen::Vector3i& pos)
   m_visibleArea = GetDistanceArea() + cellPos;
   m_desiredArea = Area::InverseClip(m_visibleArea, oldVisibleArea);
 
-  //for (size_t i = 0; i < m_desiredArea.size(); ++i)
-  //  std::cout << i << ": "
-  //  << "\t min: " << m_desiredArea[i].min.transpose()
-  //  << "\t max: " << m_desiredArea[i].max.transpose()
-  //  << std::endl;
-  //std::cout << std::endl;
+  // for (size_t i = 0; i < m_desiredArea.size(); ++i)
+  //   std::cout << i << ": "
+  //   << "\t min: " << m_desiredArea[i].min.transpose()
+  //   << "\t max: " << m_desiredArea[i].max.transpose()
+  //   << std::endl;
+  // std::cout << std::endl;
 }
 
-void RenderData::EraseUnvisibleArea(const ChunkPos& oldPos, const ChunkPos& newPos)
-{
+void RenderData::EraseUnvisibleArea(const ChunkPos& oldPos,
+                                    const ChunkPos& newPos) {
   CELLNTA_PROFILE;
 
   Area oldArea = GetDistanceChunkArea() + oldPos.GetPosition();
@@ -116,46 +101,40 @@ void RenderData::EraseUnvisibleArea(const ChunkPos& oldPos, const ChunkPos& newP
   std::vector<Area> eraseList = Area::InverseClip(oldArea, newArea);
 
   Eigen::Vector3i pos;
-  for (const Area& erase : eraseList)
-  {
+  for (const Area& erase : eraseList) {
     for (pos.x() = erase.min.x(); pos.x() <= erase.max.x(); ++pos.x())
       for (pos.y() = erase.min.y(); pos.y() <= erase.max.y(); ++pos.y())
-        for (pos.z() = erase.min.z(); pos.z() <= erase.max.z(); ++pos.z())
-        {
+        for (pos.z() = erase.min.z(); pos.z() <= erase.max.z(); ++pos.z()) {
           auto res = m_data.find(pos);
-          if (res != m_data.end())
-          {
+          if (res != m_data.end()) {
             m_data.erase(res);
             m_needUpdate = true;
           }
         }
   }
-  //for (size_t i = 0; i < eraseList.size(); ++i)
-  //  std::cout << i << ": "
-  //  << "\t min: " << eraseList[i].min.transpose()
-  //  << "\t max: " << eraseList[i].max.transpose()
-  //  << std::endl;
-  //std::cout << std::endl;
+  // for (size_t i = 0; i < eraseList.size(); ++i)
+  //   std::cout << i << ": "
+  //   << "\t min: " << eraseList[i].min.transpose()
+  //   << "\t max: " << eraseList[i].max.transpose()
+  //   << std::endl;
+  // std::cout << std::endl;
 }
 
-bool RenderData::ChunkValid(const ChunkPos& pos)
-{
+bool RenderData::ChunkValid(const ChunkPos& pos) {
   CELLNTA_PROFILE;
 
   Eigen::Vector3i maxPos = m_pos.GetPosition().array() + m_distance;
   Eigen::Vector3i minPos = m_pos.GetPosition().array() - m_distance;
 
-  if ( (minPos.x() <= pos.x() && pos.x() <= maxPos.x())
-    && (minPos.y() <= pos.y() && pos.y() <= maxPos.y())
-    && (minPos.z() <= pos.z() && pos.z() <= maxPos.z())
-    )
+  if ((minPos.x() <= pos.x() && pos.x() <= maxPos.x()) &&
+      (minPos.y() <= pos.y() && pos.y() <= maxPos.y()) &&
+      (minPos.z() <= pos.z() && pos.z() <= maxPos.z()))
     return true;
 
   return false;
 }
 
-void Chunk::SetCell(const Eigen::VectorXi& pos, state_t state)
-{
+void Chunk::SetCell(const Eigen::VectorXi& pos, state_t state) {
   CELLNTA_PROFILE;
 
   assert(pos.size() >= m_d);
@@ -164,81 +143,78 @@ void Chunk::SetCell(const Eigen::VectorXi& pos, state_t state)
   m_needUpdate = true;
 }
 
-void Chunk::Clear()
-{
-  m_data.clear();
-}
+void Chunk::Clear() { m_data.clear(); }
 
-Area::Area(const Eigen::Vector3i& min, const Eigen::Vector3i& max)
-{
+Area::Area(const Eigen::Vector3i& min, const Eigen::Vector3i& max) {
   this->min = min;
   this->max = max;
 }
 
-Area::Area(const int min, const int max)
-{
+Area::Area(const int min, const int max) {
   this->min.array() = min;
   this->max.array() = max;
 }
 
-bool Area::CellValid(const Eigen::VectorXi& cell) const
-{
+bool Area::CellValid(const Eigen::VectorXi& cell) const {
   CELLNTA_PROFILE;
 
-  if (((min.x() <= cell.x()) && (cell.x() <= max.x()))
-    && ((min.y() <= cell.y()) && (cell.y() <= max.y()))
-    && ((min.z() <= cell.z()) && (cell.z() <= max.z()))
-    )
+  if (((min.x() <= cell.x()) && (cell.x() <= max.x())) &&
+      ((min.y() <= cell.y()) && (cell.y() <= max.y())) &&
+      ((min.z() <= cell.z()) && (cell.z() <= max.z())))
     return true;
   return false;
 }
 
-std::vector<Area> Area::InverseClip(const Area& clipper, const Area& subject)
-{
+std::vector<Area> Area::InverseClip(const Area& clipper, const Area& subject) {
   CELLNTA_PROFILE;
 
   Area inter = Area::Intersection(clipper, subject);
   if (!inter.Valid())
-    return { clipper };
+    return {clipper};
 
   std::vector<Area> out;
   Area tmp;
 
-  //Front area
-  tmp = Area(Eigen::Vector3i(inter.max.x(), inter.min.y(), inter.min.z()), clipper.max);
+  // Front area
+  tmp = Area(Eigen::Vector3i(inter.max.x(), inter.min.y(), inter.min.z()),
+             clipper.max);
   if (tmp.Valid())
     out.push_back(tmp);
 
-  //Behind area
-  tmp = Area(clipper.min, Eigen::Vector3i(inter.min.x(), inter.max.y(), inter.max.z()));
+  // Behind area
+  tmp = Area(clipper.min,
+             Eigen::Vector3i(inter.min.x(), inter.max.y(), inter.max.z()));
   if (tmp.Valid())
     out.push_back(tmp);
 
-  //Right area
-  tmp = Area(Eigen::Vector3i(inter.min.x(), inter.min.y(), inter.max.z()), clipper.max);
+  // Right area
+  tmp = Area(Eigen::Vector3i(inter.min.x(), inter.min.y(), inter.max.z()),
+             clipper.max);
   if (tmp.Valid())
     out.push_back(tmp);
 
-  //Left area
-  tmp = Area(clipper.min, Eigen::Vector3i(inter.max.x(), inter.min.y(), inter.max.z()));
+  // Left area
+  tmp = Area(clipper.min,
+             Eigen::Vector3i(inter.max.x(), inter.min.y(), inter.max.z()));
   if (tmp.Valid())
     out.push_back(tmp);
 
-  //Top area
-  tmp = Area(Eigen::Vector3i(inter.min.x(), inter.max.y(), inter.min.z()), clipper.max);
+  // Top area
+  tmp = Area(Eigen::Vector3i(inter.min.x(), inter.max.y(), inter.min.z()),
+             clipper.max);
   if (tmp.Valid())
     out.push_back(tmp);
 
-  //Bottom area
-  tmp = Area(clipper.min, Eigen::Vector3i(inter.max.x(), inter.max.y(), inter.min.z()));
+  // Bottom area
+  tmp = Area(clipper.min,
+             Eigen::Vector3i(inter.max.x(), inter.max.y(), inter.min.z()));
   if (tmp.Valid())
     out.push_back(tmp);
 
   return out;
 }
 
-Area Area::Intersection(const Area& first, const Area& second)
-{
+Area Area::Intersection(const Area& first, const Area& second) {
   CELLNTA_PROFILE;
 
   Area out;
@@ -252,13 +228,10 @@ Area Area::Intersection(const Area& first, const Area& second)
   return out;
 }
 
-bool Area::Valid() const
-{
+bool Area::Valid() const {
   CELLNTA_PROFILE;
 
-  if ( min.x() < max.x()
-    && min.y() < max.y()
-    && min.z() < max.z())
+  if (min.x() < max.x() && min.y() < max.y() && min.z() < max.z())
     return true;
   return false;
 }

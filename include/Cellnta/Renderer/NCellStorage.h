@@ -8,20 +8,21 @@
 
 namespace Cellnta {
 
-class NCellStorage
-{
-public:
+class NCellStorage {
+ public:
   using point_t = float;
   using Vec = Eigen::Vector<point_t, Eigen::Dynamic>;
 
-  template<bool homogeneous, typename Derived>
+  template <bool homogeneous, typename Derived>
   bool Add(const Derived& pos);
   void Restore();
 
-  void SetDimensions(const size_t dim) { m_d = dim; clear(); }
-  template<bool Clear, bool Reserve>
-  void SetMaxCellsSize(const size_t maxCells)
-  {
+  void SetDimensions(const size_t dim) {
+    m_d = dim;
+    clear();
+  }
+  template <bool Clear, bool Reserve>
+  void SetMaxCellsSize(const size_t maxCells) {
     m_maxCells = maxCells;
     if constexpr (Clear)
       clear();
@@ -32,10 +33,18 @@ public:
   const Vec& OriginalAt(const size_t idx) const { return m_origCells.at(idx); }
 
   size_t GetDimensions() const { return m_d; }
-  size_t PointsCapacity3dInBytes() const { return capacity() * sizeof(point_t) * 3; }
+  size_t PointsCapacity3dInBytes() const {
+    return capacity() * sizeof(point_t) * 3;
+  }
 
-  void clear() { m_cells.clear(); m_origCells.clear(); };
-  void reserve(size_t capacity) { m_cells.reserve(capacity); m_origCells.reserve(capacity); };
+  void clear() {
+    m_cells.clear();
+    m_origCells.clear();
+  };
+  void reserve(size_t capacity) {
+    m_cells.reserve(capacity);
+    m_origCells.reserve(capacity);
+  };
   size_t capacity() const { return m_cells.capacity(); }
 
   const Vec* data() const { return m_cells.data(); }
@@ -43,7 +52,8 @@ public:
   const Vec& at(const size_t idx) const { return m_cells.at(idx); }
   Vec& at(const size_t idx) { return m_cells.at(idx); }
   size_t size() const { return m_cells.size(); }
-private:
+
+ private:
   std::vector<Vec> m_cells;
   std::vector<Vec> m_origCells;
 
@@ -51,23 +61,20 @@ private:
   size_t m_d = 0;
 };
 
-template<bool homogeneous, typename Derived>
-bool NCellStorage::Add(const Derived& pos)
-{
+template <bool homogeneous, typename Derived>
+bool NCellStorage::Add(const Derived& pos) {
   CELLNTA_PROFILE;
 
   using Scalar = typename Derived::Scalar;
   const size_t oldCapacity = m_cells.capacity();
 
-  if constexpr (homogeneous)
-  {
+  if constexpr (homogeneous) {
     assert(pos.size() >= m_d + 1);
     if constexpr (std::is_same<Scalar, point_t>::value)
       m_cells.push_back(pos);
-    else m_cells.push_back(pos.template cast<point_t>());
-  }
-  else
-  {
+    else
+      m_cells.push_back(pos.template cast<point_t>());
+  } else {
     assert(pos.size() >= m_d);
     Eigen::Vector<Scalar, Eigen::Dynamic> tmp(m_d + 1);
     memcpy(tmp.data(), pos.data(), (m_d) * sizeof(Scalar));
@@ -75,11 +82,12 @@ bool NCellStorage::Add(const Derived& pos)
 
     if constexpr (std::is_same<Scalar, point_t>::value)
       m_cells.push_back(tmp);
-    else m_cells.push_back(tmp.template cast<point_t>());
+    else
+      m_cells.push_back(tmp.template cast<point_t>());
   }
   m_origCells.emplace_back(m_cells.at(m_cells.size() - 1));
 
   return (oldCapacity != m_cells.capacity());
 }
 
-} //namespace Cellnta
+}  // namespace Cellnta

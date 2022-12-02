@@ -3,8 +3,7 @@
 
 using namespace Ui;
 
-void Ui::DrawAlgoRandom(Cellnta::AlgoRandom* algo)
-{
+void Ui::DrawAlgoRandom(Cellnta::AlgoRandom* algo) {
   if (algo == nullptr)
     return;
 
@@ -12,7 +11,7 @@ void Ui::DrawAlgoRandom(Cellnta::AlgoRandom* algo)
   int max = algo->GetRangeMax();
 
   ImGui::SetNextItemWidth(ImGui::GetWindowWidth() / 3);
-  if(ImGui::DragInt("Min", &min))
+  if (ImGui::DragInt("Min", &min))
     algo->SetRangeMin(min);
 
   ImGui::SameLine();

@@ -1,12 +1,11 @@
 #include "AlgoSimpleSubWindow.h"
 
-#include "Widgets.h"
 #include "Context.h"
+#include "Widgets.h"
 
 using namespace Ui;
 
-void Ui::DrawAlgoSimple(Cellnta::AlgoSimple* algo)
-{
+void Ui::DrawAlgoSimple(Cellnta::AlgoSimple* algo) {
   if (algo == nullptr)
     return;
 
@@ -15,7 +14,7 @@ void Ui::DrawAlgoSimple(Cellnta::AlgoSimple* algo)
     algo->SetWorldRepeated(repeated);
 
   auto size = algo->GetSize();
-  if(Widget::DragN("Size", size.data(), size.size()))
+  if (Widget::DragN("Size", size.data(), size.size()))
     algo->SetSize(size);
 
   Widget::Separator();

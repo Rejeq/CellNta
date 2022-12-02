@@ -1,24 +1,22 @@
 #pragma once
 
-#include <Cellnta/Algorithms/AlgoBase.h>
 #include "Window.h"
+#include <Cellnta/Algorithms/AlgoBase.h>
 
 namespace Ui {
 
-class Timer
-{
-public:
-  void Update(float delta){
+class Timer {
+ public:
+  void Update(float delta) {
     m_remaining -= delta;
-    if(m_remaining < 0.0f)
-    {
-      if(m_res)
+    if (m_remaining < 0.0f) {
+      if (m_res)
         m_res();
       m_remaining = m_init;
     }
   }
 
-  void Start(float init, std::function<void()> res){
+  void Start(float init, std::function<void()> res) {
     m_init = init;
     m_remaining = init;
     m_res = res;
@@ -27,28 +25,27 @@ public:
   void Stop() { m_remaining = FLT_MAX; }
   bool Enabled() const { return m_remaining != FLT_MAX; }
 
-private:
+ private:
   float m_init = 0;
   float m_remaining = FLT_MAX;
   std::function<void()> m_res;
 };
 
-class AlgoWindow : public Window
-{
+class AlgoWindow : public Window {
   static constexpr WindowProperties DefaultProperties = {
-    .Name = "Algorithm",
+      .Name = "Algorithm",
   };
 
-public:
+ public:
   AlgoWindow() : Window(DefaultProperties) {}
 
   void Draw() override;
 
-private:
+ private:
   void DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo);
 
   Cellnta::Cell m_setCell;
   Timer m_timer;
 };
 
-} //namespace Ui
+}  // namespace Ui

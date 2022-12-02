@@ -6,13 +6,13 @@
 
 namespace Ui {
 
-class SceneWindow : public Window
-{
+class SceneWindow : public Window {
   static constexpr WindowProperties DefaultProperties = {
-    .Name = "Scene",
-    .VisibleInMenubar = false,
+      .Name = "Scene",
+      .VisibleInMenubar = false,
   };
-public:
+
+ public:
   SceneWindow() : Window(DefaultProperties) {}
   ~SceneWindow();
 
@@ -24,7 +24,7 @@ public:
   uint32_t GetTexture() const { return m_texture; }
   bool GetFocused() const { return m_focused; }
 
-private:
+ private:
   void OnEnterFocus();
   void OnLeaveFocus();
   void HandleInput();
@@ -38,4 +38,4 @@ private:
   bool m_focused = false;
 };
 
-} //namespace Ui
+}  // namespace Ui

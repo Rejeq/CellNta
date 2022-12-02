@@ -8,19 +8,18 @@
 
 namespace Ui {
 
-class RendererWindow : public Window
-{
+class RendererWindow : public Window {
   static constexpr WindowProperties DefaultProperties = {
-    .Name = "Renderer",
+      .Name = "Renderer",
   };
-public:
+
+ public:
   RendererWindow() : Window(DefaultProperties) {}
 
   void Draw() override;
 
-private:
-  enum CameraMatUpdated
-  {
+ private:
+  enum CameraMatUpdated {
     CameraUpdated_None,
     CameraUpdated_Projection,
     CameraUpdated_UpMat,
@@ -32,15 +31,14 @@ private:
   void DrawCameras();
   void DrawLoadedCells();
 
-
   void DrawCells(const Cellnta::NCellStorage& cells);
 
   void PrintCamera3d(Cellnta::Camera3d& camera);
   void PrintCameraNd(Cellnta::CameraNd& camera);
   int PrintCameraMatrices(bool* perspectiveState, Eigen::MatrixXf* upMat,
-      Eigen::MatrixXf* viewMat, Eigen::MatrixXf* projMat);
+                          Eigen::MatrixXf* viewMat, Eigen::MatrixXf* projMat);
 
   bool m_showCellsTab = false;
 };
 
-} //namespace Ui
+}  // namespace Ui

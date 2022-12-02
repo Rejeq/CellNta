@@ -4,25 +4,22 @@
 
 using namespace Cellnta;
 
-void Camera3d::Move(MoveDirection dir, float delta)
-{
+void Camera3d::Move(MoveDirection dir, float delta) {
   CELLNTA_PROFILE;
 
   p_updateView = true;
   const float velocity = m_moveSpeed * delta;
-  switch (dir)
-  {
-  case MoveDirection::FORWARD:    m_pos += m_front * velocity; break;
-  case MoveDirection::BACKWARD:   m_pos -= m_front * velocity; break;
-  case MoveDirection::LEFT:       m_pos -= m_right * velocity; break;
-  case MoveDirection::RIGHT:      m_pos += m_right * velocity; break;
-  case MoveDirection::WORLD_UP:   m_pos += m_worldUp * velocity; break;
-  case MoveDirection::WORLD_DOWN: m_pos -= m_worldUp * velocity; break;
+  switch (dir) {
+    case MoveDirection::FORWARD: m_pos += m_front * velocity; break;
+    case MoveDirection::BACKWARD: m_pos -= m_front * velocity; break;
+    case MoveDirection::LEFT: m_pos -= m_right * velocity; break;
+    case MoveDirection::RIGHT: m_pos += m_right * velocity; break;
+    case MoveDirection::WORLD_UP: m_pos += m_worldUp * velocity; break;
+    case MoveDirection::WORLD_DOWN: m_pos -= m_worldUp * velocity; break;
   }
 }
 
-void Camera3d::Rotate(float xoffset, float yoffset, float delta)
-{
+void Camera3d::Rotate(float xoffset, float yoffset, float delta) {
   CELLNTA_PROFILE;
 
   p_updateView = true;
@@ -40,8 +37,7 @@ void Camera3d::Rotate(float xoffset, float yoffset, float delta)
     m_pitch = -quarter + 0.001f;
 }
 
-void Camera3d::UpdateViewMatrix()
-{
+void Camera3d::UpdateViewMatrix() {
   CELLNTA_PROFILE;
 
   const double cYaw = cos(m_yaw);
@@ -57,7 +53,7 @@ void Camera3d::UpdateViewMatrix()
   m_right = m_front.cross(m_worldUp).normalized();
   m_up = m_right.cross(m_front).normalized();
 
-  //m_view = glm::lookAt(m_pos, m_pos + m_front, m_up);
+  // m_view = glm::lookAt(m_pos, m_pos + m_front, m_up);
 
   Eigen::Vector3f f(m_front.normalized());
   const Eigen::Vector3f s(f.cross(m_up).normalized());
@@ -78,14 +74,11 @@ void Camera3d::UpdateViewMatrix()
   m_view(2, 3) = f.dot(m_pos);
 }
 
-
-void Camera3d::UpdateProjMatrix()
-{
+void Camera3d::UpdateProjMatrix() {
   CELLNTA_PROFILE;
 
-  if (p_usePerspective)
-  {
-    //Perspective projection
+  if (p_usePerspective) {
+    // Perspective projection
     const float zNear = 0.001f;
     const float zFar = 1000.0f;
     const float aspect = m_size.x() / m_size.y();
@@ -97,10 +90,8 @@ void Camera3d::UpdateProjMatrix()
     m_proj(2, 2) = -(zFar + zNear) / (zFar - zNear);
     m_proj(3, 2) = -1.0f;
     m_proj(2, 3) = -(2.0f * zFar * zNear) / (zFar - zNear);
-  }
-  else
-  {
-    //orthographic projection
+  } else {
+    // orthographic projection
     const float left = -2.0f;
     const float right = +2.0f;
     const float bottom = -2.0f;

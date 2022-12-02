@@ -4,8 +4,7 @@
 
 using namespace Cellnta;
 
-void NCellStorage::Restore()
-{
+void NCellStorage::Restore() {
   CELLNTA_PROFILE;
   m_cells = m_origCells;
 }

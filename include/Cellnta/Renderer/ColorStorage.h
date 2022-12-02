@@ -5,9 +5,8 @@
 
 namespace Cellnta {
 
-class ColorStorage
-{
-public:
+class ColorStorage {
+ public:
   using color_t = float;
   constexpr static size_t SIZE = 4;
 
@@ -20,16 +19,17 @@ public:
   size_t GetSizeInBytes() const { return GetSize() * sizeof(color_t); }
 
   const float* GetData() const { return m_data.data(); }
-private:
+
+ private:
   void GenerateRandomRGBAColor(color_t* dst, color_t alpha);
 
   float m_seedHue = 0;
 
   float m_hue = 0;
-  float m_saturation = 0.9f;//0.8f
-  float m_brightness = 0.9f;//0.5f
+  float m_saturation = 0.9f;  // 0.8f
+  float m_brightness = 0.9f;  // 0.5f
 
   std::vector<color_t> m_data;
 };
 
-} //namespace Cellnta
+}  // namespace Cellnta

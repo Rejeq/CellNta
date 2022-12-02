@@ -2,8 +2,8 @@
 
 #include <cfloat>
 
-#include <string>
 #include <iomanip>
+#include <string>
 #include <vector>
 
 #include <imgui.h>
@@ -16,11 +16,10 @@
 
 namespace Ui {
 
-class Context
-{
+class Context {
   using WindowsDataType = std::vector<std::unique_ptr<Window>>;
 
-public:
+ public:
   Context();
 
   void AddWindow(std::unique_ptr<Window>&& window);
@@ -42,25 +41,31 @@ public:
   const Cellnta::Renderer& GetRenderer() const { return m_renderer; }
   Cellnta::Renderer& GetRenderer() { return m_renderer; }
 
-
-  void SetOnFirstStartup(const std::function<void(const Context&)>& onFirstStartup){
+  void SetOnFirstStartup(
+      const std::function<void(const Context&)>& onFirstStartup) {
     m_OnFirstStartup = onFirstStartup;
   }
 
   char* GetTmpBuffer();
   char* GetTmpBuffer(size_t& size);
 
-private:
-  void ReadWindowProperties(ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf);
-  void WriteWindowProperties(ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf);
+ private:
+  void ReadWindowProperties(ImGuiSettingsHandler* handler,
+                            ImGuiTextBuffer* buf);
+  void WriteWindowProperties(ImGuiSettingsHandler* handler,
+                             ImGuiTextBuffer* buf);
 
-  static void  SettingsHandler_WriteAll(ImGuiContext*, ImGuiSettingsHandler* handler, ImGuiTextBuffer* buf);
-  static void  SettingsHandler_ReadLine(ImGuiContext*, ImGuiSettingsHandler* handler, void* entry, const char* line);
-  static void* SettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler*, const char* name);
-
+  static void SettingsHandler_WriteAll(ImGuiContext*,
+                                       ImGuiSettingsHandler* handler,
+                                       ImGuiTextBuffer* buf);
+  static void SettingsHandler_ReadLine(ImGuiContext*,
+                                       ImGuiSettingsHandler* handler,
+                                       void* entry, const char* line);
+  static void* SettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler*,
+                                        const char* name);
 
   WindowsDataType m_windowsData;
-	std::unique_ptr<Cellnta::AlgoBase> m_algo;
+  std::unique_ptr<Cellnta::AlgoBase> m_algo;
   Cellnta::Renderer m_renderer;
 
   std::string m_currentWindow;
@@ -71,4 +76,4 @@ private:
   ImGuiID m_dockspaceId = 0;
 };
 
-} //namespace Ui
+}  // namespace Ui

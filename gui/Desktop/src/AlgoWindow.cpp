@@ -2,43 +2,43 @@
 
 #include <array>
 
-#include "Widgets.h"
 #include "AlgoRandomSubWindow.h"
 #include "AlgoSimpleSubWindow.h"
 #include "Context.h"
+#include "Widgets.h"
 
 using namespace Ui;
 
-void AlgoWindow::Draw()
-{
+void AlgoWindow::Draw() {
   CELLNTA_PROFILE;
 
   Cellnta::AlgoBase* algo = &GetContext()->GetAlgo();
 
-  if(ImGui::Begin(p_prop.Name, &p_prop.Opened))
-  {
+  if (ImGui::Begin(p_prop.Name, &p_prop.Opened)) {
     DrawBaseAlgoInfo(algo);
 
     Widget::Separator();
 
-    switch (algo->GetType())
-    {
-    case Cellnta::AlgoType::RANDOM: DrawAlgoRandom((Cellnta::AlgoRandom*) algo); break;
-    case Cellnta::AlgoType::SIMPLE: DrawAlgoSimple((Cellnta::AlgoSimple*) algo); break;
-    default: break;
+    switch (algo->GetType()) {
+      case Cellnta::AlgoType::RANDOM:
+        DrawAlgoRandom((Cellnta::AlgoRandom*)algo);
+        break;
+      case Cellnta::AlgoType::SIMPLE:
+        DrawAlgoSimple((Cellnta::AlgoSimple*)algo);
+        break;
+      default: break;
     }
   }
 
   ImGui::End();
 }
 
-void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo)
-{
+void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo) {
   CELLNTA_PROFILE;
 
   static const std::array<ComboData<Cellnta::AlgoType>, 2> AlgoTypeData = {
-    ComboData(Cellnta::AlgoType::RANDOM, "Random"),
-    ComboData(Cellnta::AlgoType::SIMPLE, "Simple"),
+      ComboData(Cellnta::AlgoType::RANDOM, "Random"),
+      ComboData(Cellnta::AlgoType::SIMPLE, "Simple"),
   };
 
   if (algo == nullptr)
@@ -47,8 +47,7 @@ void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo)
   Context* ctx = GetContext();
 
   Cellnta::AlgoType res;
-  if (Widget::ComboEnum("Algorithm type", algo->GetType(), AlgoTypeData, res))
-  {
+  if (Widget::ComboEnum("Algorithm type", algo->GetType(), AlgoTypeData, res)) {
     if (ctx->SetAlgo(res))
       assert(0 && "Unable to change algorithm type");
     algo = &ctx->GetAlgo();
@@ -61,7 +60,8 @@ void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo)
   ImGui::Spacing();
 
   int32_t step = algo->GetStep();
-  if (ImGui::DragInt("Step", (int*)&step, 1.0f, 0, INT32_MAX, nullptr, ImGuiSliderFlags_AlwaysClamp))
+  if (ImGui::DragInt("Step", (int*)&step, 1.0f, 0, INT32_MAX, nullptr,
+                     ImGuiSliderFlags_AlwaysClamp))
     algo->SetStep(step);
 
   if (ImGui::Button("Next generation"))
@@ -70,15 +70,14 @@ void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo)
   ImGui::SameLine();
 
   bool enabled = m_timer.Enabled();
-  if (ImGui::Checkbox("Auto", &enabled))
-  {
+  if (ImGui::Checkbox("Auto", &enabled)) {
     if (enabled)
-      m_timer.Start(1.0f, [&](){algo->Update();});
-    else m_timer.Stop();
+      m_timer.Start(1.0f, [&]() { algo->Update(); });
+    else
+      m_timer.Stop();
   }
-  if(enabled)
+  if (enabled)
     m_timer.Update(ImGui::GetIO().DeltaTime);
-
 
   ImGui::Spacing();
 
