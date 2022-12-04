@@ -10,7 +10,9 @@ struct RandomRange {
   RandomRange(const Scalar& low, const Scalar& high,
               std::default_random_engine& gen)
       : dis(low, high), gen(gen) {}
-  const Scalar operator()() const { return dis(gen); }
+  Scalar operator()() const { return dis(gen); }
+
+ private:
   mutable std::uniform_int_distribution<> dis;
   std::default_random_engine& gen;
 };
@@ -22,7 +24,7 @@ void AlgoRandom::Update() {
   if (p_dim == 0)
     return;
 
-  for (size_t i = 0; i < GetStep(); ++i) {
+  for (int i = 0; i < GetStep(); ++i) {
     Eigen::VectorXi pos = Eigen::VectorXi::NullaryExpr(
         p_dim, RandomRange<int>(m_rangeMin, m_rangeMax, m_gen));
     m_data.push_back(pos);
@@ -37,16 +39,17 @@ void AlgoRandom::LoadWorld(RenderData* data) {
     return;
 
   if (p_needLoadInRenderer) {
-    for (size_t i = 0; i < m_data.size(); ++i) data->SetCell(m_data[i], 1);
+    for (auto& cell : m_data)
+      data->SetCell(cell, 1);
     p_needLoadInRenderer = false;
     data->DesireAreaProcessed();
   } else if (data->DesireArea()) {
     const std::vector<Area>& rects = data->GetDesireArea();
 
-    for (size_t i = 0; i < m_data.size(); ++i) {
-      for (auto& rect : rects) {
-        if (rect.CellValid(m_data[i])) {
-          data->SetCell(m_data[i], 1);
+    for (auto& cell : m_data) {
+      for (const auto& rect : rects) {
+        if (rect.CellValid(cell)) {
+          data->SetCell(cell, 1);
           break;
         }
       }
@@ -55,7 +58,7 @@ void AlgoRandom::LoadWorld(RenderData* data) {
   }
 }
 
-void AlgoRandom::SetDimension(size_t dim) {
+void AlgoRandom::SetDimension(int dim) {
   CELLNTA_PROFILE;
 
   if (dim == p_dim)

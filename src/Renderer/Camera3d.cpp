@@ -40,10 +40,10 @@ void Camera3d::Rotate(float xoffset, float yoffset, float delta) {
 void Camera3d::UpdateViewMatrix() {
   CELLNTA_PROFILE;
 
-  const double cYaw = cos(m_yaw);
-  const double cPitch = cos(m_pitch);
-  const double sYaw = sin(m_yaw);
-  const double sPitch = sin(m_pitch);
+  const float cYaw = std::cos(m_yaw);
+  const float cPitch = std::cos(m_pitch);
+  const float sYaw = std::sin(m_yaw);
+  const float sPitch = std::sin(m_pitch);
 
   m_front.x() = cYaw * cPitch;
   m_front.y() = sPitch;
@@ -53,8 +53,8 @@ void Camera3d::UpdateViewMatrix() {
   m_right = m_front.cross(m_worldUp).normalized();
   m_up = m_right.cross(m_front).normalized();
 
-  // m_view = glm::lookAt(m_pos, m_pos + m_front, m_up);
 
+  // LookAt
   Eigen::Vector3f f(m_front.normalized());
   const Eigen::Vector3f s(f.cross(m_up).normalized());
   const Eigen::Vector3f u(s.cross(f));
@@ -82,7 +82,7 @@ void Camera3d::UpdateProjMatrix() {
     const float zNear = 0.001f;
     const float zFar = 1000.0f;
     const float aspect = m_size.x() / m_size.y();
-    const float tanHalfFovy = tan(m_fov / 2.0f);
+    const float tanHalfFovy = std::tan(m_fov / 2.0f);
 
     m_proj = Eigen::Matrix4f::Zero();
     m_proj(0, 0) = 1.0f / (aspect * tanHalfFovy);
@@ -99,7 +99,7 @@ void Camera3d::UpdateProjMatrix() {
     const float zNear = -0.001f;
     const float zFar = +100.0f;
 
-    m_proj = m_proj.Identity();
+    m_proj = Eigen::Matrix4f::Identity();
     m_proj(0, 0) = 2.0f / (right - left);
     m_proj(1, 1) = 2.0f / (top - bottom);
     m_proj(2, 2) = -2.0f / (zFar - zNear);

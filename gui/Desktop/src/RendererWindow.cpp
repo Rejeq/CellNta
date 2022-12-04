@@ -5,7 +5,9 @@
 #include "Context.h"
 #include "Widgets.h"
 
-void Ui::RendererWindow::Draw() {
+using namespace Ui;
+
+void RendererWindow::Draw() {
   CELLNTA_PROFILE;
 
   constexpr ImGuiWindowFlags WinFlags = ImGuiWindowFlags_HorizontalScrollbar;
@@ -31,7 +33,7 @@ void Ui::RendererWindow::Draw() {
         ComboData(Cellnta::CubeMode::POLYGON, "Polygon (gives errors from 6d)"),
     };
 
-    Cellnta::CubeMode res;
+    Cellnta::CubeMode res = Cellnta::CubeMode::NONE;
     if (Widget::ComboEnum("Cube mode", ren.GetCubeMode(), CubeModeData, res))
       ren.SetCubeMode(res);
 
@@ -78,7 +80,7 @@ void Ui::RendererWindow::Draw() {
   ImGui::End();
 }
 
-void Ui::RendererWindow::ShowCollatingInfo() {
+void RendererWindow::ShowCollatingInfo() {
   Cellnta::Renderer& ren = GetContext()->GetRenderer();
 
   int x = ren.GetCollatingX();
@@ -92,7 +94,7 @@ void Ui::RendererWindow::ShowCollatingInfo() {
     ren.SetCollatingZ(z);
 }
 
-void Ui::RendererWindow::DrawCameras() {
+void RendererWindow::DrawCameras() {
   CELLNTA_PROFILE;
 
   Cellnta::Renderer& ren = GetContext()->GetRenderer();
@@ -109,7 +111,7 @@ void Ui::RendererWindow::DrawCameras() {
   for (Cellnta::CameraNd& cam : ren.GetNdCameras()) {
     size_t size = 8 + 3;
     char* fmt = GetContext()->GetTmpBuffer(size);
-    snprintf(fmt, size, "%zud Camera", cam.GetDimensions());
+    snprintf(fmt, size, "%dd Camera", cam.GetDimensions());
 
     if (ImGui::TreeNodeEx(fmt, ImGuiTreeNodeFlags_DefaultOpen)) {
       PrintCameraNd(cam);
@@ -123,17 +125,17 @@ void Ui::RendererWindow::DrawCameras() {
   }
 }
 
-void Ui::RendererWindow::DrawLoadedCells() {
+void RendererWindow::DrawLoadedCells() {
   CELLNTA_PROFILE;
 
   Cellnta::Renderer& ren = GetContext()->GetRenderer();
   const Cellnta::NCellStorage& cells = ren.GetCells();
-  ImGui::Text("Loaded: %zu", cells.size());
+  ImGui::Text("Loaded: %d", cells.size());
 
   DrawCells(cells);
 }
 
-void Ui::RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
+void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
   constexpr ImGuiTableFlags TableFlags =
       0 | ImGuiTableFlags_Borders | ImGuiTableFlags_Reorderable |
       ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
@@ -187,7 +189,7 @@ void Ui::RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
   }
 }
 
-void Ui::RendererWindow::PrintCamera3d(Cellnta::Camera3d& camera) {
+void RendererWindow::PrintCamera3d(Cellnta::Camera3d& camera) {
   ImGui::PushID(camera.GetDimensions());
 
   Eigen::VectorXf pos = camera.GetPosition();
@@ -230,7 +232,7 @@ void Ui::RendererWindow::PrintCamera3d(Cellnta::Camera3d& camera) {
   ImGui::PopID();
 }
 
-void Ui::RendererWindow::PrintCameraNd(Cellnta::CameraNd& camera) {
+void RendererWindow::PrintCameraNd(Cellnta::CameraNd& camera) {
   ImGui::PushID(camera.GetDimensions());
 
   bool needSkip = camera.NeedSkip();
@@ -277,7 +279,7 @@ void Ui::RendererWindow::PrintCameraNd(Cellnta::CameraNd& camera) {
   ImGui::PopID();
 }
 
-int Ui::RendererWindow::PrintCameraMatrices(bool* perspectiveState,
+int RendererWindow::PrintCameraMatrices(bool* perspectiveState,
                                             Eigen::MatrixXf* upMat,
                                             Eigen::MatrixXf* viewMat,
                                             Eigen::MatrixXf* projMat) {

@@ -98,23 +98,23 @@ bool Context::SetAlgo(const Cellnta::AlgoType type) {
   return false;
 }
 
-void* Context::SettingsHandler_ReadOpen(ImGuiContext*,
+void* Context::SettingsHandler_ReadOpen(ImGuiContext* /*unused*/,
                                         ImGuiSettingsHandler* handler,
-                                        const char* name) {
+                                        const char* /*unused*/) {
   CELLNTA_PROFILE;
 
-  Context* ctx = (Context*)handler->UserData;
+  auto* ctx = (Context*)handler->UserData;
   ctx->m_firstStartup = false;
   ctx->m_currentWindow.clear();
   return (void*)ctx;
 }
 
-void Context::SettingsHandler_ReadLine(ImGuiContext*,
-                                       ImGuiSettingsHandler* handler,
+void Context::SettingsHandler_ReadLine(ImGuiContext* /*unused*/,
+                                       ImGuiSettingsHandler* /*unused*/,
                                        void* entry, const char* line) {
   CELLNTA_PROFILE;
 
-  Context* ctx = (Context*)entry;
+  auto* ctx = (Context*)entry;
 
   if (line[0] == '(') {
     size_t size = std::strlen(line);
@@ -130,7 +130,7 @@ void Context::SettingsHandler_ReadLine(ImGuiContext*,
   }
 }
 
-void Context::SettingsHandler_WriteAll(ImGuiContext*,
+void Context::SettingsHandler_WriteAll(ImGuiContext* /*unused*/,
                                        ImGuiSettingsHandler* handler,
                                        ImGuiTextBuffer* buf) {
   CELLNTA_PROFILE;
@@ -138,14 +138,14 @@ void Context::SettingsHandler_WriteAll(ImGuiContext*,
   if (handler->UserData == nullptr)
     return;
 
-  Context* ctx = (Context*)handler->UserData;
+  auto* ctx = (Context*)handler->UserData;
   buf->reserve(buf->size() + 6 * 6);
   buf->appendf("[%s][%s]\n", "CellNta", "Context");
   ctx->WriteWindowProperties(handler, buf);
   buf->append("\n");
 }
 
-void Context::WriteWindowProperties(ImGuiSettingsHandler* handler,
+void Context::WriteWindowProperties(ImGuiSettingsHandler* /*unused*/,
                                     ImGuiTextBuffer* buf) {
   CELLNTA_PROFILE;
 

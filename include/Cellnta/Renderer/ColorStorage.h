@@ -8,15 +8,15 @@ namespace Cellnta {
 class ColorStorage {
  public:
   using color_t = float;
-  constexpr static size_t SIZE = 4;
+  constexpr static int SIZE = 4;
 
-  void Generate(size_t maxIter, size_t polygons);
+  void Generate(int maxIter, int polygons);
   void SetSeed(float seed) { m_seedHue = seed; }
 
   void Clear() { return m_data.clear(); }
 
-  size_t GetSize() const { return m_data.size(); }
-  size_t GetSizeInBytes() const { return GetSize() * sizeof(color_t); }
+  int GetSize() const { return m_data.size(); }
+  int GetSizeInBytes() const { return GetSize() * sizeof(color_t); }
 
   const float* GetData() const { return m_data.data(); }
 

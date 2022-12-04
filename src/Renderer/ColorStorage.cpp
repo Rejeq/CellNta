@@ -9,7 +9,7 @@
 
 using namespace Cellnta;
 
-void ColorStorage::Generate(size_t maxIter, size_t polygons) {
+void ColorStorage::Generate(int maxIter, int polygons) {
   CELLNTA_PROFILE;
 
   m_data.resize(polygons * maxIter * SIZE);
@@ -17,7 +17,7 @@ void ColorStorage::Generate(size_t maxIter, size_t polygons) {
 
   m_hue = m_seedHue;
 
-  for (size_t i = 0; i < maxIter; ++i) {
+  for (int i = 0; i < maxIter; ++i) {
     assert(ptr < m_data.data() + GetSize() && "Out of range");
 
     GenerateRandomRGBAColor(ptr, /*1.0f*/ 0.9f);
@@ -25,7 +25,7 @@ void ColorStorage::Generate(size_t maxIter, size_t polygons) {
       if (polygons == 1)
         std::memcpy(ptr + SIZE, ptr, SIZE * sizeof(color_t));
       else {
-        for (uint32_t j = 1; j < polygons; ++j)
+        for (int j = 1; j < polygons; ++j)
           std::memcpy(ptr + (SIZE * j), ptr, SIZE * sizeof(color_t));
       }
     }
@@ -37,7 +37,7 @@ void ColorStorage::GenerateRandomRGBAColor(color_t* dst, color_t alpha) {
   CELLNTA_PROFILE;
 
   // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-  constexpr float golden_ratio_conjugate = (float)0.618033988749895;
+  constexpr float golden_ratio_conjugate = 0.618033988749895f;
 
   m_hue += golden_ratio_conjugate;
   m_hue = std::fmod(m_hue, 1.0f);

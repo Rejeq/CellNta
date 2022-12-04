@@ -18,7 +18,7 @@ class CameraNd : public CameraBase {
   }
   bool NeedSkip() const { return m_needSkip; }
 
-  void SetDimensions(size_t dim) override;
+  void SetDimensions(int dim) override;
   void SetUsePerspective(bool newState) override;
 
   void SetViewMatrix(const Eigen::MatrixXf& view) override {

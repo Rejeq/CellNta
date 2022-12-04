@@ -15,7 +15,7 @@ class AlgoSimple : public AlgoBase {
 
   void Update() override;
   void LoadWorld(RenderData* data) override;
-  void SetDimension(size_t dim) override;
+  void SetDimension(int dim) override;
 
   void SetCell(const Cell& cell) override;
   void SetCell(const std::vector<Cell>& cells) override;
@@ -50,15 +50,15 @@ class AlgoSimple : public AlgoBase {
   void CreateWorld();
   void DeleteWorld();
 
-  state_t* GetWorld() { return (m_oddGen) ? m_worlds[0] : m_worlds[1]; }
-  state_t* GetBufferWorld() { return (m_oddGen) ? m_worlds[1] : m_worlds[0]; }
+  state_t* GetWorld() { return m_worlds[m_oddGen].get(); }
+  state_t* GetBufferWorld() { return m_worlds[!m_oddGen].get(); }
 
   inline size_t GetTotalArea() const { return m_totalArea; }
   inline size_t GetTotalAreaInBytes() const {
     return GetTotalArea() * sizeof(state_t);
   }
 
-  state_t* m_worlds[2] = {nullptr, nullptr};
+  std::array<std::unique_ptr<state_t[]>, 2> m_worlds;
   std::vector<size_t> m_size;
   size_t m_totalArea = 0;
 

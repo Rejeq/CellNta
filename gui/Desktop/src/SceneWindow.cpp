@@ -26,7 +26,7 @@ void SceneWindow::Draw() {
       ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoResize |
       ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar |
       ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoTitleBar |
-      ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove;
+      ImGuiWindowFlags_NoMove;
 
   ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
   ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);

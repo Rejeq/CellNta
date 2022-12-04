@@ -5,11 +5,11 @@
 
 using namespace Cellnta;
 
-void CameraNd::SetDimensions(size_t dim) {
+void CameraNd::SetDimensions(int dim) {
   CELLNTA_PROFILE;
 
   CameraBase::SetDimensions(dim);
-  const size_t currDim = GetDimensions();
+  const int currDim = GetDimensions();
 
   m_front.resize(currDim);
   m_pos.resize(currDim);

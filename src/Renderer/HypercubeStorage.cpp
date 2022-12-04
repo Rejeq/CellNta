@@ -9,7 +9,7 @@
 #define HYPERCUBE_VALIDATE_POLYGONS(data_, dim_, polygonsCount_)               \
   {                                                                            \
     assert((data_ < (m_ind.data() + m_ind.size())) && "Out of range");         \
-    for (size_t p_ = 0; p_ < polygonsCount_ * 3; p_ += 3) {                    \
+    for (int p_ = 0; p_ < polygonsCount_ * 3; p_ += 3) {                    \
       assert(data_[p_ + 0] < GetVerticesCount(dim_) && "Too large index");     \
       assert(data_[p_ + 1] < GetVerticesCount(dim_) && "Too large index");     \
       assert(data_[p_ + 2] < GetVerticesCount(dim_) && "Too large index");     \
@@ -25,7 +25,7 @@
 
 using namespace Cellnta;
 
-uint32_t HypercubeStorage::GenerateCube(size_t dim, point_t a, CubeMode mode) {
+uint32_t HypercubeStorage::GenerateCube(int dim, point_t a, CubeMode mode) {
   CELLNTA_PROFILE;
 
   CELLNTA_LOG_DEBUG("Trying to generate hypercube");
@@ -87,14 +87,14 @@ void HypercubeStorage::GenerateVertices() {
 
   m_pnt.resize(GetPointsSize());
 
-  const size_t halfVert = GetVerticesCount() >> 1;
+  const uint32_t halfVert = GetVerticesCount() >> 1;
   point_t* data = m_pnt.data();
   point_t* sec_data = m_pnt.data() + halfVert * GetVertexSize();
-  // Better use dynamic bitset
+  // TODO: Better use dynamic bitset
   for (uint32_t bitset = 0; bitset < halfVert; ++bitset) {
     uint32_t j = 0;
     uint64_t pos = bitset * GetVertexSize();
-    for (; j < m_d - 1; ++j, ++pos) {
+    for (; j < (uint32_t) m_d - 1; ++j, ++pos) {
       // Check j bit
       if (bitset & ((uint32_t)1 << j))
         data[pos] = sec_data[pos] = +m_cubeSize;
@@ -113,7 +113,7 @@ void HypercubeStorage::GenerateVertices() {
 #ifdef HYPERCUBE_DEBUG_PRINT
   CELLNTA_LOG_DEBUG("Points:");
   for (size_t i = 0; i < m_pnt.size() / GetVertexSize(); ++i) {
-    size_t offset = i * GetVertexSize();
+    int offset = i * GetVertexSize();
     auto start = m_pnt.begin() + offset;
     auto end = start + GetVertexSize();
     CELLNTA_LOG_DEBUG("{}: {:+f}", i, fmt::join(start, end, ", "));
@@ -127,25 +127,25 @@ void HypercubeStorage::GenerateIndicesPolygon() {
   // m_ind.clear();
   m_ind.resize(GetFacesCount() * 6, 0);
 
-  const size_t usedTotalSize = GetVerticesCount();
+  const int usedTotalSize = GetVerticesCount();
   std::unique_ptr<bool[]> usedTotal = std::make_unique<bool[]>(usedTotalSize);
   memset(usedTotal.get(), 0, usedTotalSize * sizeof(bool));
 
   ind_t* data = m_ind.data();
 
-  const size_t maxVert = GetVerticesCount();
+  const int maxVert = GetVerticesCount();
 
-  for (size_t offset = 0; offset < maxVert;
+  for (int offset = 0; offset < maxVert;
        offset = (offset == 0) ? 1 : offset << 1) {
-    for (size_t corner = 1; corner < maxVert; corner <<= 1) {
+    for (int corner = 1; corner < maxVert; corner <<= 1) {
       if (corner == offset)
         continue;
 
-      for (size_t edge = corner << 1; edge < maxVert; edge <<= 1) {
+      for (int edge = corner << 1; edge < maxVert; edge <<= 1) {
         if (edge == corner || edge == offset)
           continue;
 
-        size_t total = edge + corner + offset;
+        int total = edge + corner + offset;
         data[0] = offset;
         data[3] = offset;
         data[1] = corner + offset;
@@ -159,17 +159,17 @@ void HypercubeStorage::GenerateIndicesPolygon() {
         if (!usedTotal[total]) {
           usedTotal[total] = true;
 
-          for (size_t conCorner = 1; conCorner < maxVert; conCorner <<= 1) {
+          for (int conCorner = 1; conCorner < maxVert; conCorner <<= 1) {
             if (conCorner == corner || conCorner == edge || conCorner == offset)
               continue;
 
-            for (size_t conEdge = conCorner << 1; conEdge < maxVert;
+            for (int conEdge = conCorner << 1; conEdge < maxVert;
                  conEdge <<= 1) {
               if (conEdge == conCorner || conEdge == corner ||
                   conEdge == edge || conEdge == offset)
                 continue;
 
-              size_t conTotal = conEdge + conCorner + total;
+              int conTotal = conEdge + conCorner + total;
               data[0] = total;
               data[3] = total;
               data[1] = conCorner + total;
@@ -190,10 +190,10 @@ void HypercubeStorage::GenerateIndicesPolygon() {
 
 #ifdef HYPERCUBE_DEBUG_PRINT
   CELLNTA_LOG_DEBUG("Polygon: (faces={})", GetFacesCount());
-  for (int i = 0; i < m_ind.size(); i += 6) {
+  for (size_t i = 0; i < m_ind.size(); i += 6) {
     CELLNTA_LOG_DEBUG("Face: {}", i / 6);
     for (int j = 0; j < 2; ++j) {
-      constexpr size_t offset = 3;
+      constexpr int offset = 3;
       auto start = m_ind.begin() + i + j * offset;
       auto end = start + offset;
       CELLNTA_LOG_DEBUG("{}", fmt::join(start, end, ", "));
@@ -212,8 +212,8 @@ void HypercubeStorage::GenerateIndicesWireframe() {
   ind_t* data = m_ind.data();
 
   // https://stackoverflow.com/questions/51877294/connecting-points-in-n-dimensional-hyper-cube
-  for (size_t currDim = 0; currDim < m_d; currDim++) {
-    const size_t nVert = ((size_t)1) << currDim;
+  for (int currDim = 0; currDim < m_d; currDim++) {
+    const int nVert = ((int)1) << currDim;
     const ind_t* indicesEnd = data;
 
     // copy + shift previous edges
@@ -229,7 +229,7 @@ void HypercubeStorage::GenerateIndicesWireframe() {
     }
 
     // create new edges to join cube copies
-    for (size_t i = 0; i < nVert; ++i) {
+    for (int i = 0; i < nVert; ++i) {
       assert(data < m_ind.data() + m_ind.size() && "Out of range");
 
       data[0] = i;
@@ -249,7 +249,7 @@ void HypercubeStorage::GenerateIndicesWireframe() {
 
 void HypercubeStorage::GenerateIndicesPoints() {
   m_ind.resize(GetVerticesCount());
-  for (size_t i = 0; i < GetVerticesCount(); ++i) m_ind[i] = i;
+  for (int i = 0; i < GetVerticesCount(); ++i) m_ind[i] = i;
 }
 
 #undef HYPERCUBE_DEBUG_PRINT

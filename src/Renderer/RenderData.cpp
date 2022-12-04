@@ -6,8 +6,7 @@ using namespace Cellnta;
 
 RenderData::RenderData() { m_desiredArea.reserve(4); }
 
-RenderData::RenderData(size_t dim) {
-  m_d = dim;
+RenderData::RenderData(int dim) : m_d(dim) {
   m_desiredArea.reserve(4);
 }
 
@@ -53,7 +52,7 @@ void RenderData::Clear() {
   m_needUpdate = true;
 }
 
-void RenderData::SetDistance(size_t distance) {
+void RenderData::SetDistance(int distance) {
   CELLNTA_PROFILE;
 
   if (distance == m_distance)
@@ -84,7 +83,7 @@ void RenderData::UpdateVisibleArea(const Eigen::Vector3i& pos) {
   m_visibleArea = GetDistanceArea() + cellPos;
   m_desiredArea = Area::InverseClip(m_visibleArea, oldVisibleArea);
 
-  // for (size_t i = 0; i < m_desiredArea.size(); ++i)
+  // for (int i = 0; i < m_desiredArea.size(); ++i)
   //   std::cout << i << ": "
   //   << "\t min: " << m_desiredArea[i].min.transpose()
   //   << "\t max: " << m_desiredArea[i].max.transpose()
@@ -112,7 +111,7 @@ void RenderData::EraseUnvisibleArea(const ChunkPos& oldPos,
           }
         }
   }
-  // for (size_t i = 0; i < eraseList.size(); ++i)
+  // for (int i = 0; i < eraseList.size(); ++i)
   //   std::cout << i << ": "
   //   << "\t min: " << eraseList[i].min.transpose()
   //   << "\t max: " << eraseList[i].max.transpose()
@@ -126,12 +125,9 @@ bool RenderData::ChunkValid(const ChunkPos& pos) {
   Eigen::Vector3i maxPos = m_pos.GetPosition().array() + m_distance;
   Eigen::Vector3i minPos = m_pos.GetPosition().array() - m_distance;
 
-  if ((minPos.x() <= pos.x() && pos.x() <= maxPos.x()) &&
-      (minPos.y() <= pos.y() && pos.y() <= maxPos.y()) &&
-      (minPos.z() <= pos.z() && pos.z() <= maxPos.z()))
-    return true;
-
-  return false;
+  return ((minPos.x() <= pos.x() && pos.x() <= maxPos.x()) &&
+         (minPos.y() <= pos.y() && pos.y() <= maxPos.y()) &&
+         (minPos.z() <= pos.z() && pos.z() <= maxPos.z()));
 }
 
 void Chunk::SetCell(const Eigen::VectorXi& pos, state_t state) {
@@ -158,11 +154,9 @@ Area::Area(const int min, const int max) {
 bool Area::CellValid(const Eigen::VectorXi& cell) const {
   CELLNTA_PROFILE;
 
-  if (((min.x() <= cell.x()) && (cell.x() <= max.x())) &&
+  return (((min.x() <= cell.x()) && (cell.x() <= max.x())) &&
       ((min.y() <= cell.y()) && (cell.y() <= max.y())) &&
-      ((min.z() <= cell.z()) && (cell.z() <= max.z())))
-    return true;
-  return false;
+      ((min.z() <= cell.z()) && (cell.z() <= max.z())));
 }
 
 std::vector<Area> Area::InverseClip(const Area& clipper, const Area& subject) {
@@ -231,7 +225,5 @@ Area Area::Intersection(const Area& first, const Area& second) {
 bool Area::Valid() const {
   CELLNTA_PROFILE;
 
-  if (min.x() < max.x() && min.y() < max.y() && min.z() < max.z())
-    return true;
-  return false;
+  return (min.x() < max.x() && min.y() < max.y() && min.z() < max.z());
 }

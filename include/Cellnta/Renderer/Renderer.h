@@ -39,7 +39,7 @@ class Renderer {
   }
 
   void GenrateHypercube(float a = -1, CubeMode mode = CubeMode::NONE);
-  void Rotate(size_t axis1, size_t axis2, float angle);
+  void Rotate(int axis1, int axis2, float angle);
   void ProjectBuffers();
 
   int GetCollatingX() const { return m_renderData.GetCollatingX(); }
@@ -54,7 +54,7 @@ class Renderer {
   void SetDimension(uint32_t D);
   void SetCubeMode(CubeMode mode);
 
-  size_t GetDimensions() const { return m_d; }
+  int GetDimensions() const { return m_d; }
   CubeMode GetCubeMode() const { return m_cube.GetMode(); }
 
   const Camera3d& GetCamera3d() const { return p_camera; }
@@ -84,8 +84,8 @@ class Renderer {
 
   void UpdateColorTexture();
 
-  void BeginArrayBufferSource(float*& dst, size_t offset, size_t size);
-  void EndArrayBufferSource();
+  static void BeginArrayBufferSource(float*& dst, int offset, int size);
+  static void EndArrayBufferSource();
 
   RenderData m_renderData;
 
@@ -103,9 +103,9 @@ class Renderer {
   Shader m_cellShader;
   Shader m_gridShader;
 
-  std::vector<size_t> CollatingValues;
+  std::vector<int> CollatingValues;
 
-  size_t m_d = 0;  // dimensions
+  int m_d = 0;  // dimensions
   bool m_updateVboCells = false;
   bool m_wantDraw = false;
 };

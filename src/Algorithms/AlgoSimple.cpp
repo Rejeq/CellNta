@@ -20,7 +20,7 @@ void AlgoSimple::Update() {
   if (p_dim == 0 || m_worlds[0] == nullptr || m_worlds[1] == nullptr)
     return;
 
-  for (size_t i = 0; i < GetStep(); ++i) {
+  for (int i = 0; i < GetStep(); ++i) {
     const state_t* world = GetWorld();
     state_t* buffWorld = GetBufferWorld();
 
@@ -55,17 +55,16 @@ void AlgoSimple::LoadWorld(RenderData* data) {
 
     for (int i = pos.size() - 1; i >= 0; --i) {
       pos[i] += 1;
-      if (pos[i] < m_size[i])
+      if (pos[i] < (Cell::Vec::Scalar) m_size[i])
         break;
       pos[i] = 0;
-      continue;
     }
   }
   p_needLoadInRenderer = false;
   data->DesireAreaProcessed();
 }
 
-void AlgoSimple::SetDimension(size_t dim) {
+void AlgoSimple::SetDimension(int dim) {
   CELLNTA_PROFILE;
 
   if (dim == p_dim)
@@ -75,10 +74,10 @@ void AlgoSimple::SetDimension(size_t dim) {
   m_bornMask = boost::dynamic_bitset<>(std::pow(3, p_dim));
   m_surviveMask = boost::dynamic_bitset<>(std::pow(3, p_dim));
 
-  m_bornMask[4] = 1;
-  m_bornMask[5] = 1;
+  m_bornMask[4] = true;
+  m_bornMask[5] = true;
 
-  m_surviveMask[5] = 1;
+  m_surviveMask[5] = true;
 
   SetSize(std::vector<size_t>(p_dim, 30));
   GenerateNeigbors({-1, 0, 1});
@@ -102,17 +101,18 @@ void AlgoSimple::SetDimension(size_t dim) {
 
   // SetCell(stair);
 
-  // constexpr int a = 15;
-  // const int a = GetSize()[0] / 2;
-  // std::vector<Cell> blinker(7, Cell(Eigen::VectorXi::Zero(p_dim), 1));
-  // blinker[0].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a    );
-  // blinker[1].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a - 1, a    , a    );
-  // blinker[2].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a + 1, a    , a    );
-  // blinker[3].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a - 1, a    );
-  // blinker[4].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a + 1, a    );
-  // blinker[5].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a - 1);
-  // blinker[6].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a + 1);
-  // SetCell(blinker);
+  //if(p_dim == 3){
+  //  const int a = GetSize()[0] / 2;
+  //  std::vector<Cell> blinker(7, Cell(Eigen::VectorXi::Zero(p_dim), 1));
+  //  blinker[0].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a    );
+  //  blinker[1].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a - 1, a    , a    );
+  //  blinker[2].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a + 1, a    , a    );
+  //  blinker[3].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a - 1, a    );
+  //  blinker[4].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a + 1, a    );
+  //  blinker[5].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a - 1);
+  //  blinker[6].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a    , a    , a + 1);
+  //  SetCell(blinker);
+  //}
 
   // constexpr int a = 15;
   // std::vector<Cell> line(3, Cell(Eigen::VectorXi::Zero(p_dim), 1));
@@ -170,7 +170,8 @@ void AlgoSimple::SetSize(const std::vector<size_t>& size) {
   m_size = size;
 
   m_totalArea = 1;
-  for (size_t i = 0; i < m_size.size(); ++i) m_totalArea *= m_size[i];
+  for (auto& i : m_size)
+    m_totalArea *= i;
   CreateWorld();
 }
 
@@ -186,8 +187,8 @@ size_t AlgoSimple::FindNeighbors(const state_t*& world, const size_t& idx) {
   CELLNTA_PROFILE;
 
   size_t out = 0;
-  for (size_t i = 0; i < m_neighbors.size(); ++i) {
-    size_t neiPos = FindIdxInRangedWorld(idx, m_neighbors[i]);
+  for (auto& i : m_neighbors) {
+    size_t neiPos = FindIdxInRangedWorld(idx, i);
 
     if (neiPos < GetTotalArea())
       if (world[neiPos] != 0)
@@ -209,17 +210,18 @@ void AlgoSimple::GenerateNeigbors(const std::vector<cell_t>& oneDimNei) {
   std::vector<Vi::const_iterator> vd;
   vd.reserve(NDimNei.size());
 
-  for (const auto& it : NDimNei) vd.push_back(it.begin());
+  for (const auto& it : NDimNei)
+    vd.push_back(it.begin());
 
-  while (1) {
+  while (true) {
     Cell::Vec result = Cell::Vec::Zero(NDimNei.size());
     for (int i = vd.size() - 1; i >= 0; --i)
       result[result.size() - i - 1] = (*(vd[i]));
     m_neighbors.push_back(CalculateIdxFromPos(result));
 
-    std::vector<Vi::const_iterator>::iterator it = vd.begin();
+    auto it = vd.begin();
     int i = 0;
-    while (1) {
+    while (true) {
       ++(*it);
       if (*it != NDimNei[i].end())
         break;
@@ -280,23 +282,17 @@ size_t AlgoSimple::CalculateIdxFromPos(const Cell::Vec& pos) {
 void AlgoSimple::CreateWorld() {
   CELLNTA_PROFILE;
 
-  for (size_t i = 0; i < 2; ++i) {
-    if (m_worlds[i] != nullptr)
-      delete[] m_worlds[i];
-    m_worlds[i] = (state_t*)malloc(GetTotalAreaInBytes());
-    if (m_worlds[i] == nullptr)
+  for (auto& world : m_worlds) {
+    world = std::make_unique<state_t[]>(GetTotalArea());
+    if (world == nullptr)
       throw "Unable to allocate memory";
-    memset(m_worlds[i], 0, GetTotalAreaInBytes());
+    memset(world.get(), 0, GetTotalAreaInBytes());
   }
 }
 
 void AlgoSimple::DeleteWorld() {
   CELLNTA_PROFILE;
 
-  for (size_t i = 0; i < 2; ++i) {
-    if (m_worlds[i] != nullptr) {
-      delete[] m_worlds[i];
-      m_worlds[i] = nullptr;
-    }
-  }
+  for (auto& world : m_worlds)
+    world.reset(nullptr);
 }

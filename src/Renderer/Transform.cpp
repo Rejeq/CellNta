@@ -10,7 +10,7 @@ static Eigen::VectorXf getNormalVector(Eigen::MatrixXf vectors) {
   CELLNTA_PROFILE;
 
   assert(vectors.rows() == vectors.cols() + 1);
-  const unsigned int N = vectors.rows();
+  const int N = vectors.rows();
 
   Eigen::MatrixXf pM = vectors.transpose();
   pM.conservativeResize(pM.rows() + 1, Eigen::NoChange);
@@ -19,10 +19,10 @@ static Eigen::VectorXf getNormalVector(Eigen::MatrixXf vectors) {
   Eigen::VectorXf result = Eigen::VectorXf::Zero(N);
 
   int signal = 1;
-  for (unsigned int i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++) {
     Eigen::MatrixXf pS(N - 1, N - 1);
 
-    for (unsigned int j = 0; j < (N - 1); j++) {
+    for (int j = 0; j < (N - 1); j++) {
       pS.block(j, 0, 1, i) = pM.block(j, 0, 1, i);
       pS.block(j, i, 1, N - i - 1) = pM.block(j, i + 1, 1, N - i - 1);
     }
@@ -34,15 +34,15 @@ static Eigen::VectorXf getNormalVector(Eigen::MatrixXf vectors) {
   return result;
 }
 
-Eigen::MatrixXf Cellnta::LookAt(const size_t N, const Eigen::VectorXf& from,
+Eigen::MatrixXf Cellnta::LookAt(const int N, const Eigen::VectorXf& from,
                                 const Eigen::VectorXf& to,
                                 const Eigen::MatrixXf& ups) {
   CELLNTA_PROFILE;
 
   assert(N > 2);
-  assert(N == (size_t)from.size());
-  assert(N == (size_t)to.size());
-  assert(N == (size_t)ups.rows());
+  assert(N == from.size());
+  assert(N == to.size());
+  assert(N == ups.rows());
 
   Eigen::MatrixXf rot(N, N);  // rotate matrix
 
@@ -79,7 +79,7 @@ Eigen::MatrixXf Cellnta::LookAt(const size_t N, const Eigen::VectorXf& from,
   return temp.transpose() * translate;
 }
 
-Eigen::MatrixXf Cellnta::Perspective(const size_t N, double eyeAngle,
+Eigen::MatrixXf Cellnta::Perspective(const int N, double eyeAngle,
                                      double nearPlane, double farPlane,
                                      double aspect) {
   CELLNTA_PROFILE;
@@ -103,13 +103,13 @@ Eigen::MatrixXf Cellnta::Perspective(const size_t N, double eyeAngle,
   return m;
 }
 
-void Cellnta::NProject(NCellStorage& cells, const size_t cameraDim,
+void Cellnta::NProject(NCellStorage& cells, const int cameraDim,
                        const Eigen::MatrixXf& viewProj, bool perspective) {
   CELLNTA_PROFILE;
 
-  const uint32_t divPos = ((perspective) ? 2 : 1);
+  const int divPos = ((perspective) ? 2 : 1);
 
-  for (size_t i = 0; i < cells.size(); ++i) {
+  for (int i = 0; i < cells.size(); ++i) {
     Eigen::Map<Eigen::VectorXf> pos(cells.at(i).data(), cameraDim + 1);
 
     pos = viewProj * pos;
@@ -118,16 +118,16 @@ void Cellnta::NProject(NCellStorage& cells, const size_t cameraDim,
   }
 }
 
-void Cellnta::NProject(HypercubeStorage& cube, const size_t cameraDim,
+void Cellnta::NProject(HypercubeStorage& cube, const int cameraDim,
                        const Eigen::MatrixXf& viewProj, bool perspective) {
   CELLNTA_PROFILE;
 
-  const size_t rows = cameraDim + 1;
-  const size_t cols = cube.GetVerticesCount();
-  const uint32_t divPos = ((perspective) ? 2 : 1);
+  const int rows = cameraDim + 1;
+  const int cols = cube.GetVerticesCount();
+  const int divPos = ((perspective) ? 2 : 1);
   float* points = cube.GetPoints();
 
-  for (size_t vert = 0; vert < cols; ++vert) {
+  for (int vert = 0; vert < cols; ++vert) {
     Eigen::Map<Eigen::VectorXf> pos(&points[vert * cube.GetVertexSize()], rows);
 
     pos = viewProj * pos;
@@ -136,7 +136,7 @@ void Cellnta::NProject(HypercubeStorage& cube, const size_t cameraDim,
   }
 }
 
-Eigen::MatrixXf Cellnta::NRotate(size_t N, size_t axis1, size_t axis2,
+Eigen::MatrixXf Cellnta::NRotate(int N, int axis1, int axis2,
                                  float angle) {
   assert(axis1 != axis2);
   assert(axis1 < N);
@@ -144,10 +144,10 @@ Eigen::MatrixXf Cellnta::NRotate(size_t N, size_t axis1, size_t axis2,
 
   Eigen::MatrixXf rot_aa = Eigen::MatrixXf::Identity(N + 1, N + 1);
 
-  rot_aa(axis1, axis1) = cos(angle);
-  rot_aa(axis1, axis2) = sin(angle);
-  rot_aa(axis2, axis1) = -sin(angle);
-  rot_aa(axis2, axis2) = cos(angle);
+  rot_aa(axis1, axis1) = std::cos(angle);
+  rot_aa(axis1, axis2) = std::sin(angle);
+  rot_aa(axis2, axis1) = -std::sin(angle);
+  rot_aa(axis2, axis2) = std::cos(angle);
 
   return rot_aa.transpose();
 }

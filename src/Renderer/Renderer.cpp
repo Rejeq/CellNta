@@ -149,12 +149,12 @@ void Renderer::GenrateHypercube(float a, CubeMode mode) {
   }
 }
 
-void Renderer::Rotate(size_t axis1, size_t axis2, float angle) {
+void Renderer::Rotate(int axis1, int axis2, float angle) {
   p_Ncameras[p_Ncameras.size() - 1].Rotate();
   // Eigen::MatrixXf mat;
   // Eigen::Rotation2D rot(angle);
 
-  // const size_t dim = p_Ncameras.end()->GetDimensions();
+  // const int dim = p_Ncameras.end()->GetDimensions();
   // NCamera& cam = *p_Ncameras.end();
   // cam. = NRotate(dim, 0, dim - 1, radians(5.0f));
 }
@@ -205,13 +205,13 @@ void Renderer::ProjectBuffers() {
   m_cube.Restore();
   m_cells.Restore();
 
-  for (size_t i = 0; i < p_Ncameras.size(); ++i) {
-    if (p_Ncameras[i].NeedSkip())
+  for (auto& camera : p_Ncameras) {
+    if (camera.NeedSkip())
       continue;
 
-    const Eigen::MatrixXf viewProj = p_Ncameras[i].GetViewProj();
-    const size_t dim = p_Ncameras[i].GetDimensions();
-    const bool usePerspective = p_Ncameras[i].GetUsePerspective();
+    const Eigen::MatrixXf viewProj = camera.GetViewProj();
+    const int dim = camera.GetDimensions();
+    const bool usePerspective = camera.GetUsePerspective();
 
     NProject(m_cube, dim, viewProj, usePerspective);
     NProject(m_cells, dim, viewProj, usePerspective);
@@ -256,7 +256,7 @@ void Renderer::InitBuffers() {
   glEnableVertexAttribArray(1);
 }
 
-void Renderer::BeginArrayBufferSource(float*& dst, size_t offset, size_t size) {
+void Renderer::BeginArrayBufferSource(float*& dst, int offset, int size) {
   CELLNTA_PROFILE;
 
   dst =
@@ -321,7 +321,7 @@ void Renderer::UpdateCubeBuffer() {
   glBindBuffer(GL_ARRAY_BUFFER, m_cubeBuffer);
   BeginArrayBufferSource(dst, 0, m_cube.GetPointsSizeInBytes());
 
-  const size_t pointsCount = m_cube.GetVerticesCount() * 3;
+  const int pointsCount = m_cube.GetVerticesCount() * 3;
   const float* end = dst + pointsCount;
   float* pnt = m_cube.GetPoints();
 
@@ -344,7 +344,7 @@ void Renderer::UpdateCellBuffer() {
     return;
 
   float* dst = nullptr;
-  const size_t pointCount = m_cells.size();
+  const int pointCount = m_cells.size();
 
   glBindBuffer(GL_ARRAY_BUFFER, m_cellBuffer);
   BeginArrayBufferSource(dst, 0,

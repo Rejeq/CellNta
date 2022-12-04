@@ -16,7 +16,7 @@ class Shader {
   Shader(GLuint id) : m_id(id) {}
   ~Shader();
 
-  void Use();
+  void Use() const;
   void Delete();
 
   bool CreateFromMemory(std::string& src);
@@ -32,15 +32,15 @@ class Shader {
               const std::string& pathGeometry);
 #endif
 
-  GLuint GetID();
+  GLuint GetID() const;
 
   GLint GetUniformLocation(const std::string& Location);
-  GLint GetAttribLocation(const std::string& Location);
+  GLint GetAttribLocation(const std::string& Location) const;
 
   GLint GetLocation(const std::string& location);
 
-  void Set(const std::string& location, const GLint value);
-  void Set(const std::string& location, const GLfloat value);
+  void Set(const std::string& location, GLint value);
+  void Set(const std::string& location, GLfloat value);
 
   void Set(const std::string& location, const Eigen::Vector2i& value);
   void Set(const std::string& location, const Eigen::Vector3i& value);
@@ -78,15 +78,15 @@ class Shader {
  private:
   void SetID(GLuint id);
 
-  std::string ReadFile(const std::string& path);
+  static std::string ReadFile(const std::string& path);
   GLuint LoadShader(const char* src, GLint length, GLenum type);
 
-  GLuint LinkShaders(GLuint vertex, GLuint fragment, GLuint geometry = 0);
+  static GLuint LinkShaders(GLuint vertex, GLuint fragment, GLuint geometry = 0);
 
-  bool GetLinkStatusError(GLuint program, std::string& out);
-  bool GetShaderErrorStatus(GLuint program, std::string& out);
+  static bool GetLinkStatusError(GLuint program, std::string& out);
+  static bool GetShaderErrorStatus(GLuint program, std::string& out);
 
-  const char* GetShaderTypeString(GLenum type) const;
+  static const char* GetShaderTypeString(GLenum type);
 
   GLuint m_id = 0;
   std::unordered_map<std::string, GLuint> m_uniforms;

@@ -17,12 +17,12 @@ class NCellStorage {
   bool Add(const Derived& pos);
   void Restore();
 
-  void SetDimensions(const size_t dim) {
+  void SetDimensions(const int dim) {
     m_d = dim;
     clear();
   }
   template <bool Clear, bool Reserve>
-  void SetMaxCellsSize(const size_t maxCells) {
+  void SetMaxCellsSize(const int maxCells) {
     m_maxCells = maxCells;
     if constexpr (Clear)
       clear();
@@ -30,10 +30,10 @@ class NCellStorage {
       reserve(m_maxCells);
   }
 
-  const Vec& OriginalAt(const size_t idx) const { return m_origCells.at(idx); }
+  const Vec& OriginalAt(const int idx) const { return m_origCells.at(idx); }
 
-  size_t GetDimensions() const { return m_d; }
-  size_t PointsCapacity3dInBytes() const {
+  int GetDimensions() const { return m_d; }
+  int PointsCapacity3dInBytes() const {
     return capacity() * sizeof(point_t) * 3;
   }
 
@@ -41,24 +41,24 @@ class NCellStorage {
     m_cells.clear();
     m_origCells.clear();
   };
-  void reserve(size_t capacity) {
+  void reserve(int capacity) {
     m_cells.reserve(capacity);
     m_origCells.reserve(capacity);
   };
-  size_t capacity() const { return m_cells.capacity(); }
+  int capacity() const { return m_cells.capacity(); }
 
   const Vec* data() const { return m_cells.data(); }
   Vec* data() { return m_cells.data(); }
-  const Vec& at(const size_t idx) const { return m_cells.at(idx); }
-  Vec& at(const size_t idx) { return m_cells.at(idx); }
-  size_t size() const { return m_cells.size(); }
+  const Vec& at(const int idx) const { return m_cells.at(idx); }
+  Vec& at(const int idx) { return m_cells.at(idx); }
+  int size() const { return m_cells.size(); }
 
  private:
   std::vector<Vec> m_cells;
   std::vector<Vec> m_origCells;
 
-  size_t m_maxCells = 0;
-  size_t m_d = 0;
+  int m_maxCells = 0;
+  int m_d = 0;
 };
 
 template <bool homogeneous, typename Derived>

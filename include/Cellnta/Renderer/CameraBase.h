@@ -11,7 +11,7 @@ static float radians(float degrees) {
 class CameraBase {
  public:
   CameraBase() = default;
-  CameraBase(size_t dim) { SetDimensions(dim); }
+  CameraBase(int dim) { SetDimensions(dim); }
   virtual ~CameraBase() {}
 
   bool Update() {
@@ -32,8 +32,8 @@ class CameraBase {
     return out;
   }
 
-  virtual void SetDimensions(size_t dim) { m_dim = dim; }
-  size_t GetDimensions() const { return m_dim; }
+  virtual void SetDimensions(int dim) { m_dim = dim; }
+  int GetDimensions() const { return m_dim; }
   virtual void SetUsePerspective(bool newState) { p_usePerspective = newState; }
   bool GetUsePerspective() const { return p_usePerspective; }
 
@@ -66,7 +66,7 @@ class CameraBase {
   bool p_usePerspective = true;
   float p_fov = 45.0f;  // radians(45.0f);
  private:
-  size_t m_dim = 0;
+  int m_dim = 0;
 };
 
 }  // namespace Cellnta

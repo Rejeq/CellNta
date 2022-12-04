@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 
 project(CellNta)
 
-option(ENABLE_PROFILING "Enable profiling" OFF)
+option(CELLNTA_PROFILING "Enable profiling" OFF)
+option(CELLNTA_TIDY "run clang-tidy" OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
@@ -16,6 +17,14 @@ set(CELLNTA_FOLDERS
   "Renderer"
 )
 
+if(CELLNTA_TIDY)
+  find_program(CLANG_TIDY_BIN NAMES "clang-tidy" REQUIRED)
+
+  set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_BIN})
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+  message(STATUS "Enabled clang-tidy: ${CLANG_TIDY_BIN}")
+endif()
 
 set(BOOST_INCLUDEDIR "${CELLNTA_THIRD_PARTY}/boost")
 
@@ -25,7 +34,7 @@ find_package(Boost REQUIRED)
 find_package(spdlog REQUIRED)
 include(${CELLNTA_THIRD_PARTY}/Eigen.cmake)
 
-if(ENABLE_PROFILING)
+if(CELLNTA_PROFILING)
   include(${CELLNTA_THIRD_PARTY}/Tracy.cmake)
 endif()
 

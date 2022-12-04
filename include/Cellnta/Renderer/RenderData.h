@@ -7,7 +7,7 @@
 
 #include <Eigen/Core>
 
-#define CHUNK_SIZE ((size_t)16)
+#define CHUNK_SIZE ((int)16)
 
 namespace Cellnta {
 
@@ -24,9 +24,9 @@ struct Cell {
 
 template <typename T>
 struct EigeneHasher {
-  size_t operator()(T const& data) const {
-    size_t seed = 0;
-    for (size_t i = 0; i < data.size(); ++i)
+  int operator()(T const& data) const {
+    int seed = 0;
+    for (int i = 0; i < data.size(); ++i)
       seed ^= std::hash<typename T::Scalar>()(data(i)) + 0x9e3779b9 +
               (seed << 6) + (seed >> 2);
     return seed;
@@ -43,7 +43,7 @@ struct Area {
 
   bool Valid() const;
   bool CellValid(const Eigen::VectorXi& cell) const;
-  size_t GetSize() const { return min.size(); }
+  int GetSize() const { return min.size(); }
 
   static Area Intersection(const Area& first, const Area& second);
   static std::vector<Area> InverseClip(const Area& clipper,
@@ -97,7 +97,7 @@ class ChunkPos {
 };
 
 struct ChunkPosHasher {
-  size_t operator()(const ChunkPos& k) const {
+  int operator()(const ChunkPos& k) const {
     EigeneHasher<Eigen::Vector3i> hasher;
     return hasher(k.GetPosition());
   }
@@ -108,14 +108,14 @@ class Chunk {
   using Map = std::unordered_map<Eigen::VectorXi, state_t,
                                  EigeneHasher<Eigen::VectorXi>>;
 
-  Chunk(size_t dim, const ChunkPos& pos) : m_d(dim), m_pos(pos) {}
+  Chunk(int dim, const ChunkPos& pos) : m_d(dim), m_pos(pos) {}
   ~Chunk() = default;
 
   void SetCell(const Eigen::VectorXi& pos, state_t state);
 
   const Map& GetData() const { return m_data; }
   ChunkPos GetPosition() const { return m_pos; }
-  size_t GetDimensions() const { return m_d; }
+  int GetDimensions() const { return m_d; }
 
   void Clear();
 
@@ -132,7 +132,7 @@ class Chunk {
   Map::const_iterator end() const { return m_data.end(); }
 
  private:
-  size_t m_d;
+  int m_d;
   ChunkPos m_pos;
   Map m_data;
   bool m_needUpdate = false;
@@ -144,9 +144,9 @@ class RenderData {
   using Map = std::unordered_map<ChunkPos, ChunkPtr, ChunkPosHasher>;
 
   RenderData();
-  RenderData(size_t dim);
+  RenderData(int dim);
 
-  void SetDimensions(size_t dim) {
+  void SetDimensions(int dim) {
     m_data.clear();
     m_d = dim;
   }
@@ -178,9 +178,9 @@ class RenderData {
     m_desiredArea.push_back(GetDistanceArea());
   }
 
-  void SetDistance(size_t distance);
+  void SetDistance(int distance);
   uint32_t GetDistance() const { return m_distance; }
-  size_t GetArea() const { return m_distance * m_distance * m_distance; }
+  int GetArea() const { return m_distance * m_distance * m_distance; }
 
   void SetPosition(const ChunkPos& pos);
 
@@ -209,10 +209,10 @@ class RenderData {
     return Area(-chunkDistance, chunkDistance);
   }
 
-  size_t m_d = 0;
+  int m_d = 0;
   Map m_data;
   bool m_needUpdate = false;
-  size_t m_distance = 0;
+  int m_distance = 0;
   ChunkPos m_pos = ChunkPos(Eigen::Vector3i(0, 0, 0));
   Area m_visibleArea = GetDistanceArea();
 

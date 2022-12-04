@@ -31,10 +31,8 @@ bool Log::InitDefault() {
 bool Log::InitCustom(const std::vector<spdlog::sink_ptr>& sinks) {
   s_logger =
       std::make_shared<spdlog::logger>("CellNta", sinks.begin(), sinks.end());
-  if (s_logger == nullptr)
-    return true;
 
-  return false;
+  return (s_logger == nullptr);
 }
 
 std::shared_ptr<spdlog::logger>& Log::GetLogger() { return s_logger; }

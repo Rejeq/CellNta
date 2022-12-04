@@ -46,7 +46,7 @@ void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo) {
 
   Context* ctx = GetContext();
 
-  Cellnta::AlgoType res;
+  Cellnta::AlgoType res = Cellnta::AlgoType::COUNT;
   if (Widget::ComboEnum("Algorithm type", algo->GetType(), AlgoTypeData, res)) {
     if (ctx->SetAlgo(res))
       assert(0 && "Unable to change algorithm type");

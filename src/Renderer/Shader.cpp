@@ -20,7 +20,7 @@ void Shader::Delete() {
   m_id = 0;
 }
 
-void Shader::Use() {
+void Shader::Use() const {
   CELLNTA_PROFILE;
   glUseProgram(m_id);
 }
@@ -197,34 +197,32 @@ bool Shader::GetLinkStatusError(GLuint program, std::string& out) {
 
   GLint status = 0;
   glGetProgramiv(program, GL_LINK_STATUS, &status);
-  if (!status) {
+  if (status == 0) {
     GLint size = 0;
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &size);
 
     out.resize(size);
-    glGetProgramInfoLog(program, size, NULL, out.data());
-    return 1;
+    glGetProgramInfoLog(program, size, nullptr, out.data());
   }
-  return 0;
+  return status == 0;
 }
 
-bool Shader::GetShaderErrorStatus(GLuint shader, std::string& out) {
+bool Shader::GetShaderErrorStatus(GLuint program, std::string& out) {
   CELLNTA_PROFILE;
 
   GLint status = 0;
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-  if (!status) {
+  glGetShaderiv(program, GL_COMPILE_STATUS, &status);
+  if (status == 0) {
     GLint size = 0;
-    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &size);
+    glGetShaderiv(program, GL_INFO_LOG_LENGTH, &size);
 
     out.resize(size);
-    glGetShaderInfoLog(shader, size, NULL, out.data());
-    return true;
+    glGetShaderInfoLog(program, size, nullptr, out.data());
   }
-  return false;
+  return status == 0;
 }
 
-const char* Shader::GetShaderTypeString(GLenum type) const {
+const char* Shader::GetShaderTypeString(GLenum type) {
   switch (type) {
     case GL_VERTEX_SHADER: return "Vertex";
     case GL_FRAGMENT_SHADER: return "Fragment";
@@ -253,9 +251,13 @@ std::string Shader::ReadFile(const std::string& path) {
   return out;
 }
 
-void Shader::SetID(GLuint id) { m_id = id; }
+void Shader::SetID(GLuint id) {
+  m_id = id;
+}
 
-GLuint Shader::GetID() { return m_id; }
+GLuint Shader::GetID() const {
+  return m_id;
+}
 
 GLint Shader::GetUniformLocation(const std::string& location) {
   CELLNTA_PROFILE;
@@ -269,15 +271,15 @@ GLint Shader::GetUniformLocation(const std::string& location) {
   return loc;
 }
 
-GLint Shader::GetAttribLocation(const std::string& Location) {
+GLint Shader::GetAttribLocation(const std::string& Location) const {
   return glGetAttribLocation(m_id, Location.c_str());
 }
 
-void Shader::Set(const std::string& location, const GLfloat value) {
+void Shader::Set(const std::string& location, GLfloat value) {
   glUniform1f(GetUniformLocation(location), value);
 }
 
-void Shader::Set(const std::string& location, const GLint value) {
+void Shader::Set(const std::string& location, GLint value) {
   glUniform1i(GetUniformLocation(location), value);
 }
 

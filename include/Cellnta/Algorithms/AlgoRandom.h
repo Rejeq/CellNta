@@ -15,13 +15,13 @@ class AlgoRandom : public AlgoBase {
 
   void Update() override;
   void LoadWorld(RenderData* data) override;
-  void SetDimension(size_t dim) override;
+  void SetDimension(int dim) override;
 
   void SetCell(const Cell&) override {}
   void SetCell(const std::vector<Cell>&) override {}
   state_t GetCell(const Eigen::VectorXi&) override { return 0; }
 
-  void SetSeed(size_t seed) { m_gen = std::default_random_engine(seed); }
+  void SetSeed(int seed) { m_gen = std::default_random_engine(seed); }
 
   void SetRangeMin(int min);
   void SetRangeMax(int max);

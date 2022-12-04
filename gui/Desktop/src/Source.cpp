@@ -50,8 +50,8 @@ const char* GlDebugTypeToString(GLenum type) {
 }
 
 void GlMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
-                       GLsizei length, const GLchar* message,
-                       const void* userParam) {
+                       GLsizei /*length*/, const GLchar* message,
+                       const void* /*userParam*/) {
   // Since the shader error handled in the Shader class
   if (source == GL_DEBUG_SOURCE_SHADER_COMPILER)
     return;
@@ -178,9 +178,9 @@ void ResetContextLayout(const Ui::Context& ctx) {
 
   constexpr float size = 0.25f;
   ImGuiID dockIdLeft =
-      ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Left, size, NULL, &dockId);
+      ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Left, size, nullptr, &dockId);
   ImGuiID dockIdRem = ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Right,
-                                                  1.0f - size, NULL, &dockId);
+                                                  1.0f - size, nullptr, &dockId);
 
   // TODO: Make independent of window name
   ImGui::DockBuilderDockWindow("Scene", dockIdRem);
@@ -193,7 +193,7 @@ void ResetContextLayout(const Ui::Context& ctx) {
   ImGui::DockBuilderFinish(dockId);
 }
 
-bool CreateContextLayout(int width, int height, Ui::Context& ctx) {
+bool CreateContextLayout(Ui::Context& ctx) {
   Cellnta::Renderer& ren = ctx.GetRenderer();
 
   ctx.SetAlgo(Cellnta::AlgoType::SIMPLE);
@@ -220,9 +220,9 @@ bool CreateContextLayout(int width, int height, Ui::Context& ctx) {
   return false;
 }
 
-int main(int, char**) {
+int main(int /*unused*/, char** /*unused*/) {
   SDL_Window* win = nullptr;
-  SDL_GLContext glCtx;
+  SDL_GLContext glCtx = nullptr;
 
   if (InitLogging()) {
     printf("Unable to initialize logging");
@@ -248,20 +248,14 @@ int main(int, char**) {
 
   glEnable(GL_DEBUG_OUTPUT);
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-  glDebugMessageCallback(GlMessageCallback, 0);
+  glDebugMessageCallback(GlMessageCallback, nullptr);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_DEPTH_TEST);
 
-  int winWidth = 0;
-  int winHeight = 0;
-  // Not used size macro, because sometimes window manager
-  // cannot create the right size and used the default size
-  SDL_GetWindowSize(win, &winWidth, &winHeight);
-
   Ui::Context ctx;
-  if (CreateContextLayout(winWidth, winHeight, ctx)) {
+  if (CreateContextLayout(ctx)) {
     Shutdown(win, glCtx);
     return EXIT_FAILURE;
   }
