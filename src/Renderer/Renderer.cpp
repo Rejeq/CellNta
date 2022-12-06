@@ -206,10 +206,10 @@ void Renderer::ProjectBuffers() {
   m_cells.Restore();
 
   for (auto& camera : p_Ncameras) {
-    if (camera.NeedSkip())
+    if (camera.WantSkip())
       continue;
 
-    const Eigen::MatrixXf viewProj = camera.GetViewProj();
+    const Eigen::MatrixXf viewProj = camera.CalculateViewProj();
     const int dim = camera.GetDimensions();
     const bool usePerspective = camera.GetUsePerspective();
 
@@ -274,8 +274,8 @@ void Renderer::EndArrayBufferSource() {
 void Renderer::UpdateCameraUniform() {
   CELLNTA_PROFILE;
 
-  const Eigen::Matrix4f proj = p_camera.GetProjectionMatrixBase();
-  const Eigen::Matrix4f view = p_camera.GetViewMatrixBase();
+  const Eigen::Matrix4f& proj = p_camera.GetProjection();
+  const Eigen::Matrix4f& view = p_camera.GetView();
   const Eigen::Matrix4f projView = proj * view;
 
   m_cellShader.Use();

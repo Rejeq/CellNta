@@ -2,7 +2,7 @@
 
 #include <Eigen/Dense>
 
-#include "Cellnta/Renderer/CameraBase.h"
+#include "Cellnta/Renderer/CameraController.h"
 
 namespace Cellnta {
 
@@ -15,80 +15,36 @@ enum class MoveDirection {
   WORLD_DOWN,
 };
 
-class Camera3d : public CameraBase {
+class Camera3d : public CameraController {
  public:
-  Camera3d() : CameraBase(3) {}
+  Camera3d() = default;
 
   void Move(MoveDirection dir, float delta);
   void Rotate(float xoffset, float yoffset, float delta);
-  void Resize(Eigen::Vector2f size) {
-    m_size = size;
-    p_updateProj = true;
-  }
+  void Resize(Eigen::Vector2f size);
 
   void SetMoveSpeed(float speed) { m_moveSpeed = speed; }
   void SetMouseSpeed(float speed) { m_mouseSpeed = speed; }
+  float GetMoveSpeed() const { return m_moveSpeed; }
+  float GetMouseSpeed() const { return m_mouseSpeed; }
 
-  void SetYawBase(float yaw) {
-    m_yaw = yaw;
-    p_updateView = true;
-  }
-  void SetPitchBase(float pitch) {
-    m_pitch = pitch;
-    p_updateView = true;
-  }
+  const Eigen::Matrix4f& GetView() const { return m_view; }
+  const Eigen::Matrix4f& GetProjection() const { return m_proj; }
+  const Eigen::Vector3f& GetPosition() const { return m_pos; }
+  const Eigen::Vector3f& GetFront() const { return m_front; }
+  const Eigen::Vector2f& GetSize() const { return m_size; }
+  float GetFov() const { return m_fov; }
+  float GetYaw() const { return m_yaw; }
+  float GetPitch() const { return m_pitch; }
 
-  const float& GetMoveSpeed() const { return m_moveSpeed; }
-  const float& GetMouseSpeed() const { return m_mouseSpeed; }
-  float& GetMoveSpeed() { return m_moveSpeed; }
-  float& GetMouseSpeed() { return m_mouseSpeed; }
-
-  const Eigen::Matrix4f& GetViewMatrixBase() const { return m_view; }
-  const Eigen::Matrix4f& GetProjectionMatrixBase() const { return m_proj; }
-  const Eigen::Vector3f& GetPositionBase() const { return m_pos; }
-  const Eigen::Vector3f& GetFrontBase() const { return m_front; }
-  const Eigen::Vector2f& GetSizeBase() const { return m_size; }
-  float GetYawBase() const { return m_yaw; }
-  float GetPitchBase() const { return m_pitch; }
-
-  void SetUsePerspective(bool newState) override {
-    CameraBase::SetUsePerspective(newState);
-    p_updateProj = true;
-  }
-
-  void SetViewMatrix(const Eigen::MatrixXf& view) override {
-    m_view = view;
-    p_updateMatrix = true;
-  }
-  void SetProjectionMatrix(const Eigen::MatrixXf& proj) override {
-    m_proj = proj;
-    p_updateMatrix = true;
-  }
-  void SetPosition(const Eigen::VectorXf& pos) override {
-    m_pos = pos;
-    p_updateView = true;
-  }
-  void SetFront(const Eigen::VectorXf& front) override {
-    m_front = front;
-    p_updateView = true;
-  }
-  void SetWorldUp(const Eigen::MatrixXf& worldUp) override {
-    m_worldUp = worldUp;
-    p_updateView = true;
-  }
-  void SetFov(float fov) override {
-    m_fov = fov;
-    p_updateView = true;
-  }
-
-  Eigen::MatrixXf GetViewMatrix() const override { return m_view; }
-  Eigen::MatrixXf GetProjectionMatrix() const override { return m_proj; }
-  Eigen::MatrixXf GetUps() const override { return m_worldUp; }
-  Eigen::VectorXf GetPosition() const override { return m_pos; }
-  Eigen::VectorXf GetFront() const override { return m_front; }
-
-  // TODO:
-  void ForceUpdateProj() { p_updateProj = true; }
+  void SetView(const Eigen::Matrix4f& view);
+  void SetProjection(const Eigen::Matrix4f& proj);
+  void SetPosition(const Eigen::Vector3f& pos);
+  void SetFront(const Eigen::Vector3f& front);
+  void SetWorldUp(const Eigen::Vector3f& worldUp);
+  void SetFov(float fov);
+  void SetYaw(float yaw);
+  void SetPitch(float pitch);
 
  private:
   void UpdateViewMatrix() override;

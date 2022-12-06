@@ -2,72 +2,45 @@
 
 #include <Eigen/Dense>
 
-#include "Cellnta/Renderer/CameraBase.h"
-
+#include "Cellnta/Renderer/CameraController.h"
 // TODO: Delete this
 #include "Cellnta/Renderer/Transform.h"
 
 namespace Cellnta {
 
-class CameraNd : public CameraBase {
+class CameraNd : public CameraController {
  public:
-  void SetNeedSkip(bool skip) {
-    m_needSkip = skip;
-    p_updateProj = true;
-    p_updateView = true;
-  }
-  bool NeedSkip() const { return m_needSkip; }
+  CameraNd() = default;
 
-  void SetDimensions(int dim) override;
-  void SetUsePerspective(bool newState) override;
+  void NeedSkip(bool needSkip);
+  bool WantSkip() const { return m_wantSkip; }
 
-  void SetViewMatrix(const Eigen::MatrixXf& view) override {
-    m_view = view;
-    p_updateMatrix = true;
-  }
-  void SetProjectionMatrix(const Eigen::MatrixXf& proj) override {
-    m_proj = proj;
-    p_updateMatrix = true;
-  }
-  void SetPosition(const Eigen::VectorXf& pos) override {
-    m_pos = pos;
-    p_updateView = true;
-  }
-  void SetFront(const Eigen::VectorXf& front) override {
-    m_front = front;
-    p_updateView = true;
-  }
-  // TODO: Rename
-  void SetWorldUp(const Eigen::MatrixXf& Ups) override {
-    m_ups = Ups;
-    p_updateView = true;
-  }
-  void SetFov(float fov) override {
-    p_fov = fov;
-    p_updateView = true;
-  }
+  void SetDimensions(int dim);
+  int GetDimensions() const { return m_dim; }
 
-  Eigen::MatrixXf GetViewProj() const { return CalculateViewProj(); }
+  Eigen::MatrixXf CalculateViewProj() const;
 
-  Eigen::MatrixXf GetViewMatrix() const override { return m_view; }
-  Eigen::MatrixXf GetProjectionMatrix() const override { return m_proj; }
-  Eigen::MatrixXf GetUps() const override { return m_ups; }
-  Eigen::VectorXf GetPosition() const override { return m_pos; }
-  Eigen::VectorXf GetFront() const override { return m_front; }
+  void SetView(const Eigen::MatrixXf& view);
+  void SetProjection(const Eigen::MatrixXf& proj);
+  void SetPosition(const Eigen::VectorXf& pos);
+  void SetFront(const Eigen::VectorXf& front);
+  void SetUp(const Eigen::MatrixXf& Ups);
+  void SetFov(float fov);
 
-  void Rotate() {
-    m_view *= NRotate(GetDimensions(), GetDimensions() - 2, GetDimensions() - 1,
-                      radians(5.0f));
-    p_updateMatrix = true;
-  }
+  const Eigen::MatrixXf& GetView() const { return m_view; }
+  const Eigen::MatrixXf& GetProjection() const { return m_proj; }
+  const Eigen::MatrixXf& GetUp() const { return m_ups; }
+  const Eigen::VectorXf& GetPosition() const { return m_pos; }
+  const Eigen::VectorXf& GetFront() const { return m_front; }
+
+  // TODO: make usable
+  void Rotate();
 
  private:
   void UpdateViewMatrix() override;
   void UpdateProjMatrix() override;
 
-  Eigen::MatrixXf CalculateViewProj() const;
-
-  bool m_needSkip = false;
+  int GetVecSize() const { return m_dim + 1; }
 
   Eigen::VectorXf m_pos;
   Eigen::VectorXf m_front;
@@ -75,6 +48,10 @@ class CameraNd : public CameraBase {
 
   Eigen::MatrixXf m_view;
   Eigen::MatrixXf m_proj;
+
+  bool m_wantSkip = false;
+  float m_fov = 45.0f;  // radians(45.0f);
+  int m_dim = 0;
 };
 
 }  // namespace Cellnta

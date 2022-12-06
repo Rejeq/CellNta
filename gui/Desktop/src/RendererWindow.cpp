@@ -190,7 +190,7 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
 }
 
 void RendererWindow::PrintCamera3d(Cellnta::Camera3d& camera) {
-  ImGui::PushID(camera.GetDimensions());
+  ImGui::PushID(3); // 3 is dimension
 
   Eigen::VectorXf pos = camera.GetPosition();
   Eigen::VectorXf front = camera.GetFront();
@@ -200,34 +200,33 @@ void RendererWindow::PrintCamera3d(Cellnta::Camera3d& camera) {
   constexpr float ItemWidth = 75.0f;
   constexpr float DragRotateSpeed = 0.002f;
 
-  float yaw = camera.GetYawBase();
+  float yaw = camera.GetYaw();
   ImGui::SetNextItemWidth(ItemWidth);
   if (ImGui::DragFloat("Yaw##Camera", &yaw, DragRotateSpeed))
-    camera.SetYawBase(yaw);
+    camera.SetYaw(yaw);
 
   ImGui::SameLine();
 
-  float pitch = camera.GetPitchBase();
+  float pitch = camera.GetPitch();
   ImGui::SetNextItemWidth(ItemWidth);
   if (ImGui::DragFloat("Pitch##Camera", &pitch, DragRotateSpeed))
-    camera.SetPitchBase(pitch);
+    camera.SetPitch(pitch);
 
   ImGui::Spacing();
 
   bool perspectiveState = camera.GetUsePerspective();
-  // TODO: Dont't forget use reference
-  auto viewMat = camera.GetViewMatrix();
-  auto projMat = camera.GetProjectionMatrix();
+  auto& viewMat = camera.GetView();
+  auto& projMat = camera.GetProjection();
 
-  int updated =
-      PrintCameraMatrices(&perspectiveState, nullptr, &viewMat, &projMat);
+  int updated = 0;
+      //PrintCameraMatrices(&perspectiveState, (Eigen::Matrix4f*) nullptr, &viewMat, &projMat);
   if (updated | CameraUpdated_Projection)
     camera.SetUsePerspective(perspectiveState);
   // TODO: if used reference, just call ForceUpdateMatrix()
   if (updated | CameraUpdated_ViewMat)
-    camera.SetViewMatrix(viewMat);
+    camera.SetView(viewMat);
   if (updated | CameraUpdated_ProjMat)
-    camera.SetProjectionMatrix(projMat);
+    camera.SetProjection(projMat);
 
   ImGui::PopID();
 }
@@ -235,11 +234,11 @@ void RendererWindow::PrintCamera3d(Cellnta::Camera3d& camera) {
 void RendererWindow::PrintCameraNd(Cellnta::CameraNd& camera) {
   ImGui::PushID(camera.GetDimensions());
 
-  bool needSkip = camera.NeedSkip();
-  if (ImGui::Checkbox("Skip", &needSkip))
-    camera.SetNeedSkip(needSkip);
+  bool skip = camera.WantSkip();
+  if (ImGui::Checkbox("Skip", &skip))
+    camera.NeedSkip(skip);
 
-  if (needSkip)
+  if (skip)
     ImGui::BeginDisabled();
 
   constexpr float DragSpeed = 0.01f;
@@ -256,33 +255,31 @@ void RendererWindow::PrintCameraNd(Cellnta::CameraNd& camera) {
   ImGui::Spacing();
 
   bool perspectiveState = camera.GetUsePerspective();
-  // TODO: Dont't forget use reference
-  auto upMat = camera.GetUps();
-  auto viewMat = camera.GetViewMatrix();
-  auto projMat = camera.GetProjectionMatrix();
+  auto& upMat = camera.GetUp();
+  auto& viewMat = camera.GetView();
+  auto& projMat = camera.GetProjection();
 
-  int updated =
-      PrintCameraMatrices(&perspectiveState, &upMat, &viewMat, &projMat);
+  int updated = 0;
+      //PrintCameraMatrices(&perspectiveState, &upMat, &viewMat, &projMat);
   if (updated | CameraUpdated_Projection)
     camera.SetUsePerspective(perspectiveState);
-  // TODO: if used reference, just call ForceUpdateMatrix()
-  if (updated | CameraUpdated_UpMat)
-    camera.SetWorldUp(upMat);
-  if (updated | CameraUpdated_ViewMat)
-    camera.SetViewMatrix(viewMat);
-  if (updated | CameraUpdated_ProjMat)
-    camera.SetProjectionMatrix(projMat);
 
-  if (needSkip)
+  if (updated | CameraUpdated_UpMat)
+    camera.SetUp(upMat);
+  if (updated | CameraUpdated_ViewMat)
+    camera.SetView(viewMat);
+  if (updated | CameraUpdated_ProjMat)
+    camera.SetProjection(projMat);
+
+  if (skip)
     ImGui::EndDisabled();
 
   ImGui::PopID();
 }
 
-int RendererWindow::PrintCameraMatrices(bool* perspectiveState,
-                                            Eigen::MatrixXf* upMat,
-                                            Eigen::MatrixXf* viewMat,
-                                            Eigen::MatrixXf* projMat) {
+template<typename UpMatType, typename ViewMatType, typename ProjMatType>
+int RendererWindow::PrintCameraMatrices(bool* perspectiveState, UpMatType* upMat,
+                        ViewMatType* viewMat, ProjMatType* projMat) {
   constexpr const char* UpMatStr = "Up matrix";
   constexpr const char* ViewMatStr = "View matrix";
   constexpr const char* ProjMatStr = "Projection matrix";

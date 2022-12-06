@@ -35,8 +35,10 @@ class RendererWindow : public Window {
 
   void PrintCamera3d(Cellnta::Camera3d& camera);
   void PrintCameraNd(Cellnta::CameraNd& camera);
-  int PrintCameraMatrices(bool* perspectiveState, Eigen::MatrixXf* upMat,
-                          Eigen::MatrixXf* viewMat, Eigen::MatrixXf* projMat);
+
+  template<typename UpMatType, typename ViewMatType, typename ProjMatType>
+  int PrintCameraMatrices(bool* perspectiveState, UpMatType* upMat,
+                          ViewMatType* viewMat, ProjMatType* projMat);
 
   bool m_showCellsTab = false;
 };

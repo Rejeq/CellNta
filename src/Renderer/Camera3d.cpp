@@ -108,3 +108,48 @@ void Camera3d::UpdateProjMatrix() {
     m_proj(2, 3) = -(zFar + zNear) / (zFar - zNear);
   }
 }
+
+void Camera3d::Resize(Eigen::Vector2f size) {
+    m_size = size;
+    p_updateProj = true;
+  }
+
+void Camera3d::SetView(const Eigen::Matrix4f& view) {
+  m_view = view;
+  p_updateView = true;
+}
+
+void Camera3d::SetProjection(const Eigen::Matrix4f& proj) {
+  m_proj = proj;
+  p_updateProj = true;
+}
+
+void Camera3d::SetPosition(const Eigen::Vector3f& pos) {
+  m_pos = pos;
+  p_updateView = true;
+}
+
+void Camera3d::SetFront(const Eigen::Vector3f& front) {
+  m_front = front;
+  p_updateView = true;
+}
+
+void Camera3d::SetWorldUp(const Eigen::Vector3f& worldUp) {
+  m_worldUp = worldUp;
+  p_updateView = true;
+}
+
+void Camera3d::SetFov(float fov) {
+  m_fov = fov;
+  p_updateView = true;
+}
+
+void Camera3d::SetYaw(float yaw) {
+  m_yaw = yaw;
+  p_updateView = true;
+}
+
+void Camera3d::SetPitch(float pitch) {
+  m_pitch = pitch;
+  p_updateView = true;
+}
