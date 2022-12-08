@@ -28,9 +28,6 @@ target_include_directories(GUI PUBLIC
 target_link_libraries(GUI PUBLIC
   CellNta
   ImGui::ImGui
-  ImGui::ImplOpenGL3
-  ImGui::ImplSDL2
-  ImGui::MiscCpp
   ${SDL2_LIBRARIES}
   ${CMAKE_DL_LIBS}
 )
