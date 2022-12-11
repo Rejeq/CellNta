@@ -1,6 +1,11 @@
 #include "RendererWindow.h"
 
 #include <array>
+//TODO: Need use external fmt
+#include <spdlog/fmt/fmt.h>
+
+#include <Cellnta/Renderer/Camera3d.h>
+#include <Cellnta/Renderer/CameraNd.h>
 
 #include "Context.h"
 #include "Widgets.h"
@@ -94,37 +99,6 @@ void RendererWindow::ShowCollatingInfo() {
     ren.SetCollatingZ(z);
 }
 
-void RendererWindow::DrawCameras() {
-  CELLNTA_PROFILE;
-
-  Cellnta::Renderer& ren = GetContext()->GetRenderer();
-  Cellnta::Camera3d& camera3d = ren.GetCamera3d();
-
-  float mouseSpeed = camera3d.GetMouseSpeed();
-  if (ImGui::DragFloat("Mouse sensitivity", &mouseSpeed, 0.001f, 0.0f, 100.0f))
-    camera3d.SetMouseSpeed(mouseSpeed);
-
-  float moveSpeed = camera3d.GetMoveSpeed();
-  if (ImGui::DragFloat("Move speed", &moveSpeed, 0.001f, 0.0f, 100.0f))
-    camera3d.SetMoveSpeed(moveSpeed);
-
-  for (Cellnta::CameraNd& cam : ren.GetNdCameras()) {
-    size_t size = 8 + 3;
-    char* fmt = GetContext()->GetTmpBuffer(size);
-    snprintf(fmt, size, "%dd Camera", cam.GetDimensions());
-
-    if (ImGui::TreeNodeEx(fmt, ImGuiTreeNodeFlags_DefaultOpen)) {
-      PrintCameraNd(cam);
-      ImGui::TreePop();
-    }
-  }
-
-  if (ImGui::TreeNodeEx("3d camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-    PrintCamera3d(camera3d);
-    ImGui::TreePop();
-  }
-}
-
 void RendererWindow::DrawLoadedCells() {
   CELLNTA_PROFILE;
 
@@ -189,87 +163,112 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
   }
 }
 
-void RendererWindow::PrintCamera3d(Cellnta::Camera3d& camera) {
+void RendererWindow::DrawCameras() {
+  CELLNTA_PROFILE;
+
+  Cellnta::Renderer& ren = GetContext()->GetRenderer();
+  Cellnta::Camera3d* camera3d = ren.GetCamera3d();
+  Cellnta::CameraNdList* cameraNd = ren.GetCameraNd();
+
+  if (camera3d != nullptr)
+    DrawCameraSensitivity(*camera3d);
+
+  if(cameraNd != nullptr)
+    DrawCameraNdList(*cameraNd);
+
+  if (camera3d != nullptr) {
+    if (ImGui::TreeNodeEx("3d camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+      DrawCamera3d(*camera3d);
+      ImGui::TreePop();
+    }
+  }
+}
+
+
+void RendererWindow::DrawCameraSensitivity(Cellnta::Camera3d& camera) {
+  CELLNTA_PROFILE;
+
+  float mouseSpeed = camera.GetMouseSpeed();
+  if (ImGui::DragFloat("Mouse sensitivity", &mouseSpeed, 0.001f, 0.0f, 100.0f))
+    camera.SetMouseSpeed(mouseSpeed);
+
+  float moveSpeed = camera.GetMoveSpeed();
+  if (ImGui::DragFloat("Move speed", &moveSpeed, 0.001f, 0.0f, 100.0f))
+    camera.SetMoveSpeed(moveSpeed);
+
+}
+
+void RendererWindow::DrawCamera3d(Cellnta::Camera3d& cam3d) {
+  CELLNTA_PROFILE;
+
   ImGui::PushID(3); // 3 is dimension
 
-  Eigen::VectorXf pos = camera.GetPosition();
-  Eigen::VectorXf front = camera.GetFront();
+  Eigen::VectorXf pos = cam3d.GetPosition();
+  Eigen::VectorXf front = cam3d.GetFront();
   if (ImGui::DragFloat3("Position##CameraPos", pos.data(), 0.01f))
-    camera.SetPosition(pos);
+    cam3d.SetPosition(pos);
 
   constexpr float ItemWidth = 75.0f;
   constexpr float DragRotateSpeed = 0.002f;
 
-  float yaw = camera.GetYaw();
+  float yaw = cam3d.GetYaw();
   ImGui::SetNextItemWidth(ItemWidth);
   if (ImGui::DragFloat("Yaw##Camera", &yaw, DragRotateSpeed))
-    camera.SetYaw(yaw);
+    cam3d.SetYaw(yaw);
 
   ImGui::SameLine();
 
-  float pitch = camera.GetPitch();
+  float pitch = cam3d.GetPitch();
   ImGui::SetNextItemWidth(ItemWidth);
   if (ImGui::DragFloat("Pitch##Camera", &pitch, DragRotateSpeed))
-    camera.SetPitch(pitch);
+    cam3d.SetPitch(pitch);
 
   ImGui::Spacing();
 
-  bool perspectiveState = camera.GetUsePerspective();
-  auto& viewMat = camera.GetView();
-  auto& projMat = camera.GetProjection();
-
-  int updated = 0;
-      //PrintCameraMatrices(&perspectiveState, (Eigen::Matrix4f*) nullptr, &viewMat, &projMat);
-  if (updated | CameraUpdated_Projection)
-    camera.SetUsePerspective(perspectiveState);
-  // TODO: if used reference, just call ForceUpdateMatrix()
-  if (updated | CameraUpdated_ViewMat)
-    camera.SetView(viewMat);
-  if (updated | CameraUpdated_ProjMat)
-    camera.SetProjection(projMat);
+  DrawCameraController(cam3d);
 
   ImGui::PopID();
 }
 
-void RendererWindow::PrintCameraNd(Cellnta::CameraNd& camera) {
-  ImGui::PushID(camera.GetDimensions());
+void RendererWindow::DrawCameraNdList(Cellnta::CameraNdList& list) {
+  CELLNTA_PROFILE;
 
-  bool skip = camera.WantSkip();
+  for (Cellnta::CameraNd& cam : list) {
+    std::string camName = fmt::format("{} Camera", cam.GetDimensions());
+
+    if (ImGui::TreeNodeEx(camName.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
+      DrawCameraNd(cam);
+      ImGui::TreePop();
+    }
+  }
+}
+
+void RendererWindow::DrawCameraNd(Cellnta::CameraNd& camNd) {
+  CELLNTA_PROFILE;
+
+  ImGui::PushID(camNd.GetDimensions());
+
+  bool skip = camNd.WantSkip();
   if (ImGui::Checkbox("Skip", &skip))
-    camera.NeedSkip(skip);
+    camNd.NeedSkip(skip);
 
   if (skip)
     ImGui::BeginDisabled();
 
   constexpr float DragSpeed = 0.01f;
 
-  Eigen::VectorXf pos = camera.GetPosition();
-  Eigen::VectorXf front = camera.GetFront();
+  Eigen::VectorXf pos = camNd.GetPosition();
+  Eigen::VectorXf front = camNd.GetFront();
 
   if (Widget::DragN("Position##CameraPos", pos.data(), pos.size(), DragSpeed))
-    camera.SetPosition(pos);
+    camNd.SetPosition(pos);
 
   if (Widget::DragN("Target##CameraPos", front.data(), front.size(), DragSpeed))
-    camera.SetFront(front);
+    camNd.SetFront(front);
 
   ImGui::Spacing();
 
-  bool perspectiveState = camera.GetUsePerspective();
-  auto& upMat = camera.GetUp();
-  auto& viewMat = camera.GetView();
-  auto& projMat = camera.GetProjection();
-
-  int updated = 0;
-      //PrintCameraMatrices(&perspectiveState, &upMat, &viewMat, &projMat);
-  if (updated | CameraUpdated_Projection)
-    camera.SetUsePerspective(perspectiveState);
-
-  if (updated | CameraUpdated_UpMat)
-    camera.SetUp(upMat);
-  if (updated | CameraUpdated_ViewMat)
-    camera.SetView(viewMat);
-  if (updated | CameraUpdated_ProjMat)
-    camera.SetProjection(projMat);
+  DrawCameraController(camNd);
 
   if (skip)
     ImGui::EndDisabled();
@@ -277,47 +276,13 @@ void RendererWindow::PrintCameraNd(Cellnta::CameraNd& camera) {
   ImGui::PopID();
 }
 
-template<typename UpMatType, typename ViewMatType, typename ProjMatType>
-int RendererWindow::PrintCameraMatrices(bool* perspectiveState, UpMatType* upMat,
-                        ViewMatType* viewMat, ProjMatType* projMat) {
-  constexpr const char* UpMatStr = "Up matrix";
-  constexpr const char* ViewMatStr = "View matrix";
-  constexpr const char* ProjMatStr = "Projection matrix";
+void RendererWindow::DrawCameraController(Cellnta::CameraController& controller) {
   constexpr const char* PerspectiveStr = "Current perspective";
   constexpr const char* OrthoStr = "Current orthographic";
 
-  int updated = CameraUpdated_None;
+  bool perspective = controller.GetUsePerspective();
+  const char* perspectiveName = (perspective) ? PerspectiveStr : OrthoStr;
 
-  if (perspectiveState != nullptr) {
-    const char* CheckboxId = (*perspectiveState) ? PerspectiveStr : OrthoStr;
-
-    if (ImGui::Checkbox(CheckboxId, perspectiveState))
-      updated |= CameraUpdated_Projection;
-  }
-
-  if (upMat != nullptr) {
-    if (ImGui::TreeNode(UpMatStr)) {
-      if (Widget::DragMatrix(UpMatStr, *upMat))
-        updated |= CameraUpdated_UpMat;
-      ImGui::TreePop();
-    }
-  }
-
-  if (viewMat != nullptr) {
-    if (ImGui::TreeNode(ViewMatStr)) {
-      if (Widget::DragMatrix(ViewMatStr, *viewMat))
-        updated |= CameraUpdated_ViewMat;
-      ImGui::TreePop();
-    }
-  }
-
-  if (projMat != nullptr) {
-    if (ImGui::TreeNode(ProjMatStr)) {
-      if (Widget::DragMatrix(ProjMatStr, *projMat))
-        updated |= CameraUpdated_ProjMat;
-      ImGui::TreePop();
-    }
-  }
-
-  return updated;
+  if (ImGui::Checkbox(perspectiveName, &perspective))
+    controller.SetUsePerspective(perspective);
 }

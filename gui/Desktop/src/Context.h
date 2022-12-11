@@ -65,8 +65,10 @@ class Context {
                                         const char* name);
 
   WindowsDataType m_windowsData;
-  std::unique_ptr<Cellnta::AlgoBase> m_algo;
   Cellnta::Renderer m_renderer;
+  std::unique_ptr<Cellnta::AlgoBase> m_algo;
+  std::shared_ptr<Cellnta::Camera3d> m_camera3d;
+  std::shared_ptr<Cellnta::CameraNdList> m_cameraNd;
 
   std::string m_currentWindow;
 

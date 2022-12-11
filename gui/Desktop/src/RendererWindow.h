@@ -19,26 +19,17 @@ class RendererWindow : public Window {
   void Draw() override;
 
  private:
-  enum CameraMatUpdated {
-    CameraUpdated_None,
-    CameraUpdated_Projection,
-    CameraUpdated_UpMat,
-    CameraUpdated_ViewMat,
-    CameraUpdated_ProjMat,
-  };
-
   void ShowCollatingInfo();
-  void DrawCameras();
   void DrawLoadedCells();
 
   void DrawCells(const Cellnta::NCellStorage& cells);
 
-  void PrintCamera3d(Cellnta::Camera3d& camera);
-  void PrintCameraNd(Cellnta::CameraNd& camera);
-
-  template<typename UpMatType, typename ViewMatType, typename ProjMatType>
-  int PrintCameraMatrices(bool* perspectiveState, UpMatType* upMat,
-                          ViewMatType* viewMat, ProjMatType* projMat);
+  void DrawCameras();
+  void DrawCameraSensitivity(Cellnta::Camera3d& camera);
+  void DrawCamera3d(Cellnta::Camera3d& cam3d);
+  void DrawCameraNdList(Cellnta::CameraNdList& list);
+  void DrawCameraNd(Cellnta::CameraNd& camNd);
+  void DrawCameraController(Cellnta::CameraController& controller);
 
   bool m_showCellsTab = false;
 };

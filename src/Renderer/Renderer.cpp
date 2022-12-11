@@ -5,6 +5,8 @@
 #include "Cellnta/Config.h"
 #include "Cellnta/Log.h"
 #include "Cellnta/Renderer/Transform.h"
+#include "Cellnta/Renderer/Camera3d.h"
+#include "Cellnta/Renderer/CameraNd.h"
 
 using namespace Cellnta;
 
@@ -149,13 +151,16 @@ void Renderer::GenrateHypercube(float a, CubeMode mode) {
   }
 }
 
-void Renderer::Rotate(int axis1, int axis2, float angle) {
-  p_Ncameras[p_Ncameras.size() - 1].Rotate();
+void Renderer::Rotate() {
+  if(m_cameraNd == nullptr)
+    return;
+
+  m_cameraNd->at(m_cameraNd->size() - 1).Rotate();
   // Eigen::MatrixXf mat;
   // Eigen::Rotation2D rot(angle);
 
-  // const int dim = p_Ncameras.end()->GetDimensions();
-  // NCamera& cam = *p_Ncameras.end();
+  // const int dim = m_cameraNd.end()->GetDimensions();
+  // NCamera& cam = *m_cameraNd.end();
   // cam. = NRotate(dim, 0, dim - 1, radians(5.0f));
 }
 
@@ -168,19 +173,23 @@ void Renderer::SetDimension(uint32_t dim) {
   m_renderData.SetDimensions(dim);
 
   m_cells.SetDimensions(dim);
-  p_Ncameras.clear();
+  if (m_cameraNd == nullptr)
+    CELLNTA_LOG_TRACE("Unable to set dimension in Nd camera");
+  else {
+    m_cameraNd->clear();
 
-  for (uint32_t i = dim; i > 3; --i) {
-    Eigen::VectorXf pos = Eigen::VectorXf::Zero(i);
-    Eigen::VectorXf front = Eigen::VectorXf::Zero(i);
-    CameraNd cam;
+    for (uint32_t i = dim; i > 3; --i) {
+      Eigen::VectorXf pos = Eigen::VectorXf::Zero(i);
+      Eigen::VectorXf front = Eigen::VectorXf::Zero(i);
+      CameraNd cam;
 
-    pos(pos.rows() - 1) = 2.0f;
-    cam.SetDimensions(i);
-    cam.SetPosition(pos);
-    cam.SetFront(front);
+      pos(pos.rows() - 1) = 2.0f;
+      cam.SetDimensions(i);
+      cam.SetPosition(pos);
+      cam.SetFront(front);
 
-    p_Ncameras.push_back(cam);
+      m_cameraNd->push_back(cam);
+    }
   }
 }
 
@@ -202,10 +211,13 @@ void Renderer::SetRenderDistance(uint32_t distance) {
 void Renderer::ProjectBuffers() {
   CELLNTA_PROFILE;
 
+  if(m_cameraNd == nullptr)
+    return;
+
   m_cube.Restore();
   m_cells.Restore();
 
-  for (auto& camera : p_Ncameras) {
+  for (auto& camera : *m_cameraNd) {
     if (camera.WantSkip())
       continue;
 
@@ -274,8 +286,11 @@ void Renderer::EndArrayBufferSource() {
 void Renderer::UpdateCameraUniform() {
   CELLNTA_PROFILE;
 
-  const Eigen::Matrix4f& proj = p_camera.GetProjection();
-  const Eigen::Matrix4f& view = p_camera.GetView();
+  if(m_camera3d == nullptr)
+    return;
+
+  const Eigen::Matrix4f& proj = m_camera3d->GetProjection();
+  const Eigen::Matrix4f& view = m_camera3d->GetView();
   const Eigen::Matrix4f projView = proj * view;
 
   m_cellShader.Use();
@@ -300,14 +315,35 @@ void Renderer::UpdateRenderDistanceUniform() {
 void Renderer::UpdateCamera() {
   CELLNTA_PROFILE;
 
-  if (p_camera.Update()) {
+  UpdateCamera3d();
+  UpdateCameraNd();
+}
+
+void Renderer::UpdateCamera3d() {
+  CELLNTA_PROFILE;
+
+  if(m_camera3d == nullptr) {
+    CELLNTA_LOG_TRACE("Unable to update 3d camera");
+    return;
+  }
+
+  if (m_camera3d->Update()) {
     m_renderData.SetPosition(
-        Chunk::GetPosFromGlobalPos(p_camera.GetPosition()));
+        Chunk::GetPosFromGlobalPos(m_camera3d->GetPosition()));
     UpdateCameraUniform();
+  }
+}
+
+void Renderer::UpdateCameraNd() {
+  CELLNTA_PROFILE;
+
+  if(m_cameraNd == nullptr) {
+    CELLNTA_LOG_TRACE("Unable to update Nd camera");
+    return;
   }
 
   bool camUpdated = false;
-  for (auto& ncam : p_Ncameras)
+  for (auto& ncam : *m_cameraNd)
     if (ncam.Update())
       camUpdated = true;
   if (camUpdated)

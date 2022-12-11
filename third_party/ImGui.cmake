@@ -12,6 +12,7 @@ endfunction()
 
 add_library(ImGui OBJECT)
 add_library(ImGui::ImGui ALIAS ImGui)
+
 # Prevent clang-tidy checks if enabled
 set_target_properties(ImGui PROPERTIES CXX_CLANG_TIDY "")
 

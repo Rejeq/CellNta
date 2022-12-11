@@ -7,6 +7,7 @@
 #include <Cellnta/Config.h>
 #include <Cellnta/Log.h>
 #include <Cellnta/Renderer/GlBackend.h>
+#include <Cellnta/Renderer/Camera3d.h>
 
 #include "AlgoWindow.h"
 #include "Context.h"
@@ -195,6 +196,7 @@ void ResetContextLayout(const Ui::Context& ctx) {
 
 bool CreateContextLayout(Ui::Context& ctx) {
   Cellnta::Renderer& ren = ctx.GetRenderer();
+  Cellnta::Camera3d* cam3d = ren.GetCamera3d();
 
   ctx.SetAlgo(Cellnta::AlgoType::SIMPLE);
   ctx.SetDimension(2);
@@ -206,7 +208,10 @@ bool CreateContextLayout(Ui::Context& ctx) {
     return true;
   }
 
-  ren.GetCamera3d().SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
+  if (cam3d == nullptr)
+    CELLNTA_LOG_ERROR("Camera not initialized");
+  else cam3d->SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
+
   ren.SetRenderDistance(16);
   ren.GenrateHypercube(0.5f);
 

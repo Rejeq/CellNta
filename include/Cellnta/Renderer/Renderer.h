@@ -1,11 +1,8 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
-#include <Eigen/Dense>
-
-#include "Cellnta/Renderer/Camera3d.h"
-#include "Cellnta/Renderer/CameraNd.h"
 #include "Cellnta/Renderer/ColorStorage.h"
 #include "Cellnta/Renderer/GlBackend.h"
 #include "Cellnta/Renderer/HypercubeStorage.h"
@@ -14,6 +11,11 @@
 #include "Cellnta/Renderer/Shader.h"
 
 namespace Cellnta {
+
+class CameraController;
+class Camera3d;
+class CameraNd;
+using CameraNdList = std::vector<CameraNd>;
 
 class Renderer {
  public:
@@ -39,7 +41,7 @@ class Renderer {
   }
 
   void GenrateHypercube(float a = -1, CubeMode mode = CubeMode::NONE);
-  void Rotate(int axis1, int axis2, float angle);
+  void Rotate();
   void ProjectBuffers();
 
   int GetCollatingX() const { return m_renderData.GetCollatingX(); }
@@ -57,18 +59,21 @@ class Renderer {
   int GetDimensions() const { return m_d; }
   CubeMode GetCubeMode() const { return m_cube.GetMode(); }
 
-  const Camera3d& GetCamera3d() const { return p_camera; }
-  Camera3d& GetCamera3d() { return p_camera; }
-  const std::vector<CameraNd>& GetNdCameras() const { return p_Ncameras; }
-  std::vector<CameraNd>& GetNdCameras() { return p_Ncameras; }
+  void SetCamera3d(const std::shared_ptr<Camera3d>& camera) { m_camera3d = camera; }
+  const Camera3d* GetCamera3d() const { return m_camera3d.get(); }
+  Camera3d* GetCamera3d() { return m_camera3d.get(); }
+
+  void SetCameraNd(const std::shared_ptr<CameraNdList>& camera) {
+    m_cameraNd = camera;
+  }
+
+  const CameraNdList* GetCameraNd() const { return m_cameraNd.get(); }
+  CameraNdList* GetCameraNd() { return m_cameraNd.get(); }
+
   const NCellStorage& GetCells() const { return m_cells; }
 
   const RenderData& GetData() const { return m_renderData; }
   RenderData& GetData() { return m_renderData; }
-
- protected:
-  Camera3d p_camera;
-  std::vector<CameraNd> p_Ncameras;
 
  private:
   void InitBuffers();
@@ -77,6 +82,8 @@ class Renderer {
   void UpdateRenderDistanceUniform();
 
   void UpdateCamera();
+  void UpdateCamera3d();
+  void UpdateCameraNd();
 
   void UpdateCubeBuffer();
   void UpdateCellBuffer();
@@ -88,6 +95,10 @@ class Renderer {
   static void EndArrayBufferSource();
 
   RenderData m_renderData;
+
+  std::shared_ptr<Camera3d> m_camera3d;
+  std::shared_ptr<CameraNdList> m_cameraNd;
+
 
   HypercubeStorage m_cube;
   NCellStorage m_cells;

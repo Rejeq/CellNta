@@ -1,10 +1,8 @@
 #pragma once
 
-#include <Eigen/Dense>
+#include <Eigen/Core>
 
 #include "Cellnta/Renderer/CameraController.h"
-// TODO: Delete this
-#include "Cellnta/Renderer/Transform.h"
 
 namespace Cellnta {
 
@@ -53,5 +51,7 @@ class CameraNd : public CameraController {
   float m_fov = 45.0f;  // radians(45.0f);
   int m_dim = 0;
 };
+
+using CameraNdList = std::vector<CameraNd>;
 
 }  // namespace Cellnta

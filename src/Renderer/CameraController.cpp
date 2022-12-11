@@ -1,4 +1,5 @@
 #include "Cellnta/Renderer/CameraController.h"
+#include "Cellnta/Log.h"
 
 using namespace Cellnta;
 
@@ -22,5 +23,5 @@ bool CameraController::Update() {
 
 void CameraController::SetUsePerspective(bool newState) {
   p_usePerspective = newState;
-  p_updateMatrix = true;
+  p_updateProj = true;
 }

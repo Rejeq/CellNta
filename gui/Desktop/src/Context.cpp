@@ -3,7 +3,10 @@
 #include <memory>
 #include <vector>
 
+#include <Cellnta/Log.h>
 #include <Cellnta/Algorithms/AlgoList.h>
+#include <Cellnta/Renderer/Camera3d.h>
+#include <Cellnta/Renderer/CameraNd.h>
 
 #include "Widgets.h"
 
@@ -12,6 +15,16 @@ using namespace Ui;
 static std::unique_ptr<Context> s_ctx;
 
 Context::Context() {
+  m_camera3d = std::make_shared<Cellnta::Camera3d>();
+  if (m_camera3d == nullptr)
+    CELLNTA_LOG_ERROR("Unable to create 3d camera");
+  m_renderer.SetCamera3d(m_camera3d);
+
+  m_cameraNd = std::make_shared<Cellnta::CameraNdList>();
+  if (m_cameraNd == nullptr)
+    CELLNTA_LOG_ERROR("Unable to create Nd camera");
+  m_renderer.SetCameraNd(m_cameraNd);
+
   ImGuiContext* imguiCtx = ImGui::GetCurrentContext();
   ImGuiSettingsHandler contextHandler;
   contextHandler.TypeName = "CellNta";

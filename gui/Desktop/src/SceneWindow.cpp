@@ -4,6 +4,7 @@
 
 #include <Cellnta/Log.h>
 #include <Cellnta/Renderer/GlBackend.h>
+#include <Cellnta/Renderer/Camera3d.h>
 
 #include "Context.h"
 #include "Widgets.h"
@@ -105,16 +106,20 @@ void SceneWindow::HandleInput() {
   ImVec2 size = ImGui::GetContentRegionAvail();
 
   if (size.x != m_framebufferSize.x || size.y != m_framebufferSize.y) {
-    ren.GetCamera3d().Resize(Eigen::Vector2f(size.x, size.y));
+    Cellnta::Camera3d* cam = ren.GetCamera3d();
+    if (cam != nullptr)
+      cam->Resize(Eigen::Vector2f(size.x, size.y));
     ResizeFramebuffer(size.x, size.y);
   }
 
   if (ImGui::IsKeyPressed(ImGuiKey_Q, true))
-    ren.Rotate(0, 0, 0);
+    ren.Rotate();
 }
 
 void SceneWindow::HandleCameraInput() {
   CELLNTA_PROFILE;
+
+  using Direction = Cellnta::MoveDirection;
 
   auto IsPressed = []<typename... Args>(Args... keys) -> bool {
     for (auto key : {keys...})
@@ -123,28 +128,31 @@ void SceneWindow::HandleCameraInput() {
     return false;
   };
 
-  Cellnta::Camera3d& cam = GetContext()->GetRenderer().GetCamera3d();
+  Cellnta::Camera3d* cam = GetContext()->GetRenderer().GetCamera3d();
   ImGuiIO& io = ImGui::GetIO();
   float& delta = io.DeltaTime;
 
+  if (cam == nullptr)
+    return;
+
   if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
-    cam.Rotate(io.MouseDelta.x, io.MouseDelta.y, delta);
+    cam->Rotate(io.MouseDelta.x, io.MouseDelta.y, delta);
   if (io.MouseWheel != 0)
-    cam.Move(Cellnta::MoveDirection::FORWARD, io.MouseWheel / 4.0f);
+    cam->Move(Direction::FORWARD, io.MouseWheel / 4.0f);
 
   if (IsPressed(ImGuiKey_W, ImGuiKey_UpArrow))
-    cam.Move(Cellnta::MoveDirection::FORWARD, delta);
+    cam->Move(Direction::FORWARD, delta);
   if (IsPressed(ImGuiKey_A, ImGuiKey_LeftArrow))
-    cam.Move(Cellnta::MoveDirection::LEFT, delta);
+    cam->Move(Direction::LEFT, delta);
   if (IsPressed(ImGuiKey_S, ImGuiKey_DownArrow))
-    cam.Move(Cellnta::MoveDirection::BACKWARD, delta);
+    cam->Move(Direction::BACKWARD, delta);
   if (IsPressed(ImGuiKey_D, ImGuiKey_RightArrow))
-    cam.Move(Cellnta::MoveDirection::RIGHT, delta);
+    cam->Move(Direction::RIGHT, delta);
 
   if (IsPressed(ImGuiKey_Space))
-    cam.Move(Cellnta::MoveDirection::WORLD_UP, delta);
+    cam->Move(Direction::WORLD_UP, delta);
   if (IsPressed(ImGuiKey_LeftShift))
-    cam.Move(Cellnta::MoveDirection::WORLD_DOWN, delta);
+    cam->Move(Direction::WORLD_DOWN, delta);
 }
 
 void SceneWindow::ResizeFramebuffer(int width, int height) {
@@ -157,7 +165,7 @@ void SceneWindow::ResizeFramebuffer(int width, int height) {
   if (m_depthTexture == 0)
     glGenTextures(1, &m_depthTexture);
 
-  CELLNTA_LOG_INFO("Resizing framebuffer to: ({}; {})", width, height);
+  CELLNTA_LOG_TRACE("Resizing framebuffer to: ({}; {})", width, height);
 
   glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 
