@@ -10,8 +10,9 @@ namespace Cellnta {
 
 class NCellStorage {
  public:
-  using point_t = float;
-  using Vec = Eigen::Vector<point_t, Eigen::Dynamic>;
+  using Point = float;
+  using Vec = Eigen::Vector<Point, Eigen::Dynamic>;
+  using VecList = std::vector<Vec>;
 
   template <bool homogeneous, typename Derived>
   bool Add(const Derived& pos);

@@ -25,14 +25,14 @@
 
 using namespace Cellnta;
 
-uint32_t HypercubeStorage::GenerateCube(int dim, point_t a, CubeMode mode) {
+uint32_t HypercubeStorage::GenerateCube(int dim, Point a, CubeMode mode) {
   CELLNTA_PROFILE;
 
   CELLNTA_LOG_DEBUG("Trying to generate hypercube");
   uint32_t out = Updated::NONE;
 
   if (dim != m_d) {
-    if (a == (point_t)-1)
+    if (a == (Point)-1)
       a = GetScale();
     if (mode == CubeMode::NONE)
       mode = GetMode();
@@ -88,8 +88,8 @@ void HypercubeStorage::GenerateVertices() {
   m_pnt.resize(GetPointsSize());
 
   const uint32_t halfVert = GetVerticesCount() >> 1;
-  point_t* data = m_pnt.data();
-  point_t* sec_data = m_pnt.data() + halfVert * GetVertexSize();
+  Point* data = m_pnt.data();
+  Point* sec_data = m_pnt.data() + halfVert * GetVertexSize();
   // TODO: Better use dynamic bitset
   for (uint32_t bitset = 0; bitset < halfVert; ++bitset) {
     uint32_t j = 0;
@@ -131,7 +131,7 @@ void HypercubeStorage::GenerateIndicesPolygon() {
   std::unique_ptr<bool[]> usedTotal = std::make_unique<bool[]>(usedTotalSize);
   memset(usedTotal.get(), 0, usedTotalSize * sizeof(bool));
 
-  ind_t* data = m_ind.data();
+  Ind* data = m_ind.data();
 
   const int maxVert = GetVerticesCount();
 
@@ -209,15 +209,15 @@ void HypercubeStorage::GenerateIndicesWireframe() {
   m_ind.resize(GetVerticesCount() * m_d);
   // or m_ind.resize(GetFacesCount() * 4);
 
-  ind_t* data = m_ind.data();
+  Ind* data = m_ind.data();
 
   // https://stackoverflow.com/questions/51877294/connecting-points-in-n-dimensional-hyper-cube
   for (int currDim = 0; currDim < m_d; currDim++) {
     const int nVert = ((int)1) << currDim;
-    const ind_t* indicesEnd = data;
+    const Ind* indicesEnd = data;
 
     // copy + shift previous edges
-    ind_t* old_data = m_ind.data();
+    Ind* old_data = m_ind.data();
     while (old_data < indicesEnd) {
       assert(data < m_ind.data() + m_ind.size() && "Out of range");
       assert(old_data < m_ind.data() + m_ind.size() && "Out of range");

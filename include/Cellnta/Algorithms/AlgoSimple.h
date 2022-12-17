@@ -19,7 +19,7 @@ class AlgoSimple : public AlgoBase {
 
   void SetCell(const Cell& cell) override;
   void SetCell(const std::vector<Cell>& cells) override;
-  state_t GetCell(const Cell::Vec& pos) override;
+  Cell::State GetCell(const Cell::Pos& pos) override;
 
   void SetCellRandomly();
 
@@ -37,28 +37,28 @@ class AlgoSimple : public AlgoBase {
 
  private:
   void Step();
-  size_t FindNeighbors(const state_t*& world, const size_t& idx);
-  void GenerateNeigbors(const std::vector<cell_t>& oneDimNei);
+  size_t FindNeighbors(const Cell::State*& world, const size_t& idx);
+  void GenerateNeigbors(const std::vector<Cell::Point>& oneDimNei);
 
   inline size_t FindIdxInRangedWorld(const size_t& cellIdx,
                                      const size_t& neighborIdx);
 
-  void CalculatePositionFromIdx(size_t idx, Cell::Vec& out);
-  Cell::Vec CalculatePositionFromIdx(size_t idx);
-  size_t CalculateIdxFromPos(const Cell::Vec& pos);
+  void CalculatePositionFromIdx(size_t idx, Cell::Pos& out);
+  Cell::Pos CalculatePositionFromIdx(size_t idx);
+  size_t CalculateIdxFromPos(const Cell::Pos& pos);
 
   void CreateWorld();
   void DeleteWorld();
 
-  state_t* GetWorld() { return m_worlds[m_oddGen].get(); }
-  state_t* GetBufferWorld() { return m_worlds[!m_oddGen].get(); }
+  Cell::State* GetWorld() { return m_worlds[m_oddGen].get(); }
+  Cell::State* GetBufferWorld() { return m_worlds[!m_oddGen].get(); }
 
   inline size_t GetTotalArea() const { return m_totalArea; }
   inline size_t GetTotalAreaInBytes() const {
-    return GetTotalArea() * sizeof(state_t);
+    return GetTotalArea() * sizeof(Cell::State);
   }
 
-  std::array<std::unique_ptr<state_t[]>, 2> m_worlds;
+  std::array<std::unique_ptr<Cell::State[]>, 2> m_worlds;
   std::vector<size_t> m_size;
   size_t m_totalArea = 0;
 

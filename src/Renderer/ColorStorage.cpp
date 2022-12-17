@@ -13,7 +13,7 @@ void ColorStorage::Generate(int maxIter, int polygons) {
   CELLNTA_PROFILE;
 
   m_data.resize(polygons * maxIter * SIZE);
-  color_t* ptr = m_data.data();
+  Type* ptr = m_data.data();
 
   m_hue = m_seedHue;
 
@@ -23,17 +23,17 @@ void ColorStorage::Generate(int maxIter, int polygons) {
     GenerateRandomRGBAColor(ptr, /*1.0f*/ 0.9f);
     if (polygons > 1) {
       if (polygons == 1)
-        std::memcpy(ptr + SIZE, ptr, SIZE * sizeof(color_t));
+        std::memcpy(ptr + SIZE, ptr, SIZE * sizeof(Type));
       else {
         for (int j = 1; j < polygons; ++j)
-          std::memcpy(ptr + (SIZE * j), ptr, SIZE * sizeof(color_t));
+          std::memcpy(ptr + (SIZE * j), ptr, SIZE * sizeof(Type));
       }
     }
     ptr += polygons * SIZE;
   }
 }
 
-void ColorStorage::GenerateRandomRGBAColor(color_t* dst, color_t alpha) {
+void ColorStorage::GenerateRandomRGBAColor(Type* dst, Type alpha) {
   CELLNTA_PROFILE;
 
   // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/

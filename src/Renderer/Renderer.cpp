@@ -123,7 +123,7 @@ void Renderer::Draw() {
     default: assert(0 && "Unreachable"); break;
   }
 
-  static_assert(std::is_same<HypercubeStorage::ind_t, uint16_t>::value,
+  static_assert(std::is_same<HypercubeStorage::Ind, uint16_t>::value,
                 "Indices in glDrawElement has another type");
   glDrawElementsInstanced(renderMode, m_cube.GetIndicesSize(),
                           GL_UNSIGNED_SHORT, nullptr, m_cells.size());
@@ -245,25 +245,25 @@ void Renderer::InitBuffers() {
 
   glBindBuffer(GL_TEXTURE_BUFFER, m_colorBuffer);
   glBindTexture(GL_TEXTURE_BUFFER, m_colorTexture);
-  static_assert(std::is_same<ColorStorage::color_t, float>::value,
+  static_assert(std::is_same<ColorStorage::Type, float>::value,
                 "glTexBuffer has another type");
   static_assert(ColorStorage::SIZE == 4, "glTexBuffer has another size");
   glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, m_colorBuffer);
 
   glBindVertexArray(m_vao);
 
-  static_assert(std::is_same<HypercubeStorage::point_t, float>::value,
+  static_assert(std::is_same<HypercubeStorage::Point, float>::value,
                 "glVertexAttribute has another type");
   glBindBuffer(GL_ARRAY_BUFFER, m_cubeBuffer);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                        3 * sizeof(HypercubeStorage::point_t), nullptr);
+                        3 * sizeof(HypercubeStorage::Point), nullptr);
   glEnableVertexAttribArray(0);
 
-  static_assert(std::is_same<NCellStorage::point_t, float>::value,
+  static_assert(std::is_same<NCellStorage::Point, float>::value,
                 "glVertexAttribute has another type");
   glBindBuffer(GL_ARRAY_BUFFER, m_cellBuffer);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                        3 * sizeof(NCellStorage::point_t), nullptr);
+                        3 * sizeof(NCellStorage::Point), nullptr);
   glVertexAttribDivisor(1, 1);
   glEnableVertexAttribArray(1);
 }

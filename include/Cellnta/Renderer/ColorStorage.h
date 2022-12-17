@@ -7,7 +7,7 @@ namespace Cellnta {
 
 class ColorStorage {
  public:
-  using color_t = float;
+  using Type = float;
   constexpr static int SIZE = 4;
 
   void Generate(int maxIter, int polygons);
@@ -16,12 +16,12 @@ class ColorStorage {
   void Clear() { return m_data.clear(); }
 
   int GetSize() const { return m_data.size(); }
-  int GetSizeInBytes() const { return GetSize() * sizeof(color_t); }
+  int GetSizeInBytes() const { return GetSize() * sizeof(Type); }
 
   const float* GetData() const { return m_data.data(); }
 
  private:
-  void GenerateRandomRGBAColor(color_t* dst, color_t alpha);
+  void GenerateRandomRGBAColor(Type* dst, Type alpha);
 
   float m_seedHue = 0;
 
@@ -29,7 +29,7 @@ class ColorStorage {
   float m_saturation = 0.9f;  // 0.8f
   float m_brightness = 0.9f;  // 0.5f
 
-  std::vector<color_t> m_data;
+  std::vector<Type> m_data;
 };
 
 }  // namespace Cellnta

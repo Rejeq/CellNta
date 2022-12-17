@@ -78,10 +78,10 @@ void CellSelector(size_t d, Cellnta::Cell& cell) {
   const int vecSize = (homogeneous) ? d + 1 : d;
 
   if (cell.pos.size() != vecSize) {
-    Cellnta::Cell::Vec tmp = Cellnta::Cell::Vec::Zero(vecSize);
+    Cellnta::Cell::Pos tmp = Cellnta::Cell::Pos::Zero(vecSize);
     const int minSize = std::min(cell.pos.size(), tmp.size());
     memcpy(tmp.data(), cell.pos.data(),
-           minSize * sizeof(Cellnta::Cell::Vec::Scalar));
+           minSize * sizeof(Cellnta::Cell::Pos::Scalar));
 
     if constexpr (homogeneous) {
       if (cell.pos.size() < tmp.size())

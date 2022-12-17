@@ -25,8 +25,8 @@ void AlgoRandom::Update() {
     return;
 
   for (int i = 0; i < GetStep(); ++i) {
-    Eigen::VectorXi pos = Eigen::VectorXi::NullaryExpr(
-        p_dim, RandomRange<int>(m_rangeMin, m_rangeMax, m_gen));
+    Cell::Pos pos = Cell::Pos::NullaryExpr(
+        p_dim, RandomRange<Cell::Point>(m_rangeMin, m_rangeMax, m_gen));
     m_data.push_back(pos);
   }
   p_needLoadInRenderer = true;
@@ -39,17 +39,20 @@ void AlgoRandom::LoadWorld(RenderData* data) {
     return;
 
   if (p_needLoadInRenderer) {
-    for (auto& cell : m_data)
-      data->SetCell(cell, 1);
+    for (auto& pos : m_data)
+      data->SetCell(Cell(pos, 1));
     p_needLoadInRenderer = false;
     data->DesireAreaProcessed();
-  } else if (data->DesireArea()) {
+    return;
+  }
+
+  if (data->DesireArea()) {
     const std::vector<Area>& rects = data->GetDesireArea();
 
-    for (auto& cell : m_data) {
+    for (auto& pos : m_data) {
       for (const auto& rect : rects) {
-        if (rect.CellValid(cell)) {
-          data->SetCell(cell, 1);
+        if (rect.PosValid(pos)) {
+          data->SetCell(Cell(pos, 1));
           break;
         }
       }

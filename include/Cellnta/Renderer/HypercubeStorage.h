@@ -17,8 +17,8 @@ enum class CubeMode {
 
 class HypercubeStorage {
  public:
-  using point_t = float;
-  using ind_t = uint16_t;
+  using Point = float;
+  using Ind = uint16_t;
 
   enum Updated {
     NONE = 0,
@@ -26,7 +26,7 @@ class HypercubeStorage {
     INDICES = 1 << 1,
   };
 
-  uint32_t GenerateCube(int dim, point_t a, CubeMode mode);
+  uint32_t GenerateCube(int dim, Point a, CubeMode mode);
   void Restore();
 
   void SetMode(CubeMode mode);
@@ -41,17 +41,17 @@ class HypercubeStorage {
 
   int GetPointsSize() const { return GetVerticesCount() * GetVertexSize(); }
   int GetPointsSizeInBytes() const {
-    return GetPointsSize() * sizeof(point_t);
+    return GetPointsSize() * sizeof(Point);
   }
-  const point_t* GetPoints() const { return m_pnt.data(); }
-  point_t* GetPoints() { return m_pnt.data(); }
+  const Point* GetPoints() const { return m_pnt.data(); }
+  Point* GetPoints() { return m_pnt.data(); }
 
   int GetIndicesSize() const { return m_ind.size(); }
   int GetIndicesSizeInBytes() const {
-    return GetIndicesSize() * sizeof(ind_t);
+    return GetIndicesSize() * sizeof(Ind);
   }
-  const ind_t* GetIndices() const { return m_ind.data(); }
-  ind_t* GetIndices() { return m_ind.data(); }
+  const Ind* GetIndices() const { return m_ind.data(); }
+  Ind* GetIndices() { return m_ind.data(); }
 
  private:
   void GenerateVertices();
@@ -84,10 +84,10 @@ class HypercubeStorage {
 
   CubeMode m_mode = CubeMode::WIREFRAME;
 
-  std::vector<point_t> m_pnt;
-  std::vector<ind_t> m_ind;
+  std::vector<Point> m_pnt;
+  std::vector<Ind> m_ind;
 
-  std::vector<point_t> m_origPnt;
+  std::vector<Point> m_origPnt;
 
   int m_d = 0;
   float m_cubeSize = 0.5f;

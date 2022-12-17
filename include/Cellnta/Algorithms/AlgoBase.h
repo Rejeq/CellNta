@@ -22,9 +22,9 @@ class AlgoBase {
 
   virtual void SetCell(const Cell& cell) = 0;
   virtual void SetCell(const std::vector<Cell>& cells) = 0;
-  virtual state_t GetCell(const Cell::Vec& pos) = 0;
+  virtual Cell::State GetCell(const Cell::Pos& pos) = 0;
 
-  int GetDimensions() { return p_dim; }
+  int GetDimensions() const { return p_dim; }
 
   void SetStep(int step) { m_step = step; }
   int GetStep() const { return m_step; }

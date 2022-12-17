@@ -21,8 +21,8 @@ void AlgoSimple::Update() {
     return;
 
   for (int i = 0; i < GetStep(); ++i) {
-    const state_t* world = GetWorld();
-    state_t* buffWorld = GetBufferWorld();
+    const Cell::State* world = GetWorld();
+    Cell::State* buffWorld = GetBufferWorld();
 
     for (size_t cellPos = 0; cellPos < GetTotalArea(); ++cellPos) {
       const size_t neiBitmask = FindNeighbors(world, cellPos);
@@ -45,17 +45,17 @@ void AlgoSimple::LoadWorld(RenderData* data) {
   if (data == nullptr || GetWorld() == nullptr)
     return;
 
-  state_t* world = GetWorld();
-  Cell::Vec pos = Cell::Vec::Zero(GetDimensions());
+  Cell::State* world = GetWorld();
+  Cell::Pos pos = Cell::Pos::Zero(GetDimensions());
 
   data->Clear();
   for (size_t cellPos = 0; cellPos < GetTotalArea(); ++cellPos) {
     if (world[cellPos] != 0)
-      data->SetCell(pos, world[cellPos]);
+      data->SetCell(Cell(pos, world[cellPos]));
 
     for (int i = pos.size() - 1; i >= 0; --i) {
       pos[i] += 1;
-      if (pos[i] < (Cell::Vec::Scalar) m_size[i])
+      if (pos[i] < (Cell::Pos::Scalar) m_size[i])
         break;
       pos[i] = 0;
     }
@@ -127,7 +127,7 @@ void AlgoSimple::SetDimension(int dim) {
 void AlgoSimple::SetCell(const Cell& cell) {
   CELLNTA_PROFILE;
 
-  state_t* world = GetWorld();
+  Cell::State* world = GetWorld();
   if (world == nullptr)
     return;
 
@@ -141,7 +141,7 @@ void AlgoSimple::SetCell(const Cell& cell) {
 void AlgoSimple::SetCell(const std::vector<Cell>& cells) {
   CELLNTA_PROFILE;
 
-  state_t* world = GetWorld();
+  Cell::State* world = GetWorld();
   if (world == nullptr)
     return;
 
@@ -154,10 +154,10 @@ void AlgoSimple::SetCell(const std::vector<Cell>& cells) {
   p_needLoadInRenderer = true;
 }
 
-state_t AlgoSimple::GetCell(const Cell::Vec& pos) {
+Cell::State AlgoSimple::GetCell(const Cell::Pos& pos) {
   CELLNTA_PROFILE;
 
-  state_t* world = GetWorld();
+  Cell::State* world = GetWorld();
   if (world == nullptr)
     return 0;
   size_t idx = CalculateIdxFromPos(pos);
@@ -179,11 +179,11 @@ void AlgoSimple::Step() {
   CELLNTA_PROFILE;
 
   m_oddGen = !m_oddGen;
-  state_t* bufferWorld = GetBufferWorld();
+  Cell::State* bufferWorld = GetBufferWorld();
   memset(bufferWorld, 0, GetTotalAreaInBytes());
 }
 
-size_t AlgoSimple::FindNeighbors(const state_t*& world, const size_t& idx) {
+size_t AlgoSimple::FindNeighbors(const Cell::State*& world, const size_t& idx) {
   CELLNTA_PROFILE;
 
   size_t out = 0;
@@ -197,16 +197,16 @@ size_t AlgoSimple::FindNeighbors(const state_t*& world, const size_t& idx) {
   return out;
 }
 
-void AlgoSimple::GenerateNeigbors(const std::vector<cell_t>& oneDimNei) {
+void AlgoSimple::GenerateNeigbors(const std::vector<Cell::Point>& oneDimNei) {
   CELLNTA_PROFILE;
 
-  std::vector<std::vector<cell_t>> NDimNei(p_dim, oneDimNei);
+  std::vector<std::vector<Cell::Point>> NDimNei(p_dim, oneDimNei);
   m_neighbors.clear();
   m_neighbors.reserve(std::pow(oneDimNei.size(), p_dim));
 
   // Cartesian product
   // https://stackoverflow.com/a/5279601
-  using Vi = std::vector<cell_t>;
+  using Vi = std::vector<Cell::Point>;
   std::vector<Vi::const_iterator> vd;
   vd.reserve(NDimNei.size());
 
@@ -214,7 +214,7 @@ void AlgoSimple::GenerateNeigbors(const std::vector<cell_t>& oneDimNei) {
     vd.push_back(it.begin());
 
   while (true) {
-    Cell::Vec result = Cell::Vec::Zero(NDimNei.size());
+    Cell::Pos result = Cell::Pos::Zero(NDimNei.size());
     for (int i = vd.size() - 1; i >= 0; --i)
       result[result.size() - i - 1] = (*(vd[i]));
     m_neighbors.push_back(CalculateIdxFromPos(result));
@@ -246,7 +246,7 @@ size_t AlgoSimple::FindIdxInRangedWorld(const size_t& cellIdx,
   return cellIdx + neighborIdx;
 }
 
-void AlgoSimple::CalculatePositionFromIdx(size_t idx, Cell::Vec& out) {
+void AlgoSimple::CalculatePositionFromIdx(size_t idx, Cell::Pos& out) {
   CELLNTA_PROFILE;
 
   for (int i = GetDimensions() - 1; i >= 0; --i) {
@@ -257,15 +257,15 @@ void AlgoSimple::CalculatePositionFromIdx(size_t idx, Cell::Vec& out) {
   }
 }
 
-Cell::Vec AlgoSimple::CalculatePositionFromIdx(size_t idx) {
+Cell::Pos AlgoSimple::CalculatePositionFromIdx(size_t idx) {
   CELLNTA_PROFILE;
 
-  Cell::Vec out = Cell::Vec::Zero(GetDimensions());
+  Cell::Pos out = Cell::Pos::Zero(GetDimensions());
   CalculatePositionFromIdx(idx, out);
   return out;
 }
 
-size_t AlgoSimple::CalculateIdxFromPos(const Cell::Vec& pos) {
+size_t AlgoSimple::CalculateIdxFromPos(const Cell::Pos& pos) {
   CELLNTA_PROFILE;
 
   size_t idx = 0;
@@ -283,7 +283,7 @@ void AlgoSimple::CreateWorld() {
   CELLNTA_PROFILE;
 
   for (auto& world : m_worlds) {
-    world = std::make_unique<state_t[]>(GetTotalArea());
+    world = std::make_unique<Cell::State[]>(GetTotalArea());
     if (world == nullptr)
       throw "Unable to allocate memory";
     memset(world.get(), 0, GetTotalAreaInBytes());
