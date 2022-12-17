@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.16)
 project(CellNta)
 
 option(CELLNTA_PROFILING "Enable profiling" OFF)
-option(CELLNTA_TIDY "run clang-tidy" OFF)
+option(CELLNTA_TIDY "Enable clang-tidy checks" OFF)
+option(CELLNTA_TRACE_LOGGING "Enable detailed logging. Causes performance issues" OFF)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
@@ -76,6 +77,11 @@ if(CELLNTA_PROFILING_ENABLED)
   target_link_libraries(CellNta PUBLIC Tracy::Client)
   target_compile_definitions(CellNta PUBLIC CELLNTA_PROFILING_ENABLED)
   message(STATUS "Profiling enabled")
+endif()
+
+if(CELLNTA_TRACE_LOGGING)
+  target_compile_definitions(CellNta PUBLIC CELLNTA_TRACE_LOGGING_ENABLED)
+  message(STATUS "Detailed logging enabled")
 endif()
 
 add_subdirectory(gui)

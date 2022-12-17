@@ -91,7 +91,7 @@ bool InitLogging() {
   if (Cellnta::Log::InitDefault())
     return true;
 
-  Cellnta::Log::GetLogger()->set_level(spdlog::level::debug);
+  Cellnta::Log::GetLogger()->set_level(spdlog::level::trace);
   return false;
 }
 
