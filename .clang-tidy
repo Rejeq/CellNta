@@ -11,6 +11,7 @@ clang-analyzer-*,
 
 -modernize-use-trailing-return-type,
 -modernize-avoid-c-arrays,
+-modernize-use-nodiscard,
 -google-readability-todo,
 -google-build-using-namespace,
 -google-readability-braces-around-statements,
