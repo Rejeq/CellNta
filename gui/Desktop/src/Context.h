@@ -46,9 +46,6 @@ class Context {
     m_OnFirstStartup = onFirstStartup;
   }
 
-  char* GetTmpBuffer();
-  char* GetTmpBuffer(size_t& size);
-
  private:
   void ReadWindowProperties(ImGuiSettingsHandler* handler,
                             ImGuiTextBuffer* buf);

@@ -168,18 +168,3 @@ void Context::WriteWindowProperties(ImGuiSettingsHandler* /*unused*/,
     buf->appendf("\n");
   }
 }
-
-char* Context::GetTmpBuffer() {
-  ImGuiContext& g = *GImGui;
-  return g.TempBuffer.Data;
-}
-
-char* Context::GetTmpBuffer(size_t& size) {
-  ImGuiContext& g = *GImGui;
-  // Need return specified size
-  // if (size != 0)
-  //   if (size > g.TempBuffer.Capacity)
-  //     g.TempBuffer.resize(size);
-  size = g.TempBuffer.Size;
-  return g.TempBuffer.Data;
-}

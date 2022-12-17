@@ -1,7 +1,8 @@
 #include "RendererWindow.h"
 
 #include <array>
-//TODO: Need use external fmt
+// TODO: Need use external fmt
+// Not using std::format because clang still dosen't support it
 #include <spdlog/fmt/fmt.h>
 
 #include <Cellnta/Renderer/Camera3d.h>
@@ -64,13 +65,11 @@ void RendererWindow::Draw() {
         if (cellsSize != 0)
           m_showCellsTab = true;
 
-        size_t size = 28 + 9;
-        char* CellsTabStr = GetContext()->GetTmpBuffer(size);
-        snprintf(CellsTabStr, size, "Loaded Cells(%zu)###LoadedCells",
-                 cellsSize);
+        std::string cellsTabName =
+            fmt::format("Loaded Cells({})###LoadedCells", cellsSize);
 
         if (m_showCellsTab) {
-          if (ImGui::BeginTabItem(CellsTabStr)) {
+          if (ImGui::BeginTabItem(cellsTabName.c_str())) {
             ImGui::Spacing();
             DrawLoadedCells();
             ImGui::EndTabItem();
