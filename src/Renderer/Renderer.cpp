@@ -79,9 +79,10 @@ void Renderer::Update() {
 
   UpdateCamera();
 
-  if (m_renderData.NeedUpdate()) {
-    UpdateData();
-    m_renderData.Handled();
+  if (m_data.NeedUpdate()) {
+    m_updateVboCells = true;
+    ProjectBuffers();
+    m_data.Handled();
   }
 
   if (m_updateVboCells) {
@@ -100,10 +101,12 @@ void Renderer::DrawGrid() {
 void Renderer::Draw() {
   CELLNTA_PROFILE;
 
-  if (m_cells.size() == 0) {
-    m_wantDraw = false;
+  m_wantDraw = false;
+
+  NCellStorage& cells = m_data.GetCells();
+
+  if (cells.size() == 0)
     return;
-  }
 
   m_cellShader.Use();
   glActiveTexture(GL_TEXTURE0);
@@ -111,13 +114,7 @@ void Renderer::Draw() {
 
   GLenum renderMode = 0;
   switch (m_cube.GetMode()) {
-    case CubeMode::POINTS: renderMode = GL_POINTS;
-#if defined(CELLNTA_RENDERER_GL)
-      glPointSize(10.0f);
-#else
-#error "Add support for glPointSize"
-#endif
-      break;
+    case CubeMode::POINTS: renderMode = GL_POINTS; break;
     case CubeMode::WIREFRAME: renderMode = GL_LINES; break;
     case CubeMode::POLYGON: renderMode = GL_TRIANGLES; break;
     default: assert(0 && "Unreachable"); break;
@@ -126,9 +123,7 @@ void Renderer::Draw() {
   static_assert(std::is_same<HypercubeStorage::Ind, uint16_t>::value,
                 "Indices in glDrawElement has another type");
   glDrawElementsInstanced(renderMode, m_cube.GetIndicesSize(),
-                          GL_UNSIGNED_SHORT, nullptr, m_cells.size());
-
-  m_wantDraw = false;
+                          GL_UNSIGNED_SHORT, nullptr, cells.size());
 }
 
 void Renderer::GenrateHypercube(float a, CubeMode mode) {
@@ -152,7 +147,7 @@ void Renderer::GenrateHypercube(float a, CubeMode mode) {
 }
 
 void Renderer::Rotate() {
-  if(m_cameraNd == nullptr)
+  if (m_cameraNd == nullptr)
     return;
 
   m_cameraNd->at(m_cameraNd->size() - 1).Rotate();
@@ -170,52 +165,50 @@ void Renderer::SetDimension(uint32_t dim) {
   m_d = dim;
   GenrateHypercube(m_cube.GetScale());
 
-  m_renderData.SetDimensions(dim);
+  m_data.SetDimension(dim);
 
-  m_cells.SetDimensions(dim);
-  if (m_cameraNd == nullptr)
+  if (m_cameraNd == nullptr) {
     CELLNTA_LOG_TRACE("Unable to set dimension in Nd camera");
-  else {
-    m_cameraNd->clear();
+    return;
+  }
 
-    for (uint32_t i = dim; i > 3; --i) {
-      Eigen::VectorXf pos = Eigen::VectorXf::Zero(i);
-      Eigen::VectorXf front = Eigen::VectorXf::Zero(i);
-      CameraNd cam;
+  m_cameraNd->clear();
 
-      pos(pos.rows() - 1) = 2.0f;
-      cam.SetDimensions(i);
-      cam.SetPosition(pos);
-      cam.SetFront(front);
+  for (uint32_t i = dim; i > 3; --i) {
+    Eigen::VectorXf pos = Eigen::VectorXf::Zero(i);
+    Eigen::VectorXf front = Eigen::VectorXf::Zero(i);
+    CameraNd cam;
 
-      m_cameraNd->push_back(cam);
-    }
+    pos(pos.rows() - 1) = 2.0f;
+    cam.SetDimensions(i);
+    cam.SetPosition(pos);
+    cam.SetFront(front);
+
+    m_cameraNd->push_back(cam);
   }
 }
 
-void Renderer::SetCubeMode(CubeMode mode) { GenrateHypercube(-1, mode); }
-
-void Renderer::SetCollatingX(int x) { m_renderData.SetCollatingX(x); }
-
-void Renderer::SetCollatingY(int y) { m_renderData.SetCollatingY(y); }
-
-void Renderer::SetCollatingZ(int z) { m_renderData.SetCollatingZ(z); }
+void Renderer::SetCubeMode(CubeMode mode) {
+  GenrateHypercube(-1, mode);
+}
 
 void Renderer::SetRenderDistance(uint32_t distance) {
   CELLNTA_PROFILE;
 
-  m_renderData.SetDistance(distance);
+  m_data.SetDistance(distance);
   UpdateRenderDistanceUniform();
 }
 
 void Renderer::ProjectBuffers() {
   CELLNTA_PROFILE;
 
-  if(m_cameraNd == nullptr)
+  if (m_cameraNd == nullptr)
     return;
 
+  NCellStorage& cells = m_data.GetCells();
+
   m_cube.Restore();
-  m_cells.Restore();
+  cells.Restore();
 
   for (auto& camera : *m_cameraNd) {
     if (camera.WantSkip())
@@ -226,7 +219,7 @@ void Renderer::ProjectBuffers() {
     const bool usePerspective = camera.GetUsePerspective();
 
     NProject(m_cube, dim, viewProj, usePerspective);
-    NProject(m_cells, dim, viewProj, usePerspective);
+    NProject(cells, dim, viewProj, usePerspective);
   }
 
   UpdateCubeBuffer();
@@ -286,7 +279,7 @@ void Renderer::EndArrayBufferSource() {
 void Renderer::UpdateCameraUniform() {
   CELLNTA_PROFILE;
 
-  if(m_camera3d == nullptr)
+  if (m_camera3d == nullptr)
     return;
 
   const Eigen::Matrix4f& proj = m_camera3d->GetProjection();
@@ -305,11 +298,11 @@ void Renderer::UpdateCameraUniform() {
 void Renderer::UpdateRenderDistanceUniform() {
   CELLNTA_PROFILE;
 
-  constexpr float FarPlane = 6.25f * CHUNK_SIZE;
+  constexpr float FarPlane = 6.25f;
 
   m_gridShader.Use();
   m_gridShader.Set("u_near", 0.01f);
-  m_gridShader.Set("u_far", (float)m_renderData.GetDistance() * FarPlane);
+  m_gridShader.Set("u_far", (float)m_data.GetDistance() * FarPlane);
 }
 
 void Renderer::UpdateCamera() {
@@ -322,14 +315,13 @@ void Renderer::UpdateCamera() {
 void Renderer::UpdateCamera3d() {
   CELLNTA_PROFILE;
 
-  if(m_camera3d == nullptr) {
+  if (m_camera3d == nullptr) {
     CELLNTA_LOG_TRACE("Unable to update 3d camera");
     return;
   }
 
   if (m_camera3d->Update()) {
-    m_renderData.SetPosition(
-        Chunk::GetPosFromGlobalPos(m_camera3d->GetPosition()));
+    m_data.SetPosition(m_camera3d->GetPosition().cast<int>());
     UpdateCameraUniform();
   }
 }
@@ -337,7 +329,7 @@ void Renderer::UpdateCamera3d() {
 void Renderer::UpdateCameraNd() {
   CELLNTA_PROFILE;
 
-  if(m_cameraNd == nullptr) {
+  if (m_cameraNd == nullptr) {
     CELLNTA_LOG_TRACE("Unable to update Nd camera");
     return;
   }
@@ -362,9 +354,9 @@ void Renderer::UpdateCubeBuffer() {
   float* pnt = m_cube.GetPoints();
 
   while (dst < end) {
-    dst[0] = pnt[GetCollatingX()];  // x
-    dst[1] = pnt[GetCollatingY()];  // y
-    dst[2] = pnt[GetCollatingZ()];  // z
+    dst[0] = pnt[m_data.GetCollatingX()];
+    dst[1] = pnt[m_data.GetCollatingY()];
+    dst[2] = pnt[m_data.GetCollatingZ()];
 
     pnt += m_cube.GetVertexSize();
     dst += 3;
@@ -376,49 +368,44 @@ void Renderer::UpdateCubeBuffer() {
 void Renderer::UpdateCellBuffer() {
   CELLNTA_PROFILE;
 
-  if (m_cells.size() == 0)
+  NCellStorage::VecList& cells = m_data.GetCells().GetRaw();
+
+  CELLNTA_LOG_TRACE("Updating cell buffer");
+  if (cells.empty())
     return;
 
   float* dst = nullptr;
-  const int pointCount = m_cells.size();
+  int pointsCount = cells.size() * 3;
 
   glBindBuffer(GL_ARRAY_BUFFER, m_cellBuffer);
-  BeginArrayBufferSource(dst, 0,
-                         pointCount * 3 * sizeof(NCellStorage::point_t));
 
-  const float* end = dst + pointCount * 3;
-  Eigen::VectorXf* pnt = m_cells.data();
+  if (cells.capacity() != m_oldCellsCapacity) {
+    m_oldCellsCapacity = cells.capacity();
+    glBindBuffer(GL_ARRAY_BUFFER, m_cellBuffer);
+    glBufferData(GL_ARRAY_BUFFER, 3 * cells.capacity() * sizeof(NCellStorage::Point), nullptr,
+                 GL_DYNAMIC_DRAW);
+  }
+
+  BeginArrayBufferSource(dst, 0, pointsCount * sizeof(NCellStorage::Point));
+
+  const float* end = dst + pointsCount;
+  Eigen::VectorXf* pnt = cells.data();
+  if (pnt == nullptr) {
+    EndArrayBufferSource();
+    return;
+  }
 
   // memset(dst, 0, GetTotalAllocatedMemoryForPoints());
   while (dst < end) {
-    dst[0] = (*pnt)(GetCollatingX());
-    dst[1] = (*pnt)(GetCollatingY());
-    dst[2] = (*pnt)(GetCollatingZ());
+    dst[0] = (*pnt)(m_data.GetCollatingX());
+    dst[1] = (*pnt)(m_data.GetCollatingY());
+    dst[2] = (*pnt)(m_data.GetCollatingZ());
     ++pnt;
     dst += 3;
   }
 
   EndArrayBufferSource();
   m_wantDraw = true;
-}
-
-void Renderer::UpdateData() {
-  CELLNTA_LOG_DEBUG("Updating render data");
-  m_cells.clear();
-  for (const auto& data : m_renderData) {
-    const RenderData::ChunkPtr& chunk = data.second;
-
-    if (chunk == nullptr)
-      continue;
-
-    for (auto& pos : *chunk) {
-      if (pos.second != 0)
-        AddCell<false>(pos.first);
-    }
-  }
-
-  m_updateVboCells = true;
-  ProjectBuffers();
 }
 
 void Renderer::UpdateColorTexture() {

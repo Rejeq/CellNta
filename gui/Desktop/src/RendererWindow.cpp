@@ -7,6 +7,7 @@
 
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/CameraNd.h>
+#include <Cellnta/Renderer/RenderData.h>
 
 #include "Context.h"
 #include "Widgets.h"
@@ -17,7 +18,11 @@ void RendererWindow::Draw() {
   CELLNTA_PROFILE;
 
   constexpr ImGuiWindowFlags WinFlags = ImGuiWindowFlags_HorizontalScrollbar;
+
   Cellnta::Renderer& ren = GetContext()->GetRenderer();
+  Cellnta::RenderData* data = ren.GetData();
+  if (data == nullptr)
+    return;
 
   if (ImGui::Begin(p_prop.Name, &p_prop.Opened, WinFlags)) {
     uint32_t dimensions = ren.GetDimensions();
@@ -27,7 +32,7 @@ void RendererWindow::Draw() {
       ren.GenrateHypercube(0.5f);
     }
 
-    uint32_t renderDistance = ren.GetData().GetDistance();
+    uint32_t renderDistance = data->GetDistance();
     // TODO: from keyboard input negative number not clamped
     if (Widget::Input("Render distance", &renderDistance, 1,
                       ImGuiInputTextFlags_CharsDecimal))
@@ -47,7 +52,7 @@ void RendererWindow::Draw() {
     Widget::CellSelector<true>(ren.GetDimensions(), cell);
     ImGui::Spacing();
     if (ImGui::Button("Add cell (Only for renderer)"))
-      ren.AddCell(cell.pos);
+      data->SetCell(cell);
 
     ShowCollatingInfo();
 
@@ -61,7 +66,7 @@ void RendererWindow::Draw() {
       }
 
       {
-        const size_t cellsSize = ren.GetCells().size();
+        const size_t cellsSize = data->GetCells().size();
         if (cellsSize != 0)
           m_showCellsTab = true;
 
@@ -86,24 +91,31 @@ void RendererWindow::Draw() {
 
 void RendererWindow::ShowCollatingInfo() {
   Cellnta::Renderer& ren = GetContext()->GetRenderer();
+  Cellnta::RenderData* data = ren.GetData();
+  if (data == nullptr)
+    return;
 
-  int x = ren.GetCollatingX();
-  int y = ren.GetCollatingY();
-  int z = ren.GetCollatingZ();
+  int x = data->GetCollatingX();
+  int y = data->GetCollatingY();
+  int z = data->GetCollatingZ();
   if (ImGui::InputInt("X", &x))
-    ren.SetCollatingX(x);
+    data->SetCollatingX(x);
   if (ImGui::InputInt("Y", &y))
-    ren.SetCollatingY(y);
+    data->SetCollatingY(y);
   if (ImGui::InputInt("Z", &z))
-    ren.SetCollatingZ(z);
+    data->SetCollatingZ(z);
 }
 
 void RendererWindow::DrawLoadedCells() {
   CELLNTA_PROFILE;
 
   Cellnta::Renderer& ren = GetContext()->GetRenderer();
-  const Cellnta::NCellStorage& cells = ren.GetCells();
-  ImGui::Text("Loaded: %d", cells.size());
+  Cellnta::RenderData* data = ren.GetData();
+  if (data == nullptr)
+    return;
+
+  const Cellnta::NCellStorage& cells = data->GetCells();
+  ImGui::Text("Loaded: %zu", cells.size());
 
   DrawCells(cells);
 }
@@ -121,6 +133,8 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
     ImGui::TableSetupColumn("Shown", ImGuiTableColumnFlags_NoResize);
     ImGui::TableSetupScrollFreeze(1, 1);
 
+    const auto& rawOrigCells = cells.GetOrigRaw();
+    const auto& rawCells = cells.GetRaw();
     ImGuiTable* table = ImGui::GetCurrentTable();
     ImGui::TableHeadersRow();
 
@@ -135,8 +149,8 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
     clipper.Begin(cells.size());
     while (clipper.Step()) {
       for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
-        const Cellnta::NCellStorage::Vec& OrigCell = cells.OriginalAt(i);
-        const Cellnta::NCellStorage::Vec& cell = cells.at(i);
+        const auto& origCell = rawOrigCells.at(i);
+        const auto& cell = rawCells.at(i);
 
         ImGui::PushID(i);
 
@@ -148,7 +162,7 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
           ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cellBg);
         else
           ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cellBgAlt);
-        Widget::TextMatrix(OrigCell.transpose());
+        Widget::TextMatrix(origCell.transpose());
 
         ImGui::TableNextColumn();
         if (i % 2 == 0)
@@ -175,7 +189,7 @@ void RendererWindow::DrawCameras() {
   if (camera3d != nullptr)
     DrawCameraSensitivity(*camera3d);
 
-  if(cameraNd != nullptr)
+  if (cameraNd != nullptr)
     DrawCameraNdList(*cameraNd);
 
   if (camera3d != nullptr) {
@@ -185,7 +199,6 @@ void RendererWindow::DrawCameras() {
     }
   }
 }
-
 
 void RendererWindow::DrawCameraSensitivity(Cellnta::Camera3d& camera) {
   CELLNTA_PROFILE;
@@ -197,13 +210,12 @@ void RendererWindow::DrawCameraSensitivity(Cellnta::Camera3d& camera) {
   float moveSpeed = camera.GetMoveSpeed();
   if (ImGui::DragFloat("Move speed", &moveSpeed, 0.001f, 0.0f, 100.0f))
     camera.SetMoveSpeed(moveSpeed);
-
 }
 
 void RendererWindow::DrawCamera3d(Cellnta::Camera3d& cam3d) {
   CELLNTA_PROFILE;
 
-  ImGui::PushID(3); // 3 is dimension
+  ImGui::PushID(3);  // 3 is dimension
 
   Eigen::VectorXf pos = cam3d.GetPosition();
   Eigen::VectorXf front = cam3d.GetFront();
@@ -278,7 +290,8 @@ void RendererWindow::DrawCameraNd(Cellnta::CameraNd& camNd) {
   ImGui::PopID();
 }
 
-void RendererWindow::DrawCameraController(Cellnta::CameraController& controller) {
+void RendererWindow::DrawCameraController(
+    Cellnta::CameraController& controller) {
   constexpr const char* PerspectiveStr = "Current perspective";
   constexpr const char* OrthoStr = "Current orthographic";
 

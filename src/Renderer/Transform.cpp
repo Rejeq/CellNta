@@ -108,9 +108,10 @@ void Cellnta::NProject(NCellStorage& cells, const int cameraDim,
   CELLNTA_PROFILE;
 
   const int divPos = ((perspective) ? 2 : 1);
+  NCellStorage::VecList rawCells = cells.GetRaw();
 
-  for (int i = 0; i < cells.size(); ++i) {
-    Eigen::Map<Eigen::VectorXf> pos(cells.at(i).data(), cameraDim + 1);
+  for (size_t i = 0; i < rawCells.size(); ++i) {
+    Eigen::Map<Eigen::VectorXf> pos(rawCells.at(i).data(), cameraDim + 1);
 
     pos = viewProj * pos;
     const float& div = pos(pos.rows() - divPos);

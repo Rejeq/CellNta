@@ -52,8 +52,12 @@ void Context::SetDimension(int dim) {
 void Context::Update() {
   CELLNTA_PROFILE;
 
-  if (m_algo->NeedLoadWorld() || m_renderer.GetData().DesireArea())
-    m_algo->LoadWorld(&m_renderer.GetData());
+  Cellnta::RenderData* data = m_renderer.GetData();
+  if (data == nullptr)
+    return;
+
+  if (m_algo->NeedLoadWorld() || data->DesireArea())
+    m_algo->LoadWorld(data);
 
   m_renderer.Update();
 }

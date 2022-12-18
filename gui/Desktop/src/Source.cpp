@@ -212,7 +212,7 @@ bool CreateContextLayout(Ui::Context& ctx) {
     CELLNTA_LOG_ERROR("Camera not initialized");
   else cam3d->SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
 
-  ren.SetRenderDistance(16);
+  ren.SetRenderDistance(256);
   ren.GenrateHypercube(0.5f);
 
   ctx.SetOnFirstStartup(ResetContextLayout);
@@ -258,6 +258,12 @@ int main(int /*unused*/, char** /*unused*/) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_DEPTH_TEST);
+
+#if defined(CELLNTA_RENDERER_GL)
+  glPointSize(10.0f);
+#else
+#error "Add support for glPointSize"
+#endif
 
   Ui::Context ctx;
   if (CreateContextLayout(ctx)) {
