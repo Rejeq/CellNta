@@ -105,7 +105,7 @@ void SceneWindow::HandleInput() {
 
   ImVec2 size = ImGui::GetContentRegionAvail();
 
-  if (size.x != m_framebufferSize.x || size.y != m_framebufferSize.y) {
+  if (size != m_framebufferSize) {
     Cellnta::Camera3d* cam = ren.GetCamera3d();
     if (cam != nullptr)
       cam->Resize(Eigen::Vector2f(size.x, size.y));

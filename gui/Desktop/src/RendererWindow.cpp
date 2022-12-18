@@ -130,7 +130,9 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
         0x25000000  // Increases alpha channel
         + ImGui::GetColorU32(ImGui::GetStyle().Colors[ImGuiCol_TableRowBgAlt]);
 
-    ImGuiListClipper clipper(cells.size());
+    ImGuiListClipper clipper;
+
+    clipper.Begin(cells.size());
     while (clipper.Step()) {
       for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
         const Cellnta::NCellStorage::Vec& OrigCell = cells.OriginalAt(i);
@@ -158,6 +160,7 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
         ImGui::PopID();
       }
     }
+    clipper.End();
     ImGui::EndTable();
   }
 }
