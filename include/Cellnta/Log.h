@@ -18,7 +18,6 @@ spdlog::logger* GetLogger();
 
 }  // namespace Cellnta::Log
 
-
 #define CELLNTA_LOG_CRITICAL(...) \
   SPDLOG_LOGGER_CRITICAL(::Cellnta::Log::GetLogger(), __VA_ARGS__)
 #define CELLNTA_LOG_ERROR(...) \
