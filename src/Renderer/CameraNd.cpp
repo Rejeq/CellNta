@@ -1,5 +1,6 @@
 #include "Cellnta/Renderer/CameraNd.h"
 
+#include "Cellnta/Config.h"
 #include "Cellnta/Renderer/Transform.h"
 
 using namespace Cellnta;

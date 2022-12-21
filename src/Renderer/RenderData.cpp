@@ -27,7 +27,7 @@ void RenderData::SetCell(const Cell& cell) {
     return;
 
   if (GetVisibleArea().PosValid(cell.pos)) {
-    m_cells.Add<false>(cell.pos);
+    m_cells.Add(cell.pos.cast<NCellStorage::Point>());
     m_needUpdate = true;
     CELLNTA_LOG_TRACE("Added cell: ({}): {}", cell.pos.transpose(), cell.state);
   }
@@ -89,7 +89,7 @@ void RenderData::EraseUnvisibleArea(const Eigen::Vector3i& newPos) {
   const Area newArea = GetArea() + newPos;
   std::vector<Area> eraseList = Area::InverseClip(oldArea, newArea);
 
-  NCellStorage::VecList& rawCells = m_cells.GetOrigRaw();
+  NCellStorage::VecList& rawCells = m_cells.GetRaw();
   Eigen::Vector3i pos;
 
   auto PosValid = [&](auto& pos) -> bool {
@@ -102,7 +102,7 @@ void RenderData::EraseUnvisibleArea(const Eigen::Vector3i& newPos) {
   auto rem = std::remove_if(rawCells.begin(), rawCells.end(), PosValid);
   rawCells.erase(rem, rawCells.end());
 
-  for (size_t i = -1; i < eraseList.size(); ++i)
+  for (size_t i = 0; i < eraseList.size(); ++i)
     CELLNTA_LOG_TRACE("Erase list {} min: ({}) max: ({})", i,
                       eraseList[i].min.transpose(),
                       eraseList[i].max.transpose());

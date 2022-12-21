@@ -130,11 +130,11 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
     ImGui::TableSetupColumn(
         "#", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_NoHide);
     ImGui::TableSetupColumn("Original", ImGuiTableColumnFlags_NoResize);
-    ImGui::TableSetupColumn("Shown", ImGuiTableColumnFlags_NoResize);
+    ImGui::TableSetupColumn("Visible", ImGuiTableColumnFlags_NoResize);
     ImGui::TableSetupScrollFreeze(1, 1);
 
-    const auto& rawOrigCells = cells.GetOrigRaw();
     const auto& rawCells = cells.GetRaw();
+    const auto& rawVisibleCells = cells.GetVisibleRaw();
     ImGuiTable* table = ImGui::GetCurrentTable();
     ImGui::TableHeadersRow();
 
@@ -149,8 +149,6 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
     clipper.Begin(cells.size());
     while (clipper.Step()) {
       for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
-        const auto& origCell = rawOrigCells.at(i);
-        const auto& cell = rawCells.at(i);
 
         ImGui::PushID(i);
 
@@ -162,14 +160,18 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
           ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cellBg);
         else
           ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cellBgAlt);
-        Widget::TextMatrix(origCell.transpose());
+
+        const auto& cell = rawCells.at(i);
+        Widget::TextMatrix(cell.transpose());
 
         ImGui::TableNextColumn();
         if (i % 2 == 0)
           ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cellBgAlt);
         else
           ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cellBg);
-        Widget::TextMatrix(cell.transpose());
+
+        const auto& visibleCell = rawVisibleCells.at(i);
+        Widget::TextMatrix(visibleCell.transpose());
 
         ImGui::PopID();
       }
