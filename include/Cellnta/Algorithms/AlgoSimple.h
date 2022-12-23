@@ -11,7 +11,6 @@ namespace Cellnta {
 class AlgoSimple : public AlgoBase {
  public:
   AlgoSimple() : AlgoBase(AlgoType::SIMPLE) {}
-  ~AlgoSimple();
 
   void Update() override;
   void LoadWorld(RenderData* data) override;
@@ -37,18 +36,18 @@ class AlgoSimple : public AlgoBase {
 
  private:
   void Step();
-  size_t FindNeighbors(const Cell::State*& world, const size_t& idx);
-  void GenerateNeigbors(const std::vector<Cell::Point>& oneDimNei);
+  size_t FindNeighbors(const Cell::State* world, size_t idx);
+  void GenerateNeigbors();
 
-  inline size_t FindIdxInRangedWorld(const size_t& cellIdx,
-                                     const size_t& neighborIdx);
+  inline size_t FindIdxInRangedWorld(size_t cellIdx, size_t neighborIdx);
 
-  void CalculatePositionFromIdx(size_t idx, Cell::Pos& out);
-  Cell::Pos CalculatePositionFromIdx(size_t idx);
   size_t CalculateIdxFromPos(const Cell::Pos& pos);
 
   void CreateWorld();
   void DeleteWorld();
+
+  void CartesianProduct(int repeat, const Cell::Pos& oneDimNei,
+                        std::vector<int>& out);
 
   Cell::State* GetWorld() { return m_worlds[m_oddGen].get(); }
   Cell::State* GetBufferWorld() { return m_worlds[!m_oddGen].get(); }
