@@ -1,20 +1,20 @@
 #pragma once
 
-#include <Eigen/Dense>
-
-#include "Cellnta/Renderer/HypercubeStorage.h"
-#include "Cellnta/Renderer/NCellStorage.h"
+#include <Eigen/LU>
 
 namespace Cellnta {
 
-Eigen::MatrixXf LookAt(const int N, const Eigen::VectorXf& from,
+class HypercubeStorage;
+class NCellStorage;
+
+Eigen::MatrixXf LookAt(int N, const Eigen::VectorXf& from,
                        const Eigen::VectorXf& to, const Eigen::MatrixXf& ups);
-Eigen::MatrixXf Perspective(const int N, double eyeAngle, double nearPlane,
+Eigen::MatrixXf Perspective(int N, double eyeAngle, double nearPlane,
                             double farPlane, double aspect);
 
-void NProject(NCellStorage& cells, const int cameraDim,
+void NProject(NCellStorage* cells, int cameraDim,
               const Eigen::MatrixXf& viewProj, bool perspective);
-void NProject(HypercubeStorage& cube, const int cameraDim,
+void NProject(HypercubeStorage* cube, int cameraDim,
               const Eigen::MatrixXf& viewProj, bool perspective);
 
 Eigen::MatrixXf NRotate(int N, int axis1, int axis2, float angle);

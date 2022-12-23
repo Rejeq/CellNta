@@ -3,6 +3,8 @@
 #include <cfloat>
 
 #include "Cellnta/Config.h"
+#include "Cellnta/Renderer/HypercubeStorage.h"
+#include "Cellnta/Renderer/NCellStorage.h"
 
 using namespace Cellnta;
 
@@ -103,12 +105,15 @@ Eigen::MatrixXf Cellnta::Perspective(const int N, double eyeAngle,
   return m;
 }
 
-void Cellnta::NProject(NCellStorage& cells, const int cameraDim,
+void Cellnta::NProject(NCellStorage* cells, int cameraDim,
                        const Eigen::MatrixXf& viewProj, bool perspective) {
   CELLNTA_PROFILE;
 
+  if (cells == nullptr)
+    return;
+
   const int divPos = ((perspective) ? 2 : 1);
-  NCellStorage::VecList rawCells = cells.GetRaw();
+  NCellStorage::VecList rawCells = cells->GetRaw();
 
   for (size_t i = 0; i < rawCells.size(); ++i) {
     Eigen::Map<Eigen::VectorXf> pos(rawCells.at(i).data(), cameraDim + 1);
@@ -119,17 +124,20 @@ void Cellnta::NProject(NCellStorage& cells, const int cameraDim,
   }
 }
 
-void Cellnta::NProject(HypercubeStorage& cube, const int cameraDim,
+void Cellnta::NProject(HypercubeStorage* cube, int cameraDim,
                        const Eigen::MatrixXf& viewProj, bool perspective) {
   CELLNTA_PROFILE;
 
+  if (cube == nullptr)
+    return;
+
   const int rows = cameraDim + 1;
-  const int cols = cube.GetVerticesCount();
+  const int cols = cube->GetVerticesCount();
   const int divPos = ((perspective) ? 2 : 1);
-  float* points = cube.GetPoints();
+  float* points = cube->GetPoints();
 
   for (int vert = 0; vert < cols; ++vert) {
-    Eigen::Map<Eigen::VectorXf> pos(&points[vert * cube.GetVertexSize()], rows);
+    Eigen::Map<Eigen::VectorXf> pos(&points[vert * cube->GetVertexSize()], rows);
 
     pos = viewProj * pos;
     const float& div = pos(pos.rows() - divPos);

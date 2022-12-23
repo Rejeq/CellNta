@@ -218,8 +218,8 @@ void Renderer::ProjectBuffers() {
     const int dim = camera.GetDimensions();
     const bool usePerspective = camera.GetUsePerspective();
 
-    NProject(m_cube, dim, viewProj, usePerspective);
-    NProject(cells, dim, viewProj, usePerspective);
+    NProject(&m_cube, dim, viewProj, usePerspective);
+    NProject(&cells, dim, viewProj, usePerspective);
   }
 
   UpdateCubeBuffer();
