@@ -28,14 +28,12 @@ void RenderData::SetCell(const Cell& cell) {
 
   if (GetVisibleArea().PosValid(cell.pos)) {
     m_cells.Add(cell.pos.cast<NCellStorage::Point>());
-    m_needUpdate = true;
     CELLNTA_LOG_TRACE("Added cell: ({}): {}", cell.pos.transpose(), cell.state);
   }
 }
 
 void RenderData::Clear() {
   m_cells.clear();
-  m_needUpdate = true;
 }
 
 void RenderData::SetDistance(int distance) {
