@@ -32,13 +32,15 @@ class HypercubeStorage {
   bool NeedUpdate() const { return m_needUpdate; }
   void Handled() { m_needUpdate = false; }
 
-  void GenerateCube(int dim, Point size, CubeMode mode);
   void Restore();
 
   void UpdatePointsBuffer();
   void UpdateIndicesBuffer();
   void UpdateColor();
 
+  void GenerateCube(int dim, Point size, CubeMode mode);
+  void SetDimension(int dim);
+  void SetSize(Point size);
   void SetMode(CubeMode mode);
 
   CubeMode GetMode() const { return m_mode; }

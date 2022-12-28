@@ -38,6 +38,12 @@ HypercubeStorage::~HypercubeStorage() {
     glDeleteBuffers(1, &m_indicesBuffer);
 }
 
+void HypercubeStorage::Restore() {
+  CELLNTA_PROFILE;
+
+  m_pnt = m_origPnt;
+}
+
 void HypercubeStorage::GenerateCube(int dim, Point size, CubeMode mode) {
   CELLNTA_PROFILE;
 
@@ -58,40 +64,52 @@ void HypercubeStorage::GenerateCube(int dim, Point size, CubeMode mode) {
   m_d = dim;
 
   if (size != -1) {
-    m_cubeSize = size;
-    GenerateVertices();
-
-    UpdatePointsBuffer();
+    SetSize(size);
   }
 
-  if (mode != CubeMode::NONE) {
-    if (m_d == 1 && mode == CubeMode::POLYGON)
-      mode = CubeMode::WIREFRAME;
-    if (m_d == 0 && (mode == CubeMode::POLYGON || mode == CubeMode::WIREFRAME))
-      mode = CubeMode::POINTS;
-    m_mode = mode;
-    switch (mode) {
-      case CubeMode::POLYGON: GenerateIndicesPolygon(); break;
-      case CubeMode::WIREFRAME: GenerateIndicesWireframe(); break;
-      case CubeMode::POINTS: GenerateIndicesPoints(); break;
-      default: break;
-    }
-
-    UpdateIndicesBuffer();
-  }
+  SetMode(mode);
 }
 
-void HypercubeStorage::Restore() {
+void HypercubeStorage::SetDimension(int dim) {
   CELLNTA_PROFILE;
 
-  m_pnt = m_origPnt;
+  m_d = dim;
+  SetSize(GetSize());
+  SetMode(GetMode());
+}
+
+void HypercubeStorage::SetSize(Point size) {
+  CELLNTA_PROFILE;
+
+  if (size < 0)
+    return;
+
+  m_cubeSize = size;
+  GenerateVertices();
+
+  UpdatePointsBuffer();
 }
 
 void HypercubeStorage::SetMode(CubeMode mode) {
   CELLNTA_PROFILE;
 
+  if (mode == CubeMode::NONE)
+    return;
+
+  if (m_d == 1 && mode == CubeMode::POLYGON)
+    mode = CubeMode::WIREFRAME;
+  if (m_d == 0 && (mode == CubeMode::POLYGON || mode == CubeMode::WIREFRAME))
+    mode = CubeMode::POINTS;
+
   m_mode = mode;
-  GenerateCube(m_d, -1, mode);
+  switch (mode) {
+    case CubeMode::POLYGON: GenerateIndicesPolygon(); break;
+    case CubeMode::WIREFRAME: GenerateIndicesWireframe(); break;
+    case CubeMode::POINTS: GenerateIndicesPoints(); break;
+    default: break;
+  }
+
+  UpdateIndicesBuffer();
 }
 
 void HypercubeStorage::GenerateVertices() {
