@@ -112,6 +112,10 @@ bool Context::SetAlgo(const Cellnta::AlgoType type) {
   tmp->SetupFrom(m_algo.get());
   m_algo = std::move(tmp);
 
+  Cellnta::RenderData* data = m_renderer.GetData();
+  if (data != nullptr)
+    data->GetCells().clear();
+
   return false;
 }
 
