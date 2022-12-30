@@ -8,6 +8,7 @@
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/CameraNd.h>
 #include <Cellnta/Renderer/RenderData.h>
+#include <Cellnta/Renderer/HypercubeStorage.h>
 
 #include "Context.h"
 #include "Widgets.h"
@@ -21,7 +22,9 @@ void RendererWindow::Draw() {
 
   Cellnta::Renderer& ren = GetContext()->GetRenderer();
   Cellnta::RenderData* data = ren.GetData();
-  if (data == nullptr)
+  Cellnta::HypercubeStorage* cube = ren.GetHypercube();
+
+  if (data == nullptr || cube == nullptr)
     return;
 
   if (ImGui::Begin(p_prop.Name, &p_prop.Opened, WinFlags)) {
@@ -29,7 +32,7 @@ void RendererWindow::Draw() {
     if (Widget::Input("Cube dimensions", &dimensions, 1,
                       ImGuiInputTextFlags_CharsDecimal)) {
       ren.SetDimension(dimensions);
-      ren.GenrateHypercube(0.5f);
+      // ren.GenrateHypercube(0.5f);
     }
 
     uint32_t renderDistance = data->GetDistance();
@@ -45,8 +48,8 @@ void RendererWindow::Draw() {
     };
 
     Cellnta::CubeMode res = Cellnta::CubeMode::NONE;
-    if (Widget::ComboEnum("Cube mode", ren.GetCubeMode(), CubeModeData, res))
-      ren.SetCubeMode(res);
+    if (Widget::ComboEnum("Cube mode", cube->GetMode(), CubeModeData, res))
+      cube->SetMode(res);
 
     static Cellnta::Cell cell;
     Widget::CellSelector<true>(ren.GetDimensions(), cell);

@@ -66,6 +66,7 @@ class Context {
   std::unique_ptr<Cellnta::AlgoBase> m_algo;
   std::shared_ptr<Cellnta::Camera3d> m_camera3d;
   std::shared_ptr<Cellnta::CameraNdList> m_cameraNd;
+  std::shared_ptr<Cellnta::HypercubeStorage> m_hypercube;
 
   std::string m_currentWindow;
 

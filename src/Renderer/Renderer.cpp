@@ -4,11 +4,13 @@
 
 #include "Cellnta/Config.h"
 #include "Cellnta/Log.h"
+#include "Cellnta/Renderer/HypercubeStorage.h"
 #include "Cellnta/Renderer/Camera3d.h"
 #include "Cellnta/Renderer/CameraNd.h"
 #include "Cellnta/Renderer/Transform.h"
 
 using namespace Cellnta;
+
 
 Renderer::Renderer() {
   CELLNTA_PROFILE;
@@ -68,9 +70,11 @@ void Renderer::Update() {
 
   UpdateCamera();
 
-  if (m_cube.NeedUpdate()) {
-    m_wantDraw = true;
-    m_cube.Handled();
+  if(m_cube != nullptr) {
+    if (m_cube->NeedUpdate()) {
+      m_wantDraw = true;
+      m_cube->Handled();
+    }
   }
 
   NCellStorage& cells = m_data.GetCells();
@@ -95,15 +99,15 @@ void Renderer::Draw() {
 
   NCellStorage& cells = m_data.GetCells();
 
-  if (cells.size() == 0)
+  if (m_cube == nullptr || cells.size() == 0)
     return;
 
   m_cellShader.Use();
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_BUFFER, m_cube.GetColor().GetTexture());
+  glBindTexture(GL_TEXTURE_BUFFER, m_cube->GetColor().GetTexture());
 
   GLenum renderMode = 0;
-  switch (m_cube.GetMode()) {
+  switch (m_cube->GetMode()) {
     case CubeMode::POINTS: renderMode = GL_POINTS; break;
     case CubeMode::WIREFRAME: renderMode = GL_LINES; break;
     case CubeMode::POLYGON: renderMode = GL_TRIANGLES; break;
@@ -112,13 +116,8 @@ void Renderer::Draw() {
 
   static_assert(std::is_same<HypercubeStorage::Ind, uint16_t>::value,
                 "Indices in glDrawElement has another type");
-  glDrawElementsInstanced(renderMode, m_cube.GetIndicesSize(),
+  glDrawElementsInstanced(renderMode, m_cube->GetIndicesSize(),
                           GL_UNSIGNED_SHORT, nullptr, cells.size());
-}
-
-void Renderer::GenrateHypercube(float a, CubeMode mode) {
-  CELLNTA_PROFILE;
-  m_cube.GenerateCube(m_d, a, mode);
 }
 
 void Renderer::Rotate() {
@@ -138,8 +137,9 @@ void Renderer::SetDimension(uint32_t dim) {
   CELLNTA_PROFILE;
 
   m_d = dim;
-  GenrateHypercube(m_cube.GetSize());
 
+  if(m_cube != nullptr)
+    m_cube->SetDimension(dim);
   m_data.SetDimension(dim);
 
   if (m_cameraNd == nullptr) {
@@ -163,10 +163,6 @@ void Renderer::SetDimension(uint32_t dim) {
   }
 }
 
-void Renderer::SetCubeMode(CubeMode mode) {
-  GenrateHypercube(-1, mode);
-}
-
 void Renderer::SetRenderDistance(uint32_t distance) {
   CELLNTA_PROFILE;
 
@@ -177,7 +173,7 @@ void Renderer::SetRenderDistance(uint32_t distance) {
 void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
   CELLNTA_PROFILE;
 
-  if (m_cameraNd == nullptr)
+  if (m_cameraNd == nullptr || m_cube == nullptr)
     return;
 
   CELLNTA_LOG_TRACE("Project buffers: cube = {}, cells = {}", projectCube, projectCells);
@@ -189,7 +185,7 @@ void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
 
   NCellStorage& cells = m_data.GetCells();
 
-  m_cube.Restore();
+  m_cube->Restore();
   cells.Restore();
 
   for (auto& camera : *m_cameraNd) {
@@ -201,15 +197,32 @@ void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
     const bool usePerspective = camera.GetUsePerspective();
 
     if (projectCube)
-      NProject(&m_cube, dim, viewProj, usePerspective);
+      NProject(m_cube.get(), dim, viewProj, usePerspective);
     if (projectCells)
       NProject(&cells, dim, viewProj, usePerspective);
   }
 
   if (projectCube)
-    m_cube.UpdatePointsBuffer();
+    m_cube->UpdatePointsBuffer();
   if (projectCells)
     cells.UpdateBuffer();
+}
+
+
+void Renderer::SetHypercube(const std::shared_ptr<HypercubeStorage>& cube) {
+  m_cube = cube;
+
+  if (m_cube == nullptr)
+    return;
+
+  glBindVertexArray(m_vao);
+
+  static_assert(std::is_same<HypercubeStorage::Point, float>::value,
+                "glVertexAttribute has another type");
+  glBindBuffer(GL_ARRAY_BUFFER, m_cube->GetPointsBuffer());
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                        3 * sizeof(HypercubeStorage::Point), nullptr);
+  glEnableVertexAttribArray(0);
 }
 
 void Renderer::InitBuffers() {
@@ -218,13 +231,6 @@ void Renderer::InitBuffers() {
   glGenVertexArrays(1, &m_vao);
 
   glBindVertexArray(m_vao);
-
-  static_assert(std::is_same<HypercubeStorage::Point, float>::value,
-                "glVertexAttribute has another type");
-  glBindBuffer(GL_ARRAY_BUFFER, m_cube.GetPointsBuffer());
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                        3 * sizeof(HypercubeStorage::Point), nullptr);
-  glEnableVertexAttribArray(0);
 
   static_assert(std::is_same<NCellStorage::Point, float>::value,
                 "glVertexAttribute has another type");

@@ -4,11 +4,12 @@
 #include <vector>
 
 #include "Cellnta/Renderer/GlBackend.h"
-#include "Cellnta/Renderer/HypercubeStorage.h"
 #include "Cellnta/Renderer/RenderData.h"
 #include "Cellnta/Renderer/Shader.h"
 
 namespace Cellnta {
+
+class HypercubeStorage;
 
 class CameraController;
 class Camera3d;
@@ -28,16 +29,13 @@ class Renderer {
   void DrawGrid();
   bool WantDraw() const { return m_wantDraw; }
 
-  void GenrateHypercube(float a = -1, CubeMode mode = CubeMode::NONE);
   void Rotate();
   void ProjectBuffers(bool projectCube = true, bool projectCells = true);
 
   void SetRenderDistance(uint32_t distance);
   void SetDimension(uint32_t D);
-  void SetCubeMode(CubeMode mode);
 
   int GetDimensions() const { return m_d; }
-  CubeMode GetCubeMode() const { return m_cube.GetMode(); }
 
   void SetCamera3d(const std::shared_ptr<Camera3d>& camera) {
     m_camera3d = camera;
@@ -51,6 +49,10 @@ class Renderer {
 
   const CameraNdList* GetCameraNd() const { return m_cameraNd.get(); }
   CameraNdList* GetCameraNd() { return m_cameraNd.get(); }
+
+  void SetHypercube(const std::shared_ptr<HypercubeStorage>& cube);
+  const HypercubeStorage* GetHypercube() const { return m_cube.get(); }
+  HypercubeStorage* GetHypercube() { return m_cube.get(); }
 
   const RenderData* GetData() const { return &m_data; }
   RenderData* GetData() { return &m_data; }
@@ -68,7 +70,7 @@ class Renderer {
 
   std::shared_ptr<Camera3d> m_camera3d;
   std::shared_ptr<CameraNdList> m_cameraNd;
-  HypercubeStorage m_cube;
+  std::shared_ptr<HypercubeStorage> m_cube;
   RenderData m_data;
 
   Shader m_cellShader;
