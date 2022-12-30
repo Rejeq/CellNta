@@ -67,6 +67,7 @@ class Context {
   std::shared_ptr<Cellnta::Camera3d> m_camera3d;
   std::shared_ptr<Cellnta::CameraNdList> m_cameraNd;
   std::shared_ptr<Cellnta::HypercubeStorage> m_hypercube;
+  std::shared_ptr<Cellnta::RenderData> m_renderData;
 
   std::string m_currentWindow;
 

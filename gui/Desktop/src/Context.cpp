@@ -29,6 +29,11 @@ Context::Context() {
     CELLNTA_LOG_ERROR("Unable to create hypercube");
   m_renderer.SetHypercube(m_hypercube);
 
+  m_renderData = std::make_shared<Cellnta::RenderData>();
+  if (m_renderData == nullptr)
+    CELLNTA_LOG_ERROR("Unable to create hypercube");
+  m_renderer.SetData(m_renderData);
+
   ImGuiContext* imguiCtx = ImGui::GetCurrentContext();
   ImGuiSettingsHandler contextHandler;
   contextHandler.TypeName = "CellNta";

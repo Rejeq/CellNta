@@ -54,14 +54,6 @@ void RendererWindow::Draw() {
 
     Widget::CellSelectorHomogeneous(ren.GetDimensions(), m_selectedCell);
 
-<<<<<<< Updated upstream
-||||||| constructed merge base
-    static Cellnta::Cell cell;
-    Widget::CellSelector<true>(ren.GetDimensions(), cell);
-=======
-    static Cellnta::Cell cell;
-    Widget::CellSelectorHomogeneous(ren.GetDimensions(), cell);
->>>>>>> Stashed changes
     ImGui::Spacing();
 
     if (ImGui::Button("Add cell (Only for renderer)"))
