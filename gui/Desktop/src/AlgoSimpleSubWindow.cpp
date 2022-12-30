@@ -1,7 +1,8 @@
 #include "AlgoSimpleSubWindow.h"
 
 #include "Context.h"
-#include "Widgets.h"
+#include "Widgets/Eigen.h"
+#include "Widgets/Utils.h"
 
 using namespace Ui;
 

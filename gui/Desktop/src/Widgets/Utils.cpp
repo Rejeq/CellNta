@@ -1,8 +1,6 @@
-#include "Widgets.h"
+#include "Utils.h"
 
 #include "imgui_stdlib.h"
-
-#include "Context.h"
 
 using namespace Ui;
 using namespace Ui::Widget;
@@ -32,6 +30,33 @@ bool Widget::ToggleButton(const char* label, bool& v) {
   return out;
 }
 
+static void CellSelectorEx(size_t vecSize, Cellnta::Cell& cell,
+                           bool shiftLastPoint) {
+  if (cell.pos.size() != vecSize) {
+    Cellnta::Cell::Pos tmp = Cellnta::Cell::Pos::Zero(vecSize);
+    const int minSize = std::min(cell.pos.size(), tmp.size());
+    memcpy(tmp.data(), cell.pos.data(), minSize * sizeof(Cellnta::Cell::Point));
+
+    if (shiftLastPoint) {
+      if (cell.pos.size() < tmp.size())
+        tmp(tmp.size() - 2) = 0.0f;
+      tmp(tmp.size() - 1) = 1.0f;
+    }
+    cell.pos = tmp;
+  }
+
+  Widget::DragN("Position ##CellSelector", cell.pos.data(), cell.pos.size());
+  Widget::Input("State##CellSelector", &cell.state);
+}
+
+void Widget::CellSelector(size_t d, Cellnta::Cell& cell) {
+  CellSelectorEx(d, cell, false);
+}
+
+void Widget::CellSelectorHomogeneous(size_t d, Cellnta::Cell& cell) {
+  CellSelectorEx(d + 1, cell, true);
+}
+
 bool Widget::RuleMask(const char* label, boost::dynamic_bitset<>& mask) {
   auto FilterOnlyNums = [](ImGuiInputTextCallbackData* data) -> int {
     bool out = false;
@@ -41,7 +66,7 @@ bool Widget::RuleMask(const char* label, boost::dynamic_bitset<>& mask) {
     return out;
   };
 
-  constexpr ImGuiTextFlags flags = ImGuiInputTextFlags_CallbackCharFilter;
+  constexpr ImGuiInputTextFlags flags = ImGuiInputTextFlags_CallbackCharFilter;
 
   // TODO: add support several digits
   std::string str;

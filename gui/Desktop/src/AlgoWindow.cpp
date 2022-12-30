@@ -5,7 +5,8 @@
 #include "AlgoRandomSubWindow.h"
 #include "AlgoSimpleSubWindow.h"
 #include "Context.h"
-#include "Widgets.h"
+#include "Widgets/ComboEnum.h"
+#include "Widgets/Utils.h"
 
 using namespace Ui;
 

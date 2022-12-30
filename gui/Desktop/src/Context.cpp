@@ -9,8 +9,6 @@
 #include <Cellnta/Renderer/CameraNd.h>
 #include <Cellnta/Renderer/HypercubeStorage.h>
 
-#include "Widgets.h"
-
 using namespace Ui;
 
 static std::unique_ptr<Context> s_ctx;

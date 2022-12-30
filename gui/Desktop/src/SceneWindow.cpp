@@ -7,7 +7,6 @@
 #include <Cellnta/Renderer/Camera3d.h>
 
 #include "Context.h"
-#include "Widgets.h"
 
 using namespace Ui;
 

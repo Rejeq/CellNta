@@ -9,7 +9,9 @@
 #include <Cellnta/Renderer/Renderer.h>
 
 #include "Context.h"
-#include "Widgets.h"
+#include "Widgets/ComboEnum.h"
+#include "Widgets/Eigen.h"
+#include "Widgets/Utils.h"
 
 using namespace Ui;
 
@@ -50,8 +52,16 @@ void RendererWindow::Draw() {
 
     Widget::Separator();
 
-    Widget::CellSelector<true>(ren.GetDimensions(), m_selectedCell);
+    Widget::CellSelectorHomogeneous(ren.GetDimensions(), m_selectedCell);
 
+<<<<<<< Updated upstream
+||||||| constructed merge base
+    static Cellnta::Cell cell;
+    Widget::CellSelector<true>(ren.GetDimensions(), cell);
+=======
+    static Cellnta::Cell cell;
+    Widget::CellSelectorHomogeneous(ren.GetDimensions(), cell);
+>>>>>>> Stashed changes
     ImGui::Spacing();
 
     if (ImGui::Button("Add cell (Only for renderer)"))

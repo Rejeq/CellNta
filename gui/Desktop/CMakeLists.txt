@@ -8,7 +8,7 @@ find_package(SDL2 REQUIRED)
 include(${CELLNTA_THIRD_PARTY}/ImGui.cmake)
 
 
-file(GLOB SOURCE_LIST
+file(GLOB_RECURSE SOURCE_LIST
   src/*.h
   src/*.cpp
 )
