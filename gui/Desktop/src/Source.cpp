@@ -13,6 +13,7 @@
 #include "AlgoWindow.h"
 #include "Context.h"
 #include "MenubarWindow.h"
+#include "CameraWindow.h"
 #include "RendererWindow.h"
 #include "SceneWindow.h"
 
@@ -221,6 +222,7 @@ bool CreateContextLayout(Ui::Context& ctx) {
 
   ctx.SetOnFirstStartup(ResetContextLayout);
 
+  ctx.AddWindow(std::make_unique<Ui::CameraWindow>());
   ctx.AddWindow(std::make_unique<Ui::RendererWindow>());
   ctx.AddWindow(std::make_unique<Ui::AlgoWindow>());
   ctx.AddWindow(std::make_unique<Ui::SceneWindow>());
