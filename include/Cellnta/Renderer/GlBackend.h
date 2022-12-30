@@ -10,3 +10,10 @@
 #else
 #error "Unable to determine renderer"
 #endif
+
+namespace Cellnta {
+
+float* BeginArrayBufferSource(int offset, int size);
+void EndArrayBufferSource();
+
+}  // namespace Cellnta

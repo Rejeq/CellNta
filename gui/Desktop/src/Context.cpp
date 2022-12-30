@@ -7,6 +7,7 @@
 #include <Cellnta/Algorithms/AlgoList.h>
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/CameraNd.h>
+#include <Cellnta/Renderer/HypercubeStorage.h>
 
 #include "Widgets.h"
 
@@ -24,6 +25,11 @@ Context::Context() {
   if (m_cameraNd == nullptr)
     CELLNTA_LOG_ERROR("Unable to create Nd camera");
   m_renderer.SetCameraNd(m_cameraNd);
+
+  m_hypercube = std::make_shared<Cellnta::HypercubeStorage>();
+  if (m_hypercube == nullptr)
+    CELLNTA_LOG_ERROR("Unable to create hypercube");
+  m_renderer.SetHypercube(m_hypercube);
 
   ImGuiContext* imguiCtx = ImGui::GetCurrentContext();
   ImGuiSettingsHandler contextHandler;

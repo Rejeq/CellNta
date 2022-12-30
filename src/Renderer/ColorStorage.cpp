@@ -4,10 +4,32 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <cstdlib>
 
 #include "Cellnta/Config.h"
 
 using namespace Cellnta;
+
+ColorStorage::ColorStorage() {
+  SetSeed(std::rand() /*123456.789f*/);
+
+  glGenBuffers(1, &m_colorBuffer);
+  glGenTextures(1, &m_textureId);
+
+  glBindBuffer(GL_TEXTURE_BUFFER, m_colorBuffer);
+  glBindTexture(GL_TEXTURE_BUFFER, m_textureId);
+  static_assert(std::is_same<ColorStorage::Type, float>::value,
+                "glTexBuffer has another type");
+  static_assert(ColorStorage::SIZE == 4, "glTexBuffer has another size");
+  glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, m_colorBuffer);
+}
+
+ColorStorage::~ColorStorage() {
+  if (m_colorBuffer != 0)
+    glDeleteBuffers(1, &m_colorBuffer);
+  if (m_textureId != 0)
+    glDeleteTextures(1, &m_textureId);
+}
 
 void ColorStorage::Generate(int maxIter, int polygons) {
   CELLNTA_PROFILE;
@@ -31,6 +53,8 @@ void ColorStorage::Generate(int maxIter, int polygons) {
     }
     ptr += polygons * SIZE;
   }
+
+  UpdateColorBuffer();
 }
 
 void ColorStorage::GenerateRandomRGBAColor(Type* dst, Type alpha) {
@@ -92,4 +116,11 @@ void ColorStorage::GenerateRandomRGBAColor(Type* dst, Type alpha) {
   dst[1] = g;
   dst[2] = b;
   dst[3] = alpha;
+}
+
+void ColorStorage::UpdateColorBuffer() {
+  glBindBuffer(GL_TEXTURE_BUFFER, m_colorBuffer);
+  glBufferData(GL_TEXTURE_BUFFER, GetSize() * sizeof(Type), GetData(),
+               GL_DYNAMIC_DRAW);
+  Clear();
 }

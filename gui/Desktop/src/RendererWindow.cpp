@@ -1,13 +1,12 @@
 #include "RendererWindow.h"
 
 #include <array>
-// TODO: Need use external fmt
-// Not using std::format because clang still dosen't support it
-#include <spdlog/fmt/fmt.h>
 
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/CameraNd.h>
+#include <Cellnta/Renderer/HypercubeStorage.h>
 #include <Cellnta/Renderer/RenderData.h>
+#include <Cellnta/Renderer/Renderer.h>
 
 #include "Context.h"
 #include "Widgets.h"
@@ -21,7 +20,9 @@ void RendererWindow::Draw() {
 
   Cellnta::Renderer& ren = GetContext()->GetRenderer();
   Cellnta::RenderData* data = ren.GetData();
-  if (data == nullptr)
+  Cellnta::HypercubeStorage* cube = ren.GetHypercube();
+
+  if (data == nullptr || cube == nullptr)
     return;
 
   if (ImGui::Begin(p_prop.Name, &p_prop.Opened, WinFlags)) {
@@ -29,7 +30,6 @@ void RendererWindow::Draw() {
     if (Widget::Input("Cube dimensions", &dimensions, 1,
                       ImGuiInputTextFlags_CharsDecimal)) {
       ren.SetDimension(dimensions);
-      ren.GenrateHypercube(0.5f);
     }
 
     uint32_t renderDistance = data->GetDistance();
@@ -45,44 +45,34 @@ void RendererWindow::Draw() {
     };
 
     Cellnta::CubeMode res = Cellnta::CubeMode::NONE;
-    if (Widget::ComboEnum("Cube mode", ren.GetCubeMode(), CubeModeData, res))
-      ren.SetCubeMode(res);
+    if (Widget::ComboEnum("Cube mode", cube->GetMode(), CubeModeData, res))
+      cube->SetMode(res);
 
-    static Cellnta::Cell cell;
-    Widget::CellSelector<true>(ren.GetDimensions(), cell);
+    Widget::Separator();
+
+    Widget::CellSelector<true>(ren.GetDimensions(), m_selectedCell);
+
     ImGui::Spacing();
+
     if (ImGui::Button("Add cell (Only for renderer)"))
-      data->SetCell(cell);
+      data->SetCell(m_selectedCell);
+
+    Widget::Separator();
 
     ShowCollatingInfo();
 
     ImGui::Spacing();
 
-    if (ImGui::BeginTabBar("RendererTabBar")) {
-      if (ImGui::BeginTabItem("Dimensions cameras")) {
-        ImGui::Spacing();
-        DrawCameras();
-        ImGui::EndTabItem();
-      }
+    const size_t cellsSize = data->GetCells().size();
 
-      {
-        const size_t cellsSize = data->GetCells().size();
-        if (cellsSize != 0)
-          m_showCellsTab = true;
-
-        std::string cellsTabName =
-            fmt::format("Loaded Cells({})###LoadedCells", cellsSize);
-
-        if (m_showCellsTab) {
-          if (ImGui::BeginTabItem(cellsTabName.c_str())) {
-            ImGui::Spacing();
-            DrawLoadedCells();
-            ImGui::EndTabItem();
-          }
-        }
-      }
-
-      ImGui::EndTabBar();
+    ImGuiTreeNodeFlags nodeFlags =
+        ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
+        ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_SpanFullWidth;
+    if (ImGui::TreeNodeEx("Loaded cells", nodeFlags, "Loaded cells (%zu)",
+                          cellsSize)) {
+      ImGui::Unindent(ImGui::GetTreeNodeToLabelSpacing());
+      DrawLoadedCells();
+      ImGui::TreePop();
     }
   }
 
@@ -115,18 +105,16 @@ void RendererWindow::DrawLoadedCells() {
     return;
 
   const Cellnta::NCellStorage& cells = data->GetCells();
-  ImGui::Text("Loaded: %zu", cells.size());
+  if (cells.size() == 0)
+    return;
 
-  DrawCells(cells);
-}
-
-void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
   constexpr ImGuiTableFlags TableFlags =
-      0 | ImGuiTableFlags_Borders | ImGuiTableFlags_Reorderable |
+      ImGuiTableFlags_Borders | ImGuiTableFlags_Reorderable |
       ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
       ImGuiTableFlags_Hideable;
 
-  if (ImGui::BeginTable("tableCells", 3, TableFlags)) {
+  const ImVec2 outerSize = ImVec2(0, ImGui::GetFontSize() * 15);
+  if (ImGui::BeginTable("tableCells", 3, TableFlags, outerSize, 0.0f)) {
     ImGui::TableSetupColumn(
         "#", ImGuiTableColumnFlags_NoResize | ImGuiTableColumnFlags_NoHide);
     ImGui::TableSetupColumn("Original", ImGuiTableColumnFlags_NoResize);
@@ -149,7 +137,6 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
     clipper.Begin(cells.size());
     while (clipper.Step()) {
       for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
-
         ImGui::PushID(i);
 
         ImGui::TableNextColumn();
@@ -179,127 +166,4 @@ void RendererWindow::DrawCells(const Cellnta::NCellStorage& cells) {
     clipper.End();
     ImGui::EndTable();
   }
-}
-
-void RendererWindow::DrawCameras() {
-  CELLNTA_PROFILE;
-
-  Cellnta::Renderer& ren = GetContext()->GetRenderer();
-  Cellnta::Camera3d* camera3d = ren.GetCamera3d();
-  Cellnta::CameraNdList* cameraNd = ren.GetCameraNd();
-
-  if (camera3d != nullptr)
-    DrawCameraSensitivity(*camera3d);
-
-  if (cameraNd != nullptr)
-    DrawCameraNdList(*cameraNd);
-
-  if (camera3d != nullptr) {
-    if (ImGui::TreeNodeEx("3d camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-      DrawCamera3d(*camera3d);
-      ImGui::TreePop();
-    }
-  }
-}
-
-void RendererWindow::DrawCameraSensitivity(Cellnta::Camera3d& camera) {
-  CELLNTA_PROFILE;
-
-  float mouseSpeed = camera.GetMouseSpeed();
-  if (ImGui::DragFloat("Mouse sensitivity", &mouseSpeed, 0.001f, 0.0f, 100.0f))
-    camera.SetMouseSpeed(mouseSpeed);
-
-  float moveSpeed = camera.GetMoveSpeed();
-  if (ImGui::DragFloat("Move speed", &moveSpeed, 0.001f, 0.0f, 100.0f))
-    camera.SetMoveSpeed(moveSpeed);
-}
-
-void RendererWindow::DrawCamera3d(Cellnta::Camera3d& cam3d) {
-  CELLNTA_PROFILE;
-
-  ImGui::PushID(3);  // 3 is dimension
-
-  Eigen::VectorXf pos = cam3d.GetPosition();
-  Eigen::VectorXf front = cam3d.GetFront();
-  if (ImGui::DragFloat3("Position##CameraPos", pos.data(), 0.01f))
-    cam3d.SetPosition(pos);
-
-  constexpr float ItemWidth = 75.0f;
-  constexpr float DragRotateSpeed = 0.002f;
-
-  float yaw = cam3d.GetYaw();
-  ImGui::SetNextItemWidth(ItemWidth);
-  if (ImGui::DragFloat("Yaw##Camera", &yaw, DragRotateSpeed))
-    cam3d.SetYaw(yaw);
-
-  ImGui::SameLine();
-
-  float pitch = cam3d.GetPitch();
-  ImGui::SetNextItemWidth(ItemWidth);
-  if (ImGui::DragFloat("Pitch##Camera", &pitch, DragRotateSpeed))
-    cam3d.SetPitch(pitch);
-
-  ImGui::Spacing();
-
-  DrawCameraController(cam3d);
-
-  ImGui::PopID();
-}
-
-void RendererWindow::DrawCameraNdList(Cellnta::CameraNdList& list) {
-  CELLNTA_PROFILE;
-
-  for (Cellnta::CameraNd& cam : list) {
-    std::string camName = fmt::format("{} Camera", cam.GetDimensions());
-
-    if (ImGui::TreeNodeEx(camName.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-      DrawCameraNd(cam);
-      ImGui::TreePop();
-    }
-  }
-}
-
-void RendererWindow::DrawCameraNd(Cellnta::CameraNd& camNd) {
-  CELLNTA_PROFILE;
-
-  ImGui::PushID(camNd.GetDimensions());
-
-  bool skip = camNd.WantSkip();
-  if (ImGui::Checkbox("Skip", &skip))
-    camNd.NeedSkip(skip);
-
-  if (skip)
-    ImGui::BeginDisabled();
-
-  constexpr float DragSpeed = 0.01f;
-
-  Eigen::VectorXf pos = camNd.GetPosition();
-  Eigen::VectorXf front = camNd.GetFront();
-
-  if (Widget::DragN("Position##CameraPos", pos.data(), pos.size(), DragSpeed))
-    camNd.SetPosition(pos);
-
-  if (Widget::DragN("Target##CameraPos", front.data(), front.size(), DragSpeed))
-    camNd.SetFront(front);
-
-  ImGui::Spacing();
-
-  DrawCameraController(camNd);
-
-  if (skip)
-    ImGui::EndDisabled();
-
-  ImGui::PopID();
-}
-
-void RendererWindow::DrawCameraController(
-    Cellnta::CameraController& controller) {
-  constexpr const char* PerspectiveStr = "Current perspective";
-  constexpr const char* OrthoStr = "Current orthographic";
-
-  bool perspective = controller.GetUsePerspective();
-  const char* perspectiveName = (perspective) ? PerspectiveStr : OrthoStr;
-
-  if (ImGui::Checkbox(perspectiveName, &perspective))
-    controller.SetUsePerspective(perspective);
 }

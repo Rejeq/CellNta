@@ -4,17 +4,18 @@
 
 #include "Cellnta/Config.h"
 #include "Cellnta/Log.h"
-#include "Cellnta/Renderer/Transform.h"
 #include "Cellnta/Renderer/Camera3d.h"
 #include "Cellnta/Renderer/CameraNd.h"
+#include "Cellnta/Renderer/HypercubeStorage.h"
+#include "Cellnta/Renderer/RenderData.h"
+#include "Cellnta/Renderer/Transform.h"
 
 using namespace Cellnta;
 
 Renderer::Renderer() {
   CELLNTA_PROFILE;
 
-  InitBuffers();
-  m_color.SetSeed(std::rand() /*123456.789f*/);
+  glGenVertexArrays(1, &m_vao);
 }
 
 Renderer::~Renderer() {
@@ -24,16 +25,6 @@ Renderer::~Renderer() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  if (m_cubeBuffer != 0)
-    glDeleteBuffers(1, &m_cubeBuffer);
-  if (m_cellBuffer != 0)
-    glDeleteBuffers(1, &m_cellBuffer);
-  if (m_indicesBuffer != 0)
-    glDeleteBuffers(1, &m_indicesBuffer);
-  if (m_colorBuffer != 0)
-    glDeleteBuffers(1, &m_colorBuffer);
-  if (m_colorTexture != 0)
-    glDeleteTextures(1, &m_colorTexture);
   if (m_vao != 0)
     glDeleteVertexArrays(1, &m_vao);
 }
@@ -79,15 +70,20 @@ void Renderer::Update() {
 
   UpdateCamera();
 
-  if (m_data.NeedUpdate()) {
-    m_updateVboCells = true;
-    ProjectBuffers();
-    m_data.Handled();
+  if (m_cube != nullptr) {
+    if (m_cube->NeedUpdate()) {
+      m_wantDraw = true;
+      m_cube->Handled();
+    }
   }
 
-  if (m_updateVboCells) {
-    UpdateCellBuffer();
-    m_updateVboCells = false;
+  if (m_data != nullptr) {
+    NCellStorage& cells = m_data->GetCells();
+    if (cells.NeedUpdate()) {
+      ProjectBuffers(false, true);
+      m_wantDraw = true;
+      cells.Handled();
+    }
   }
 }
 
@@ -101,19 +97,22 @@ void Renderer::DrawGrid() {
 void Renderer::Draw() {
   CELLNTA_PROFILE;
 
+  if (m_cube == nullptr || m_data == nullptr) {
+    CELLNTA_LOG_TRACE("Unable to draw HypercubeStorage or RenderData");
+    return;
+  }
+
   m_wantDraw = false;
-
-  NCellStorage& cells = m_data.GetCells();
-
+  NCellStorage& cells = m_data->GetCells();
   if (cells.size() == 0)
     return;
 
   m_cellShader.Use();
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_BUFFER, m_colorTexture);
+  glBindTexture(GL_TEXTURE_BUFFER, m_cube->GetColor().GetTexture());
 
   GLenum renderMode = 0;
-  switch (m_cube.GetMode()) {
+  switch (m_cube->GetMode()) {
     case CubeMode::POINTS: renderMode = GL_POINTS; break;
     case CubeMode::WIREFRAME: renderMode = GL_LINES; break;
     case CubeMode::POLYGON: renderMode = GL_TRIANGLES; break;
@@ -122,28 +121,8 @@ void Renderer::Draw() {
 
   static_assert(std::is_same<HypercubeStorage::Ind, uint16_t>::value,
                 "Indices in glDrawElement has another type");
-  glDrawElementsInstanced(renderMode, m_cube.GetIndicesSize(),
+  glDrawElementsInstanced(renderMode, m_cube->GetIndicesSize(),
                           GL_UNSIGNED_SHORT, nullptr, cells.size());
-}
-
-void Renderer::GenrateHypercube(float a, CubeMode mode) {
-  CELLNTA_PROFILE;
-
-  uint32_t updated = m_cube.GenerateCube(m_d, a, mode);
-
-  if (updated & HypercubeStorage::Updated::VERTICES) {
-    glBindBuffer(GL_ARRAY_BUFFER, m_cubeBuffer);
-    glBufferData(GL_ARRAY_BUFFER, m_cube.GetPointsSizeInBytes(), nullptr,
-                 GL_DYNAMIC_DRAW);
-    UpdateCubeBuffer();
-  }
-
-  if (updated & HypercubeStorage::Updated::INDICES) {
-    UpdateColorTexture();
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indicesBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_cube.GetIndicesSizeInBytes(),
-                 m_cube.GetIndices(), GL_DYNAMIC_DRAW);
-  }
 }
 
 void Renderer::Rotate() {
@@ -163,9 +142,11 @@ void Renderer::SetDimension(uint32_t dim) {
   CELLNTA_PROFILE;
 
   m_d = dim;
-  GenrateHypercube(m_cube.GetScale());
 
-  m_data.SetDimension(dim);
+  if (m_cube != nullptr)
+    m_cube->SetDimension(dim);
+  if (m_data != nullptr)
+    m_data->SetDimension(dim);
 
   if (m_cameraNd == nullptr) {
     CELLNTA_LOG_TRACE("Unable to set dimension in Nd camera");
@@ -188,26 +169,33 @@ void Renderer::SetDimension(uint32_t dim) {
   }
 }
 
-void Renderer::SetCubeMode(CubeMode mode) {
-  GenrateHypercube(-1, mode);
-}
-
 void Renderer::SetRenderDistance(uint32_t distance) {
   CELLNTA_PROFILE;
 
-  m_data.SetDistance(distance);
+  if (m_data == nullptr)
+    return;
+
+  m_data->SetDistance(distance);
   UpdateRenderDistanceUniform();
 }
 
-void Renderer::ProjectBuffers() {
+void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
   CELLNTA_PROFILE;
 
-  if (m_cameraNd == nullptr)
+  if (m_cameraNd == nullptr || m_cube == nullptr || m_data == nullptr)
     return;
 
-  NCellStorage& cells = m_data.GetCells();
+  CELLNTA_LOG_TRACE("Project buffers: cube = {}, cells = {}", projectCube,
+                    projectCells);
 
-  m_cube.Restore();
+  if (!projectCube && !projectCells) {
+    CELLNTA_LOG_TRACE("Both buffers are equal to false");
+    return;
+  }
+
+  NCellStorage& cells = m_data->GetCells();
+
+  m_cube->Restore();
   cells.Restore();
 
   for (auto& camera : *m_cameraNd) {
@@ -218,62 +206,53 @@ void Renderer::ProjectBuffers() {
     const int dim = camera.GetDimensions();
     const bool usePerspective = camera.GetUsePerspective();
 
-    NProject(&m_cube, dim, viewProj, usePerspective);
-    NProject(&cells, dim, viewProj, usePerspective);
+    if (projectCube)
+      NProject(m_cube.get(), dim, viewProj, usePerspective);
+    if (projectCells)
+      NProject(&cells, dim, viewProj, usePerspective);
   }
 
-  UpdateCubeBuffer();
-  UpdateCellBuffer();
+  if (projectCube)
+    m_cube->UpdatePointsBuffer();
+  if (projectCells)
+    cells.UpdateBuffer();
 }
 
-void Renderer::InitBuffers() {
+void Renderer::SetHypercube(const std::shared_ptr<HypercubeStorage>& cube) {
   CELLNTA_PROFILE;
 
-  glGenVertexArrays(1, &m_vao);
-  glGenBuffers(1, &m_cubeBuffer);
-  glGenBuffers(1, &m_cellBuffer);
-  glGenBuffers(1, &m_indicesBuffer);
-  glGenBuffers(1, &m_colorBuffer);
-  glGenTextures(1, &m_colorTexture);
+  m_cube = cube;
 
-  glBindBuffer(GL_TEXTURE_BUFFER, m_colorBuffer);
-  glBindTexture(GL_TEXTURE_BUFFER, m_colorTexture);
-  static_assert(std::is_same<ColorStorage::Type, float>::value,
-                "glTexBuffer has another type");
-  static_assert(ColorStorage::SIZE == 4, "glTexBuffer has another size");
-  glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, m_colorBuffer);
+  if (m_cube == nullptr)
+    return;
 
   glBindVertexArray(m_vao);
 
   static_assert(std::is_same<HypercubeStorage::Point, float>::value,
                 "glVertexAttribute has another type");
-  glBindBuffer(GL_ARRAY_BUFFER, m_cubeBuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, m_cube->GetPointsBuffer());
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
                         3 * sizeof(HypercubeStorage::Point), nullptr);
   glEnableVertexAttribArray(0);
+}
+
+void Renderer::SetData(const std::shared_ptr<RenderData>& data) {
+  CELLNTA_PROFILE;
+
+  m_data = data;
+
+  if (m_data == nullptr)
+    return;
+
+  glBindVertexArray(m_vao);
 
   static_assert(std::is_same<NCellStorage::Point, float>::value,
                 "glVertexAttribute has another type");
-  glBindBuffer(GL_ARRAY_BUFFER, m_cellBuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, m_data->GetCells().GetBuffer());
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
                         3 * sizeof(NCellStorage::Point), nullptr);
   glVertexAttribDivisor(1, 1);
   glEnableVertexAttribArray(1);
-}
-
-void Renderer::BeginArrayBufferSource(float*& dst, int offset, int size) {
-  CELLNTA_PROFILE;
-
-  dst =
-      (float*)glMapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_WRITE_BIT);
-  if (dst == nullptr)
-    throw std::runtime_error("cannot get VBO");
-}
-
-void Renderer::EndArrayBufferSource() {
-  CELLNTA_PROFILE;
-
-  glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
 void Renderer::UpdateCameraUniform() {
@@ -300,9 +279,12 @@ void Renderer::UpdateRenderDistanceUniform() {
 
   constexpr float FarPlane = 6.25f;
 
+  if (m_data == nullptr)
+    return;
+
   m_gridShader.Use();
   m_gridShader.Set("u_near", 0.01f);
-  m_gridShader.Set("u_far", (float)m_data.GetDistance() * FarPlane);
+  m_gridShader.Set("u_far", (float)m_data->GetDistance() * FarPlane);
 }
 
 void Renderer::UpdateCamera() {
@@ -315,13 +297,13 @@ void Renderer::UpdateCamera() {
 void Renderer::UpdateCamera3d() {
   CELLNTA_PROFILE;
 
-  if (m_camera3d == nullptr) {
+  if (m_camera3d == nullptr || m_data == nullptr) {
     CELLNTA_LOG_TRACE("Unable to update 3d camera");
     return;
   }
 
   if (m_camera3d->Update()) {
-    m_data.SetPosition(m_camera3d->GetPosition().cast<int>());
+    m_data->SetPosition(m_camera3d->GetPosition().cast<int>());
     UpdateCameraUniform();
   }
 }
@@ -338,94 +320,7 @@ void Renderer::UpdateCameraNd() {
   for (auto& ncam : *m_cameraNd)
     if (ncam.Update())
       camUpdated = true;
-  if (camUpdated)
+  if (camUpdated) {
     ProjectBuffers();
-}
-
-void Renderer::UpdateCubeBuffer() {
-  CELLNTA_PROFILE;
-
-  float* dst = nullptr;
-  glBindBuffer(GL_ARRAY_BUFFER, m_cubeBuffer);
-  BeginArrayBufferSource(dst, 0, m_cube.GetPointsSizeInBytes());
-
-  const int pointsCount = m_cube.GetVerticesCount() * 3;
-  const float* end = dst + pointsCount;
-  float* pnt = m_cube.GetPoints();
-
-  while (dst < end) {
-    dst[0] = pnt[m_data.GetCollatingX()];
-    dst[1] = pnt[m_data.GetCollatingY()];
-    dst[2] = pnt[m_data.GetCollatingZ()];
-
-    pnt += m_cube.GetVertexSize();
-    dst += 3;
   }
-  EndArrayBufferSource();
-  m_wantDraw = true;
-}
-
-void Renderer::UpdateCellBuffer() {
-  CELLNTA_PROFILE;
-
-  NCellStorage::VecList& cells = m_data.GetCells().GetRaw();
-
-  CELLNTA_LOG_TRACE("Updating cell buffer");
-  if (cells.empty())
-    return;
-
-  float* dst = nullptr;
-  int pointsCount = cells.size() * 3;
-
-  glBindBuffer(GL_ARRAY_BUFFER, m_cellBuffer);
-
-  if (cells.capacity() != m_oldCellsCapacity) {
-    m_oldCellsCapacity = cells.capacity();
-    glBindBuffer(GL_ARRAY_BUFFER, m_cellBuffer);
-    glBufferData(GL_ARRAY_BUFFER, 3 * cells.capacity() * sizeof(NCellStorage::Point), nullptr,
-                 GL_DYNAMIC_DRAW);
-  }
-
-  BeginArrayBufferSource(dst, 0, pointsCount * sizeof(NCellStorage::Point));
-
-  const float* end = dst + pointsCount;
-  Eigen::VectorXf* pnt = cells.data();
-  if (pnt == nullptr) {
-    EndArrayBufferSource();
-    return;
-  }
-
-  // memset(dst, 0, GetTotalAllocatedMemoryForPoints());
-  while (dst < end) {
-    dst[0] = (*pnt)(m_data.GetCollatingX());
-    dst[1] = (*pnt)(m_data.GetCollatingY());
-    dst[2] = (*pnt)(m_data.GetCollatingZ());
-    ++pnt;
-    dst += 3;
-  }
-
-  EndArrayBufferSource();
-  m_wantDraw = true;
-}
-
-void Renderer::UpdateColorTexture() {
-  switch (m_cube.GetMode()) {
-    case CubeMode::POINTS:
-      m_color.Generate(m_cube.GetVerticesCount(), 1);
-      break;
-    case CubeMode::WIREFRAME:
-      if (m_cube.GetDimensions() == 1)
-        m_color.Generate(1, 1);
-      else
-        m_color.Generate(m_cube.GetFacesCount() * 2, 1);
-      break;
-    case CubeMode::POLYGON: m_color.Generate(m_cube.GetFacesCount(), 2); break;
-    default: assert(0 && "Unreachable"); break;
-  }
-
-  glBindBuffer(GL_TEXTURE_BUFFER, m_colorBuffer);
-  glBufferData(GL_TEXTURE_BUFFER, m_color.GetSizeInBytes(), m_color.GetData(),
-               GL_DYNAMIC_DRAW);
-  m_wantDraw = true;
-  m_color.Clear();
 }

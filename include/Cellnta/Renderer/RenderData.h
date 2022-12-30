@@ -22,9 +22,6 @@ class RenderData {
   void SetCell(const Cell& cell);
   void Clear();
 
-  void Handled() { m_needUpdate = false; }
-  bool NeedUpdate() const { return m_needUpdate; }
-
   const NCellStorage& GetCells() const { return m_cells; }
   NCellStorage& GetCells() { return m_cells; }
 
@@ -60,7 +57,6 @@ class RenderData {
   Area m_visibleArea = Area(0, 0);
 
   int m_distance = 0;
-  bool m_needUpdate = false;
   int m_d = 0;
 
   std::vector<Area> m_desiredArea;

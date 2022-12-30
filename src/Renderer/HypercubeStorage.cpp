@@ -9,7 +9,7 @@
 #define HYPERCUBE_VALIDATE_POLYGONS(data_, dim_, polygonsCount_)               \
   {                                                                            \
     assert((data_ < (m_ind.data() + m_ind.size())) && "Out of range");         \
-    for (int p_ = 0; p_ < polygonsCount_ * 3; p_ += 3) {                    \
+    for (int p_ = 0; p_ < polygonsCount_ * 3; p_ += 3) {                       \
       assert(data_[p_ + 0] < GetVerticesCount(dim_) && "Too large index");     \
       assert(data_[p_ + 1] < GetVerticesCount(dim_) && "Too large index");     \
       assert(data_[p_ + 2] < GetVerticesCount(dim_) && "Too large index");     \
@@ -25,48 +25,17 @@
 
 using namespace Cellnta;
 
-uint32_t HypercubeStorage::GenerateCube(int dim, Point a, CubeMode mode) {
-  CELLNTA_PROFILE;
+HypercubeStorage::HypercubeStorage() {
+  glGenBuffers(1, &m_pointsBuffer);
+  glGenBuffers(1, &m_indicesBuffer);
+}
 
-  CELLNTA_LOG_DEBUG("Trying to generate hypercube");
-  uint32_t out = Updated::NONE;
+HypercubeStorage::~HypercubeStorage() {
+  if (m_pointsBuffer != 0)
+    glDeleteBuffers(1, &m_pointsBuffer);
 
-  if (dim != m_d) {
-    if (a == (Point)-1)
-      a = GetScale();
-    if (mode == CubeMode::NONE)
-      mode = GetMode();
-  } else {
-    if (a == GetScale())
-      a = -1;
-    if (mode == GetMode())
-      mode = CubeMode::NONE;
-  }
-
-  m_d = dim;
-
-  if (a != -1) {
-    out |= Updated::VERTICES;
-    m_cubeSize = a;
-    GenerateVertices();
-  }
-
-  if (mode != CubeMode::NONE) {
-    out |= Updated::INDICES;
-
-    if (m_d == 1 && mode == CubeMode::POLYGON)
-      mode = CubeMode::WIREFRAME;
-    if (m_d == 0 && (mode == CubeMode::POLYGON || mode == CubeMode::WIREFRAME))
-      mode = CubeMode::POINTS;
-    m_mode = mode;
-    switch (mode) {
-      case CubeMode::POLYGON: GenerateIndicesPolygon(); break;
-      case CubeMode::WIREFRAME: GenerateIndicesWireframe(); break;
-      case CubeMode::POINTS: GenerateIndicesPoints(); break;
-      default: break;
-    }
-  }
-  return out;
+  if (m_indicesBuffer != 0)
+    glDeleteBuffers(1, &m_indicesBuffer);
 }
 
 void HypercubeStorage::Restore() {
@@ -75,11 +44,72 @@ void HypercubeStorage::Restore() {
   m_pnt = m_origPnt;
 }
 
+void HypercubeStorage::GenerateCube(int dim, Point size, CubeMode mode) {
+  CELLNTA_PROFILE;
+
+  CELLNTA_LOG_DEBUG("Trying to generate hypercube");
+
+  if (dim != m_d) {
+    if (size == (Point)-1)
+      size = GetSize();
+    if (mode == CubeMode::NONE)
+      mode = GetMode();
+  } else {
+    if (size == GetSize())
+      size = -1;
+    if (mode == GetMode())
+      mode = CubeMode::NONE;
+  }
+
+  m_d = dim;
+
+  if (size != -1) {
+    SetSize(size);
+  }
+
+  SetMode(mode);
+}
+
+void HypercubeStorage::SetDimension(int dim) {
+  CELLNTA_PROFILE;
+
+  m_d = dim;
+  SetSize(GetSize());
+  SetMode(GetMode());
+}
+
+void HypercubeStorage::SetSize(Point size) {
+  CELLNTA_PROFILE;
+
+  if (size < 0)
+    return;
+
+  m_cubeSize = size;
+  GenerateVertices();
+
+  UpdatePointsBuffer();
+}
+
 void HypercubeStorage::SetMode(CubeMode mode) {
   CELLNTA_PROFILE;
 
+  if (mode == CubeMode::NONE)
+    return;
+
+  if (m_d == 1 && mode == CubeMode::POLYGON)
+    mode = CubeMode::WIREFRAME;
+  if (m_d == 0 && (mode == CubeMode::POLYGON || mode == CubeMode::WIREFRAME))
+    mode = CubeMode::POINTS;
+
   m_mode = mode;
-  GenerateCube(m_d, -1, mode);
+  switch (mode) {
+    case CubeMode::POLYGON: GenerateIndicesPolygon(); break;
+    case CubeMode::WIREFRAME: GenerateIndicesWireframe(); break;
+    case CubeMode::POINTS: GenerateIndicesPoints(); break;
+    default: break;
+  }
+
+  UpdateIndicesBuffer();
 }
 
 void HypercubeStorage::GenerateVertices() {
@@ -94,7 +124,7 @@ void HypercubeStorage::GenerateVertices() {
   for (uint32_t bitset = 0; bitset < halfVert; ++bitset) {
     uint32_t j = 0;
     uint64_t pos = bitset * GetVertexSize();
-    for (; j < (uint32_t) m_d - 1; ++j, ++pos) {
+    for (; j < (uint32_t)m_d - 1; ++j, ++pos) {
       // Check j bit
       if (bitset & ((uint32_t)1 << j))
         data[pos] = sec_data[pos] = +m_cubeSize;
@@ -249,7 +279,72 @@ void HypercubeStorage::GenerateIndicesWireframe() {
 
 void HypercubeStorage::GenerateIndicesPoints() {
   m_ind.resize(GetVerticesCount());
-  for (int i = 0; i < GetVerticesCount(); ++i) m_ind[i] = i;
+  for (int i = 0; i < GetVerticesCount(); ++i)
+    m_ind[i] = i;
+}
+
+void HypercubeStorage::UpdatePointsBuffer() {
+  CELLNTA_PROFILE;
+
+  CELLNTA_LOG_TRACE("Updating points buffer");
+
+  glBindBuffer(GL_ARRAY_BUFFER, m_pointsBuffer);
+
+  const int size = GetPointsSize();
+  if (size != m_pointsBufferSize) {
+    glBufferData(GL_ARRAY_BUFFER, size * sizeof(Point), nullptr,
+                 GL_DYNAMIC_DRAW);
+    m_pointsBufferSize = size;
+  }
+
+  const int pointsCount = GetVerticesCount() * 3;
+  float* pnt = GetPoints();
+
+  if (pnt == nullptr)
+    return;
+
+  float* dst = BeginArrayBufferSource(0, GetPointsSize() * sizeof(Point));
+
+  if (dst == nullptr)
+    return;
+
+  const float* end = dst + pointsCount;
+  while (dst < end) {
+    dst[0] = pnt[0];
+    dst[1] = pnt[1];
+    dst[2] = pnt[2];
+
+    pnt += GetVertexSize();
+    dst += 3;
+  }
+
+  EndArrayBufferSource();
+  m_needUpdate = true;
+}
+
+void HypercubeStorage::UpdateIndicesBuffer() {
+  CELLNTA_PROFILE;
+
+  UpdateColor();
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indicesBuffer);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, GetIndicesSize() * sizeof(Ind),
+               GetIndices(), GL_DYNAMIC_DRAW);
+  m_needUpdate = true;
+}
+
+void HypercubeStorage::UpdateColor() {
+  switch (GetMode()) {
+    case CubeMode::POINTS: m_color.Generate(GetVerticesCount(), 1); break;
+    case CubeMode::WIREFRAME: {
+      const int size = (GetDimensions() == 1) ? 1 : GetFacesCount() * 2;
+      m_color.Generate(size, 1);
+      break;
+    }
+    case CubeMode::POLYGON: m_color.Generate(GetFacesCount(), 2); break;
+    default: assert(0 && "Unreachable"); break;
+  }
+  m_needUpdate = true;
 }
 
 #undef HYPERCUBE_DEBUG_PRINT
