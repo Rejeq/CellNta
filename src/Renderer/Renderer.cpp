@@ -4,18 +4,18 @@
 
 #include "Cellnta/Config.h"
 #include "Cellnta/Log.h"
-#include "Cellnta/Renderer/HypercubeStorage.h"
 #include "Cellnta/Renderer/Camera3d.h"
 #include "Cellnta/Renderer/CameraNd.h"
+#include "Cellnta/Renderer/HypercubeStorage.h"
+#include "Cellnta/Renderer/RenderData.h"
 #include "Cellnta/Renderer/Transform.h"
 
 using namespace Cellnta;
 
-
 Renderer::Renderer() {
   CELLNTA_PROFILE;
 
-  InitBuffers();
+  glGenVertexArrays(1, &m_vao);
 }
 
 Renderer::~Renderer() {
@@ -70,18 +70,20 @@ void Renderer::Update() {
 
   UpdateCamera();
 
-  if(m_cube != nullptr) {
+  if (m_cube != nullptr) {
     if (m_cube->NeedUpdate()) {
       m_wantDraw = true;
       m_cube->Handled();
     }
   }
 
-  NCellStorage& cells = m_data.GetCells();
-  if (cells.NeedUpdate()) {
-    ProjectBuffers(false, true);
-    m_wantDraw = true;
-    cells.Handled();
+  if (m_data != nullptr) {
+    NCellStorage& cells = m_data->GetCells();
+    if (cells.NeedUpdate()) {
+      ProjectBuffers(false, true);
+      m_wantDraw = true;
+      cells.Handled();
+    }
   }
 }
 
@@ -95,11 +97,14 @@ void Renderer::DrawGrid() {
 void Renderer::Draw() {
   CELLNTA_PROFILE;
 
+  if (m_cube == nullptr || m_data == nullptr) {
+    CELLNTA_LOG_TRACE("Unable to draw HypercubeStorage or RenderData");
+    return;
+  }
+
   m_wantDraw = false;
-
-  NCellStorage& cells = m_data.GetCells();
-
-  if (m_cube == nullptr || cells.size() == 0)
+  NCellStorage& cells = m_data->GetCells();
+  if (cells.size() == 0)
     return;
 
   m_cellShader.Use();
@@ -138,9 +143,10 @@ void Renderer::SetDimension(uint32_t dim) {
 
   m_d = dim;
 
-  if(m_cube != nullptr)
+  if (m_cube != nullptr)
     m_cube->SetDimension(dim);
-  m_data.SetDimension(dim);
+  if (m_data != nullptr)
+    m_data->SetDimension(dim);
 
   if (m_cameraNd == nullptr) {
     CELLNTA_LOG_TRACE("Unable to set dimension in Nd camera");
@@ -166,24 +172,28 @@ void Renderer::SetDimension(uint32_t dim) {
 void Renderer::SetRenderDistance(uint32_t distance) {
   CELLNTA_PROFILE;
 
-  m_data.SetDistance(distance);
+  if (m_data == nullptr)
+    return;
+
+  m_data->SetDistance(distance);
   UpdateRenderDistanceUniform();
 }
 
 void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
   CELLNTA_PROFILE;
 
-  if (m_cameraNd == nullptr || m_cube == nullptr)
+  if (m_cameraNd == nullptr || m_cube == nullptr || m_data == nullptr)
     return;
 
-  CELLNTA_LOG_TRACE("Project buffers: cube = {}, cells = {}", projectCube, projectCells);
+  CELLNTA_LOG_TRACE("Project buffers: cube = {}, cells = {}", projectCube,
+                    projectCells);
 
   if (!projectCube && !projectCells) {
     CELLNTA_LOG_TRACE("Both buffers are equal to false");
     return;
   }
 
-  NCellStorage& cells = m_data.GetCells();
+  NCellStorage& cells = m_data->GetCells();
 
   m_cube->Restore();
   cells.Restore();
@@ -208,8 +218,9 @@ void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
     cells.UpdateBuffer();
 }
 
-
 void Renderer::SetHypercube(const std::shared_ptr<HypercubeStorage>& cube) {
+  CELLNTA_PROFILE;
+
   m_cube = cube;
 
   if (m_cube == nullptr)
@@ -225,16 +236,19 @@ void Renderer::SetHypercube(const std::shared_ptr<HypercubeStorage>& cube) {
   glEnableVertexAttribArray(0);
 }
 
-void Renderer::InitBuffers() {
+void Renderer::SetData(const std::shared_ptr<RenderData>& data) {
   CELLNTA_PROFILE;
 
-  glGenVertexArrays(1, &m_vao);
+  m_data = data;
+
+  if (m_data == nullptr)
+    return;
 
   glBindVertexArray(m_vao);
 
   static_assert(std::is_same<NCellStorage::Point, float>::value,
                 "glVertexAttribute has another type");
-  glBindBuffer(GL_ARRAY_BUFFER, m_data.GetCells().GetBuffer());
+  glBindBuffer(GL_ARRAY_BUFFER, m_data->GetCells().GetBuffer());
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
                         3 * sizeof(NCellStorage::Point), nullptr);
   glVertexAttribDivisor(1, 1);
@@ -265,9 +279,12 @@ void Renderer::UpdateRenderDistanceUniform() {
 
   constexpr float FarPlane = 6.25f;
 
+  if (m_data == nullptr)
+    return;
+
   m_gridShader.Use();
   m_gridShader.Set("u_near", 0.01f);
-  m_gridShader.Set("u_far", (float)m_data.GetDistance() * FarPlane);
+  m_gridShader.Set("u_far", (float)m_data->GetDistance() * FarPlane);
 }
 
 void Renderer::UpdateCamera() {
@@ -280,13 +297,13 @@ void Renderer::UpdateCamera() {
 void Renderer::UpdateCamera3d() {
   CELLNTA_PROFILE;
 
-  if (m_camera3d == nullptr) {
+  if (m_camera3d == nullptr || m_data == nullptr) {
     CELLNTA_LOG_TRACE("Unable to update 3d camera");
     return;
   }
 
   if (m_camera3d->Update()) {
-    m_data.SetPosition(m_camera3d->GetPosition().cast<int>());
+    m_data->SetPosition(m_camera3d->GetPosition().cast<int>());
     UpdateCameraUniform();
   }
 }

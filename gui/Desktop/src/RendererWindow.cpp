@@ -7,8 +7,9 @@
 
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/CameraNd.h>
-#include <Cellnta/Renderer/RenderData.h>
 #include <Cellnta/Renderer/HypercubeStorage.h>
+#include <Cellnta/Renderer/RenderData.h>
+#include <Cellnta/Renderer/Renderer.h>
 
 #include "Context.h"
 #include "Widgets.h"
@@ -32,7 +33,6 @@ void RendererWindow::Draw() {
     if (Widget::Input("Cube dimensions", &dimensions, 1,
                       ImGuiInputTextFlags_CharsDecimal)) {
       ren.SetDimension(dimensions);
-      // ren.GenrateHypercube(0.5f);
     }
 
     uint32_t renderDistance = data->GetDistance();
