@@ -76,23 +76,14 @@ class HypercubeStorage {
   // 3d: 3  - xy,xz,yz
   // 4d: 6  - xy,xz,yz,xw,yw,zw
   // 5d: 10 - xy,xz,yz,xw,yw,zw,xe,ye,ze,we
-  inline int GetPlanesCount(const int& dim) const {
-    // Optimized binomial coefficient
-    // where n=dim, k=2
-    return dim * (dim - 1) >> 1;
-  }
+  int GetPlanesCount(int dim) const;
 
-  inline int GetRamaindingFaces(const int& dim) const {
-    assert(dim > 1);
-    return ((int)1) << (dim - 2);
-  }
-  inline int GetFacesCount(const int& dim) const {
-    return GetPlanesCount(dim) * GetRamaindingFaces(dim);
-  }
-
-  inline int GetVerticesCount(int dim) const { return ((int)1) << dim; }
+  int GetRemaindingFacesCount(int dim) const;
+  int GetFacesCount(int dim) const;
 
   int GetEdgesCount(int dim) const;
+
+  int GetVerticesCount(int dim) const;
 
 
   std::vector<Point> m_origPnt;

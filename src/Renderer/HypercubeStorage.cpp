@@ -343,11 +343,36 @@ void HypercubeStorage::UpdateColor() {
   m_needUpdate = true;
 }
 
+int HypercubeStorage::GetPlanesCount(int dim) const {
+  if (dim < 0)
+    return 0;
+  // Optimized binomial coefficient
+  // where n=dim, k=2
+  return dim * (dim - 1) >> 1;
+}
+
+int HypercubeStorage::GetRemaindingFacesCount(int dim) const {
+  return ((int)1) << (dim - 2);
+}
+
+int HypercubeStorage::GetFacesCount(int dim) const {
+  // https://oeis.org/A001788
+  if (dim < 0)
+    return 0;
+  return GetPlanesCount(dim) * GetRemaindingFacesCount(dim);
+}
+
 int HypercubeStorage::GetEdgesCount(int dim) const {
   // https://oeis.org/A001787
   if (dim < 0)
     return 0;
   return dim * GetVerticesCount(dim - 1);
+}
+
+int HypercubeStorage::GetVerticesCount(int dim) const {
+  if (dim < 0)
+    return 0;
+  return ((int)1) << dim;
 }
 
 #undef HYPERCUBE_DEBUG_PRINT
