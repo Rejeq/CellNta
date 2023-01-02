@@ -50,6 +50,7 @@ class HypercubeStorage {
   inline int GetVerticesCount() const { return GetVerticesCount(m_d); }
   inline int GetVertexSize() const { return m_d + 1; }
   inline int GetFacesCount() const { return GetFacesCount(m_d); }
+  inline int GetEdgesCount() const { return GetEdgesCount(m_d); }
 
   const ColorStorage& GetColor() const { return m_color; }
   ColorStorage& GetColor() { return m_color; }
@@ -90,6 +91,8 @@ class HypercubeStorage {
   }
 
   inline int GetVerticesCount(int dim) const { return ((int)1) << dim; }
+
+  int GetEdgesCount(int dim) const;
 
 
   std::vector<Point> m_origPnt;

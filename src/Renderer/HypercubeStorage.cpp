@@ -336,15 +336,18 @@ void HypercubeStorage::UpdateIndicesBuffer() {
 void HypercubeStorage::UpdateColor() {
   switch (GetMode()) {
     case CubeMode::POINTS: m_color.Generate(GetVerticesCount(), 1); break;
-    case CubeMode::WIREFRAME: {
-      const int size = (GetDimensions() == 1) ? 1 : GetFacesCount() * 2;
-      m_color.Generate(size, 1);
-      break;
-    }
+    case CubeMode::WIREFRAME: m_color.Generate(GetEdgesCount(), 1); break;
     case CubeMode::POLYGON: m_color.Generate(GetFacesCount(), 2); break;
     default: assert(0 && "Unreachable"); break;
   }
   m_needUpdate = true;
+}
+
+int HypercubeStorage::GetEdgesCount(int dim) const {
+  // https://oeis.org/A001787
+  if (dim < 0)
+    return 0;
+  return dim * GetVerticesCount(dim - 1);
 }
 
 #undef HYPERCUBE_DEBUG_PRINT
