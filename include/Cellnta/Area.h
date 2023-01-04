@@ -12,7 +12,7 @@ struct Cell {
   Cell() = default;
   Cell(const Pos& pos, State state) : pos(pos), state(state) {}
   Pos pos;
-  State state;
+  State state = 0;
 };
 
 struct Area {
