@@ -29,9 +29,9 @@ void CameraWindow::Draw() {
         ImGui::TreePop();
       }
     }
-
-    ImGui::End();
   }
+
+  ImGui::End();
 }
 
 void CameraWindow::DrawCameraOptions(Cellnta::Camera3d& camera) {
