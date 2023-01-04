@@ -19,7 +19,7 @@ class CameraWindow : public Window {
 
  private:
   void DrawCameras();
-  void DrawCameraSensitivity(Cellnta::Camera3d& camera);
+  void DrawCameraOptions(Cellnta::Camera3d& camera);
   void DrawCamera3d(Cellnta::Camera3d& cam3d);
   void DrawCameraNdList(Cellnta::CameraNdList& list);
   void DrawCameraNd(Cellnta::CameraNd& camNd);

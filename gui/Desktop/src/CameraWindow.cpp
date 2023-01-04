@@ -18,7 +18,7 @@ void CameraWindow::Draw() {
 
   if (ImGui::Begin(p_prop.Name, &p_prop.Opened)) {
     if (camera3d != nullptr)
-      DrawCameraSensitivity(*camera3d);
+      DrawCameraOptions(*camera3d);
 
     if (cameraNd != nullptr)
       DrawCameraNdList(*cameraNd);
@@ -34,7 +34,7 @@ void CameraWindow::Draw() {
   }
 }
 
-void CameraWindow::DrawCameraSensitivity(Cellnta::Camera3d& camera) {
+void CameraWindow::DrawCameraOptions(Cellnta::Camera3d& camera) {
   CELLNTA_PROFILE;
 
   float mouseSpeed = camera.GetMouseSpeed();
