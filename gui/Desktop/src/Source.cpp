@@ -116,6 +116,8 @@ bool CreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx) {
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
   SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+  SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
   uint32_t winFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
 #ifdef CELLNTA_RENDERER_GLES3
@@ -264,6 +266,7 @@ int main(int /*unused*/, char** /*unused*/) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_MULTISAMPLE);
 
 #if defined(CELLNTA_RENDERER_GL)
   glPointSize(10.0f);
