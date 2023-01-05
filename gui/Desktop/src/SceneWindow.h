@@ -13,7 +13,7 @@ class SceneWindow : public Window {
   };
 
  public:
-  SceneWindow() : Window(DefaultProperties) {}
+  SceneWindow();
   ~SceneWindow();
 
   void Draw() override;
@@ -33,8 +33,8 @@ class SceneWindow : public Window {
 
   ImVec2 m_framebufferSize = ImVec2(0, 0);
   uint32_t m_framebuffer = 0;
+  uint32_t m_renBuffer = 0;
   uint32_t m_texture = 0;
-  uint32_t m_depthTexture = 0;
   bool m_focused = false;
 };
 

@@ -10,13 +10,16 @@
 
 using namespace Ui;
 
+SceneWindow::SceneWindow() : Window(DefaultProperties) {
+  glGenFramebuffers(1, &m_framebuffer);
+  glGenRenderbuffers(1, &m_renBuffer);
+  glGenTextures(1, &m_texture);
+}
+
 SceneWindow::~SceneWindow() {
-  if (m_framebuffer != 0)
-    glDeleteFramebuffers(1, &m_framebuffer);
-  if (m_texture != 0)
-    glDeleteTextures(1, &m_texture);
-  if (m_depthTexture != 0)
-    glDeleteTextures(1, &m_depthTexture);
+  glDeleteFramebuffers(1, &m_framebuffer);
+  glDeleteRenderbuffers(1, &m_renBuffer);
+  glDeleteTextures(1, &m_texture);
 }
 
 void SceneWindow::Draw() {
@@ -157,13 +160,6 @@ void SceneWindow::HandleCameraInput() {
 void SceneWindow::ResizeFramebuffer(int width, int height) {
   CELLNTA_PROFILE;
 
-  if (m_framebuffer == 0)
-    glGenFramebuffers(1, &m_framebuffer);
-  if (m_texture == 0)
-    glGenTextures(1, &m_texture);
-  if (m_depthTexture == 0)
-    glGenTextures(1, &m_depthTexture);
-
   CELLNTA_LOG_TRACE("Resizing framebuffer to: ({}; {})", width, height);
 
   glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
@@ -179,16 +175,12 @@ void SceneWindow::ResizeFramebuffer(int width, int height) {
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
                          m_texture, 0);
 
-  glBindTexture(GL_TEXTURE_2D, m_depthTexture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0,
-               GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                         GL_TEXTURE_2D, m_depthTexture, 0);
+  glBindRenderbuffer(GL_RENDERBUFFER, m_renBuffer);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renBuffer);
+
+  if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    CELLNTA_LOG_ERROR("Could not create scene framebuffer");
 
   m_framebufferSize = ImVec2(width, height);
 }
