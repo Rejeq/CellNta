@@ -30,23 +30,27 @@ bool Widget::ToggleButton(const char* label, bool& v) {
   return out;
 }
 
-static void CellSelectorEx(size_t vecSize, Cellnta::Cell& cell,
+static void CellSelectorEx(size_t targetSize, Cellnta::Cell& cell,
                            bool shiftLastPoint) {
-  if (cell.pos.size() != vecSize) {
-    Cellnta::Cell::Pos tmp = Cellnta::Cell::Pos::Zero(vecSize);
-    const int minSize = std::min(cell.pos.size(), tmp.size());
+  const size_t realSize = cell.pos.size();
+
+  if (realSize != targetSize) {
+    Cellnta::Cell::Pos tmp = Cellnta::Cell::Pos::Zero(targetSize);
+    const int minSize = std::min(realSize, targetSize);
     memcpy(tmp.data(), cell.pos.data(), minSize * sizeof(Cellnta::Cell::Point));
 
     if (shiftLastPoint) {
-      if (cell.pos.size() < tmp.size())
-        tmp(tmp.size() - 2) = 0.0f;
-      tmp(tmp.size() - 1) = 1.0f;
+      if (realSize < targetSize && realSize != 0)
+        tmp(realSize - 1) = 0.0f;
+      tmp(targetSize - 1) = 1.0f;
     }
     cell.pos = tmp;
   }
 
-  Widget::DragN("Position ##CellSelector", cell.pos.data(), cell.pos.size());
-  Widget::Input("State##CellSelector", &cell.state);
+  ImGui::PushID("CellSelector");
+  Widget::DragN("Position", cell.pos.data(), cell.pos.size());
+  Widget::Input("State", &cell.state);
+  ImGui::PopID();
 }
 
 void Widget::CellSelector(size_t d, Cellnta::Cell& cell) {
