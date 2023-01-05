@@ -62,40 +62,32 @@ void Widget::CellSelectorHomogeneous(size_t d, Cellnta::Cell& cell) {
 }
 
 bool Widget::RuleMask(const char* label, boost::dynamic_bitset<>& mask) {
-  auto FilterOnlyNums = [](ImGuiInputTextCallbackData* data) -> int {
-    bool out = false;
-    if (!(data->EventChar >= '0' && data->EventChar <= '9'))
-      out = true;
-
-    return out;
-  };
-
-  constexpr ImGuiInputTextFlags flags = ImGuiInputTextFlags_CallbackCharFilter;
-
-  // TODO: add support several digits
-  std::string str;
+  std::string maskStr;
 
   for (size_t i = mask.find_first(); i != boost::dynamic_bitset<>::npos;
        i = mask.find_next(i))
-    str.push_back(i + '0');
+    maskStr.push_back(i + '0');
 
-  bool out = ImGui::InputText(label, &str, flags, FilterOnlyNums);
+  bool changed = ImGui::InputText(label, &maskStr, ImGuiInputTextFlags_CharsDecimal);
 
-  if (out) {
-    if (str.size() >= mask.size())
+  if (changed) {
+    if (maskStr.size() >= mask.size())
       return false;
 
     // Strings with the same values but in different order are equal
     // so we need to exclude false positives
     boost::dynamic_bitset<> oldMask = mask;
     mask.reset();
-    for (auto ch : str) {
+    // FIXME: Currently only single digits can be entered
+    // For example, we cannot set 12 bits
+    // it will be treated as 1 and 2
+    for (auto ch : maskStr) {
       if (ch >= '0' && ch <= '9')
         mask[ch - '0'] = ch - '0';
     }
 
     if (mask == oldMask)
-      out = false;
+      return false;
   }
-  return out;
+  return changed;
 }
