@@ -17,8 +17,10 @@ Area::Area(const int min, const int max) {
 bool Area::PosValid(const Eigen::VectorXi& pos) const {
   CELLNTA_PROFILE;
 
-  for (int i = 0; i < std::min(pos.size(), min.size()); ++i) {
-    if (!((min(i) <= pos(i)) && (pos(i) <= max(i))))
+  for (int i = 0; i < 3 /* min.size() */; ++i) {
+    int point = (i < pos.size()) ? pos(i) : 0;
+
+    if (!((min(i) <= point) && (point <= max(i))))
       return false;
   }
 
