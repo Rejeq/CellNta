@@ -4,6 +4,11 @@
 
 using namespace Cellnta;
 
+Area::Area() {
+  this->min = Eigen::Vector3i::Zero();
+  this->max = Eigen::Vector3i::Zero();
+}
+
 Area::Area(const Eigen::Vector3i& min, const Eigen::Vector3i& max) {
   this->min = min;
   this->max = max;

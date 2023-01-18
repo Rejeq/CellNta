@@ -21,7 +21,7 @@ struct Area {
   Eigen::Vector3i min;
   Eigen::Vector3i max;
 
-  Area() = default;
+  Area();
   Area(const Eigen::Vector3i& min, const Eigen::Vector3i& max);
   Area(int min, int max);
 
