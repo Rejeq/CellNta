@@ -22,6 +22,10 @@
 #define RESOURCE_DIR
 #endif
 
+#ifdef main
+#undef main
+#endif
+
 constexpr size_t WINDOW_WIDTH = 1200;
 constexpr size_t WINDOW_HEIGHT = 700;
 

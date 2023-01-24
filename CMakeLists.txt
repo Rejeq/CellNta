@@ -5,6 +5,7 @@ project(CellNta)
 option(CELLNTA_PROFILING "Enable profiling" OFF)
 option(CELLNTA_TIDY "Enable clang-tidy checks" OFF)
 option(CELLNTA_TRACE_LOGGING "Enable detailed logging. Causes performance issues" OFF)
+option(CELLNTA_FETCHING "Enable fetching third-party libraries" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
@@ -27,16 +28,16 @@ if(CELLNTA_TIDY)
   message(STATUS "Enabled clang-tidy: ${CLANG_TIDY_BIN}")
 endif()
 
-set(BOOST_INCLUDEDIR "${CELLNTA_THIRD_PARTY}/boost")
 
+list(APPEND CMAKE_MODULE_PATH "${CELLNTA_DIR}/cmake")
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
-find_package(Boost REQUIRED)
-find_package(spdlog REQUIRED)
-include(${CELLNTA_THIRD_PARTY}/Eigen.cmake)
+find_package(GLEW)
+find_package(Boost)
+find_package(Spdlog)
+find_package(Eigen)
 
 if(CELLNTA_PROFILING)
-  include(${CELLNTA_THIRD_PARTY}/Tracy.cmake)
+  find_package(Tracy REQUIRED)
 endif()
 
 
@@ -73,7 +74,7 @@ target_link_libraries(CellNta PUBLIC
   spdlog::spdlog
 )
 
-if(CELLNTA_PROFILING_ENABLED)
+if(CELLNTA_PROFILING)
   target_link_libraries(CellNta PUBLIC Tracy::Client)
   target_compile_definitions(CellNta PUBLIC CELLNTA_PROFILING_ENABLED)
   message(STATUS "Profiling enabled")

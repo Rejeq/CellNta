@@ -5,7 +5,7 @@ set(RESOURCE_DIR ${CELLNTA_DIR}/Resource/)
 set(IMGUI_CONFIG ${GUI_DIR}/src/imgui_config.h)
 
 find_package(SDL2 REQUIRED)
-include(${CELLNTA_THIRD_PARTY}/ImGui.cmake)
+find_package(ImGui REQUIRED)
 
 
 file(GLOB_RECURSE SOURCE_LIST
@@ -21,13 +21,9 @@ target_compile_definitions(GUI PUBLIC
   IMGUI_USER_CONFIG="${IMGUI_CONFIG}"
 )
 
-target_include_directories(GUI PUBLIC
-  ${SDL2_INCLUDE_DIRS}
-)
-
 target_link_libraries(GUI PUBLIC
   CellNta
   ImGui::ImGui
-  ${SDL2_LIBRARIES}
+  SDL2::SDL2
   ${CMAKE_DL_LIBS}
 )
