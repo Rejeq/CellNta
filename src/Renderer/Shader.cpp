@@ -9,6 +9,19 @@
 
 using namespace Cellnta;
 
+static int NewlineSize(const std::string& str, const size_t pos) {
+  int size = 0;
+  if (str[pos] == '\n')
+    size++; //Skip \n
+  else if (str[pos] == '\r') {
+    size++; //Skip \r
+    if (str[pos + 1] == '\n')
+      size++; //Skip \n
+  }
+
+  return size;
+}
+
 Shader::~Shader() {
   if (m_id != 0)
     Delete();
@@ -28,8 +41,8 @@ void Shader::Use() const {
 bool Shader::CreateFromMemory(std::string& src) {
   CELLNTA_PROFILE;
 
-  constexpr std::string_view DirectiveVertex = "#shader vertex\n";
-  constexpr std::string_view DirectiveFragment = "#shader fragment\n";
+  constexpr std::string_view DirectiveVertex = "#shader vertex";
+  constexpr std::string_view DirectiveFragment = "#shader fragment";
 
   size_t vertexStart = src.find(DirectiveVertex);
   size_t fragmentStart = src.find(DirectiveFragment);
@@ -38,20 +51,23 @@ bool Shader::CreateFromMemory(std::string& src) {
     return true;
   }
 
+  int vStartNewLineSize = NewlineSize(src, vertexStart + DirectiveVertex.size());
+  int fStartNewLineSize = NewlineSize(src, fragmentStart + DirectiveFragment.size());
+
   GLuint vertex = 0;
   GLuint fragment = 0;
   if (fragmentStart > vertexStart) {
-    vertexStart += DirectiveVertex.size();
+    vertexStart += DirectiveVertex.size() + vStartNewLineSize;
     vertex = LoadShader(src.c_str() + vertexStart, fragmentStart - vertexStart,
                         GL_VERTEX_SHADER);
-    fragmentStart += DirectiveFragment.size();
+    fragmentStart += DirectiveFragment.size() + fStartNewLineSize;
     fragment = LoadShader(src.c_str() + fragmentStart,
                           src.size() - fragmentStart, GL_FRAGMENT_SHADER);
   } else {
-    fragmentStart += DirectiveFragment.size();
+    fragmentStart += DirectiveFragment.size() + fStartNewLineSize;
     fragment = LoadShader(src.c_str() + fragmentStart,
                           vertexStart - fragmentStart, GL_FRAGMENT_SHADER);
-    vertexStart += DirectiveVertex.size();
+    vertexStart += DirectiveVertex.size() + vStartNewLineSize;
     vertex = LoadShader(src.c_str() + vertexStart, src.size() - vertexStart,
                         GL_VERTEX_SHADER);
   }
