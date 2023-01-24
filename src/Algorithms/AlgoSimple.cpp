@@ -214,7 +214,7 @@ size_t AlgoSimple::FindIdxInRangedWorld(size_t cellIdx, size_t neighborIdx) {
 }
 
 size_t AlgoSimple::CalculateIdxFromPos(const Cell::Pos& pos) {
-  CELLNTA_PROFILE
+  CELLNTA_PROFILE;
 
   size_t idx = 0;
   size_t size = 1;
