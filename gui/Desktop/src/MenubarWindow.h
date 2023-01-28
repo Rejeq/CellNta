@@ -3,6 +3,7 @@
 #include <functional>
 
 #include "Window.h"
+#include "Widgets/RightAlign.h"
 
 namespace Ui {
 
@@ -21,12 +22,9 @@ class MenubarWindow : public Window {
 
  private:
   void DrawWindowsButtons();
-  float DrawFramerate(float right);
-  float DrawResetLayout(float right);
 
   std::function<void(const Context&)> m_OnResetLayout;
-  float m_frameratePos = -1.0f;
-  float m_layoutPos = -1.0f;
+  Widget::RightAlign m_rAlign;
 };
 
 }  // namespace Ui
