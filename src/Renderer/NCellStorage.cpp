@@ -25,10 +25,8 @@ void NCellStorage::Restore() {
 void NCellStorage::Add(const Vec& pos) {
   CELLNTA_PROFILE;
 
-  assert(pos.size() >= m_d);
-
-  Vec tmp(m_d + 1);
-  memcpy(tmp.data(), pos.data(), m_d * sizeof(Point));
+  Vec tmp = Vec::Zero(m_d + 1);
+  memcpy(tmp.data(), pos.data(), std::min(m_d, (int) pos.size()) * sizeof(Point));
   tmp(m_d) = 1;
 
   m_cells.push_back(tmp);
@@ -39,7 +37,8 @@ void NCellStorage::Add(const Vec& pos) {
 void NCellStorage::AddHomogeneous(const Vec& pos) {
   CELLNTA_PROFILE;
 
-  assert(pos.size() >= m_d + 1);
+  Vec tmp = Vec::Zero(m_d + 1);
+  memcpy(tmp.data(), pos.data(), std::min(m_d + 1, (int) pos.size()) * sizeof(Point));
   m_cells.push_back(pos);
 
   m_needUpdate = true;
