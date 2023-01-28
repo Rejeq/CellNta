@@ -1,6 +1,6 @@
-option(GUI_DESKTOP "ImGui ui" ON)
+option(CELLNTA_GUI_DESKTOP "ImGui ui" ON)
 
-if(GUI_DESKTOP)
+if(CELLNTA_GUI_DESKTOP)
   message(STATUS "Building desktop gui")
   add_subdirectory(Desktop)
 endif()
