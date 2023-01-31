@@ -15,7 +15,7 @@ set(CELLNTA_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(CELLNTA_THIRD_PARTY ${CELLNTA_DIR}/third_party)
 set(CELLNTA_FOLDERS
   "." #Base
-  "Algorithms"
+  "World"
   "Renderer"
 )
 

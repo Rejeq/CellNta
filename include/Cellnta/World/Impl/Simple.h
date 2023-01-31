@@ -8,9 +8,9 @@
 
 namespace Cellnta {
 
-class AlgoSimple : public AlgoBase {
+class WorldImplSimple : public World {
  public:
-  AlgoSimple() : AlgoBase(AlgoType::SIMPLE) {}
+  WorldImplSimple() : World(WorldType::SIMPLE) {}
 
   void Update() override;
   void SetDimension(int dim) override;

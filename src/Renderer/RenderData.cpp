@@ -15,21 +15,21 @@ RenderData::RenderData(int dim) : m_d(dim) {
   m_desiredArea.reserve(4);
 }
 
-void RenderData::Update(const AlgoBase* algo) {
-  if (algo == nullptr)
+void RenderData::Update(const World* world) {
+  if (world == nullptr)
     return;
 
   CELLNTA_LOG_TRACE("Updating RenderData");
 
   NCellStorage::VecList& rawCells = m_cells.GetRaw();
   for (auto itPos = rawCells.begin(); itPos != rawCells.end(); ++itPos) {
-    if (algo->GetCell(itPos->cast<Cell::Point>()) == 0) {
+    if (world->GetCell(itPos->cast<Cell::Point>()) == 0) {
       rawCells.erase(itPos);
       --itPos;
     }
   }
 
-  IteratorRef iter = algo->CreateIterator(GetVisibleArea());
+  IteratorRef iter = world->CreateIterator(GetVisibleArea());
   while (const Cell* cell = iter->Next()) {
     SetCell(*cell);
   }

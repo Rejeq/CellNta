@@ -12,14 +12,14 @@
 
 namespace Cellnta {
 
-class AlgoBase;
+class World;
 
 class RenderData {
  public:
   RenderData();
   RenderData(int dim);
 
-  void Update(const AlgoBase* algo);
+  void Update(const World* world);
 
   void SetDimension(int dim);
 

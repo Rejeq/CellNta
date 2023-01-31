@@ -3,26 +3,26 @@
 
 using namespace Ui;
 
-void Ui::DrawAlgoRandom(Cellnta::AlgoRandom* algo) {
-  if (algo == nullptr)
+void Ui::DrawWorldImplRandom(Cellnta::WorldImplRandom* world) {
+  if (world == nullptr)
     return;
 
-  int min = algo->GetRangeMin();
-  int max = algo->GetRangeMax();
+  int min = world->GetRangeMin();
+  int max = world->GetRangeMax();
 
   ImGui::SetNextItemWidth(ImGui::GetWindowWidth() / 3);
   if (ImGui::DragInt("Min", &min))
-    algo->SetRangeMin(min);
+    world->SetRangeMin(min);
 
   ImGui::SameLine();
 
   ImGui::SetNextItemWidth(ImGui::GetWindowWidth() / 3);
   if (ImGui::DragInt("Max", &max))
-    algo->SetRangeMax(max);
+    world->SetRangeMax(max);
 
   ImGui::Spacing();
 
   static int seed = 0;
   if (ImGui::InputInt("Seed", &seed))
-    algo->SetSeed(seed);
+    world->SetSeed(seed);
 }

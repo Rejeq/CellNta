@@ -5,16 +5,16 @@
 
 namespace Cellnta {
 
-enum class AlgoType {
+enum class WorldType {
   RANDOM,
   SIMPLE,
   COUNT,
 };
 
-class AlgoBase : public Iterable {
+class World : public Iterable {
  public:
-  AlgoBase(AlgoType type) : m_type(type) {}
-  virtual ~AlgoBase() = default;
+  World(WorldType type) : m_type(type) {}
+  virtual ~World() = default;
 
   virtual void Update() = 0;
   virtual void SetDimension(int dim) = 0;
@@ -28,9 +28,9 @@ class AlgoBase : public Iterable {
   void SetStep(int step) { m_step = step; }
   int GetStep() const { return m_step; }
 
-  AlgoType GetType() const { return m_type; }
+  WorldType GetType() const { return m_type; }
 
-  void SetupFrom(const AlgoBase* left) {
+  void SetupFrom(const World* left) {
     if (left == nullptr)
       return;
 
@@ -43,7 +43,7 @@ class AlgoBase : public Iterable {
 
  private:
   int m_step = 1;
-  const AlgoType m_type;
+  const WorldType m_type;
 };
 
 }  // namespace Cellnta

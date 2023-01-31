@@ -15,8 +15,8 @@
 
 namespace Cellnta {
 
-class AlgoBase;
-enum class AlgoType;
+class World;
+enum class WorldType;
 
 }
 
@@ -43,9 +43,9 @@ class Context {
   const WindowsDataType& GetWindows() const { return m_windowsData; }
   Window* GetWindowByName(const std::string& name);
 
-  bool SetAlgo(const Cellnta::AlgoType type);
-  const Cellnta::AlgoBase& GetAlgo() const { return *m_algo; }
-  Cellnta::AlgoBase& GetAlgo() { return *m_algo; }
+  bool SetWorld(const Cellnta::WorldType type);
+  const Cellnta::World& GetWorld() const { return *m_world; }
+  Cellnta::World& GetWorld() { return *m_world; }
 
   const Cellnta::Renderer& GetRenderer() const { return m_renderer; }
   Cellnta::Renderer& GetRenderer() { return m_renderer; }
@@ -72,7 +72,7 @@ class Context {
 
   WindowsDataType m_windowsData;
   Cellnta::Renderer m_renderer;
-  std::unique_ptr<Cellnta::AlgoBase> m_algo;
+  std::unique_ptr<Cellnta::World> m_world;
   std::shared_ptr<Cellnta::Camera3d> m_camera3d;
   std::shared_ptr<Cellnta::CameraNdList> m_cameraNd;
   std::shared_ptr<Cellnta::HypercubeStorage> m_hypercube;

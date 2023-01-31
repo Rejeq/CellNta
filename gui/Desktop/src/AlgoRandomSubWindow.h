@@ -4,6 +4,6 @@
 
 namespace Ui {
 
-void DrawAlgoRandom(Cellnta::AlgoRandom* algo);
+void DrawWorldImplRandom(Cellnta::WorldImplRandom* world);
 
 }

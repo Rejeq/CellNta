@@ -19,13 +19,13 @@
 
 namespace Cellnta {
 
-inline std::unique_ptr<AlgoBase> CreateAlgoInstance(const AlgoType algoType) {
-  switch (algoType) {
+inline std::unique_ptr<World> CreateWorldInstance(const WorldType worldType) {
+  switch (worldType) {
 #if CELLNTA_ALGO_RANDOM
-    case AlgoType::RANDOM: return std::make_unique<AlgoRandom>(); break;
+    case WorldType::RANDOM: return std::make_unique<WorldImplRandom>(); break;
 #endif
 #if CELLNTA_ALGO_SIMPLE
-    case AlgoType::SIMPLE: return std::make_unique<AlgoSimple>(); break;
+    case WorldType::SIMPLE: return std::make_unique<WorldImplSimple>(); break;
 #endif
     default: break;
   }

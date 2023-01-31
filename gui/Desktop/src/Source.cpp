@@ -197,7 +197,7 @@ void ResetContextLayout(const Ui::Context& ctx) {
   ImGui::DockBuilderDockWindow("Dear ImGui Demo", dockIdRem);
 
   ImGui::DockBuilderDockWindow("Renderer", dockIdLeft);
-  ImGui::DockBuilderDockWindow("Algorithm", dockIdLeft);
+  ImGui::DockBuilderDockWindow("World", dockIdLeft);
 
   ImGui::DockBuilderFinish(dockId);
 }
@@ -207,7 +207,7 @@ bool CreateContextLayout(Ui::Context& ctx) {
   Cellnta::Camera3d* cam3d = ren.GetCamera3d();
   Cellnta::HypercubeStorage* cube = ren.GetHypercube();
 
-  ctx.SetAlgo(Cellnta::AlgoType::SIMPLE);
+  ctx.SetWorld(Cellnta::WorldType::SIMPLE);
   ctx.SetDimension(2);
 
   bool err = ren.CreateShaders(RESOURCE_DIR "Shaders/Grid.glsl",
@@ -230,7 +230,7 @@ bool CreateContextLayout(Ui::Context& ctx) {
 
   ctx.AddWindow(std::make_unique<Ui::CameraWindow>());
   ctx.AddWindow(std::make_unique<Ui::RendererWindow>());
-  ctx.AddWindow(std::make_unique<Ui::AlgoWindow>());
+  ctx.AddWindow(std::make_unique<Ui::WorldWindow>());
   ctx.AddWindow(std::make_unique<Ui::SceneWindow>());
   ctx.AddWindow(std::make_unique<Ui::MenubarWindow>(ResetContextLayout));
 

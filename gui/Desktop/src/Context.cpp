@@ -55,8 +55,8 @@ void Context::SetDimension(int dim) {
   CELLNTA_PROFILE;
 
   m_renderer.SetDimension(dim);
-  if (m_algo != nullptr)
-    m_algo->SetDimension(dim);
+  if (m_world != nullptr)
+    m_world->SetDimension(dim);
 }
 
 void Context::Update() {
@@ -67,7 +67,7 @@ void Context::Update() {
     return;
 
   if (data->DesireArea()) {
-    data->Update(m_algo.get());
+    data->Update(m_world.get());
     data->DesireAreaProcessed();
   }
 
@@ -99,11 +99,11 @@ void Context::Draw() {
 void Context::NextGeneration() {
   CELLNTA_PROFILE;
 
-  if (m_algo == nullptr)
+  if (m_world == nullptr)
     return;
 
-  m_algo->Update();
-  m_renderData->Update(m_algo.get());
+  m_world->Update();
+  m_renderData->Update(m_world.get());
 }
 
 void Context::SetupDockspace() {
@@ -124,15 +124,15 @@ Window* Context::GetWindowByName(const std::string& name) {
   return nullptr;
 }
 
-bool Context::SetAlgo(const Cellnta::AlgoType type) {
+bool Context::SetWorld(const Cellnta::WorldType type) {
   CELLNTA_PROFILE;
 
-  std::unique_ptr<Cellnta::AlgoBase> tmp = Cellnta::CreateAlgoInstance(type);
+  std::unique_ptr<Cellnta::World> tmp = Cellnta::CreateWorldInstance(type);
   if (tmp == nullptr)
     return true;
 
-  tmp->SetupFrom(m_algo.get());
-  m_algo = std::move(tmp);
+  tmp->SetupFrom(m_world.get());
+  m_world = std::move(tmp);
 
   Cellnta::RenderData* data = m_renderer.GetData();
   if (data != nullptr)

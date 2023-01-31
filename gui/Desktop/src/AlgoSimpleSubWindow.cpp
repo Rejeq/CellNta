@@ -6,25 +6,25 @@
 
 using namespace Ui;
 
-void Ui::DrawAlgoSimple(Cellnta::AlgoSimple* algo) {
-  if (algo == nullptr)
+void Ui::DrawWorldImplSimple(Cellnta::WorldImplSimple* world) {
+  if (world == nullptr)
     return;
 
-  bool repeated = algo->GetWorldRepeated();
+  bool repeated = world->GetWorldRepeated();
   if (ImGui::Checkbox("World repeated", &repeated))
-    algo->SetWorldRepeated(repeated);
+    world->SetWorldRepeated(repeated);
 
-  auto size = algo->GetSize();
+  auto size = world->GetSize();
   if (Widget::DragN("Size", size.data(), size.size()))
-    algo->SetSize(size);
+    world->SetSize(size);
 
   Widget::Separator();
 
-  boost::dynamic_bitset<> born = algo->GetBorn();
+  boost::dynamic_bitset<> born = world->GetBorn();
   if (Widget::RuleMask("Born", born))
-    algo->SetBorn(born);
+    world->SetBorn(born);
 
-  boost::dynamic_bitset<> survive = algo->GetSurvive();
+  boost::dynamic_bitset<> survive = world->GetSurvive();
   if (Widget::RuleMask("Survive", survive))
-    algo->SetSurvive(survive);
+    world->SetSurvive(survive);
 }

@@ -8,10 +8,10 @@
 
 namespace Cellnta {
 
-class AlgoRandom : public AlgoBase {
+class WorldImplRandom : public World {
  public:
-  AlgoRandom() : AlgoBase(AlgoType::RANDOM) {}
-  virtual ~AlgoRandom() = default;
+  WorldImplRandom() : World(WorldType::RANDOM) {}
+  virtual ~WorldImplRandom() = default;
 
   void Update() override;
   void SetDimension(int dim) override;

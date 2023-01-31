@@ -12,22 +12,22 @@
 
 using namespace Ui;
 
-void AlgoWindow::Draw() {
+void WorldWindow::Draw() {
   CELLNTA_PROFILE;
 
-  Cellnta::AlgoBase* algo = &GetContext()->GetAlgo();
+  Cellnta::World* world = &GetContext()->GetWorld();
 
   if (ImGui::Begin(p_prop.Name, &p_prop.Opened)) {
-    DrawBaseAlgoInfo(algo);
+    DrawBaseWorldInfo(world);
 
     Widget::Separator();
 
-    switch (algo->GetType()) {
-      case Cellnta::AlgoType::RANDOM:
-        DrawAlgoRandom((Cellnta::AlgoRandom*)algo);
+    switch (world->GetType()) {
+      case Cellnta::WorldType::RANDOM:
+        DrawWorldImplRandom((Cellnta::WorldImplRandom*)world);
         break;
-      case Cellnta::AlgoType::SIMPLE:
-        DrawAlgoSimple((Cellnta::AlgoSimple*)algo);
+      case Cellnta::WorldType::SIMPLE:
+        DrawWorldImplSimple((Cellnta::WorldImplSimple*)world);
         break;
       default: break;
     }
@@ -36,36 +36,36 @@ void AlgoWindow::Draw() {
   ImGui::End();
 }
 
-void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo) {
+void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
   CELLNTA_PROFILE;
 
-  static const std::array<ComboData<Cellnta::AlgoType>, 2> AlgoTypeData = {
-      ComboData(Cellnta::AlgoType::RANDOM, "Random"),
-      ComboData(Cellnta::AlgoType::SIMPLE, "Simple"),
+  static const std::array<ComboData<Cellnta::WorldType>, 2> WorldTypeData = {
+      ComboData(Cellnta::WorldType::RANDOM, "Random"),
+      ComboData(Cellnta::WorldType::SIMPLE, "Simple"),
   };
 
-  if (algo == nullptr)
+  if (world == nullptr)
     return;
 
   Context* ctx = GetContext();
 
-  Cellnta::AlgoType res = Cellnta::AlgoType::COUNT;
-  if (Widget::ComboEnum("Algorithm type", algo->GetType(), AlgoTypeData, res)) {
-    if (ctx->SetAlgo(res))
-      assert(0 && "Unable to change algorithm type");
-    algo = &ctx->GetAlgo();
+  Cellnta::WorldType res = Cellnta::WorldType::COUNT;
+  if (Widget::ComboEnum("Worldrithm type", world->GetType(), WorldTypeData, res)) {
+    if (ctx->SetWorld(res))
+      assert(0 && "Unable to change worldrithm type");
+    world = &ctx->GetWorld();
   }
 
-  size_t dim = algo->GetDimensions();
+  size_t dim = world->GetDimensions();
   if (ImGui::DragInt("Dimensions", (int*)&dim, 0.125f, 0, INT_MAX))
-    algo->SetDimension(dim);
+    world->SetDimension(dim);
 
   ImGui::Spacing();
 
-  int32_t step = algo->GetStep();
+  int32_t step = world->GetStep();
   if (ImGui::DragInt("Step", (int*)&step, 1.0f, 0, INT32_MAX, nullptr,
                      ImGuiSliderFlags_AlwaysClamp))
-    algo->SetStep(step);
+    world->SetStep(step);
 
   if (ImGui::Button("Next generation"))
     GetContext()->NextGeneration();
@@ -75,7 +75,7 @@ void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo) {
   bool enabled = m_timer.Enabled();
   if (ImGui::Checkbox("Auto", &enabled)) {
     if (enabled)
-      m_timer.Start(1.0f, [&]() { algo->Update(); });
+      m_timer.Start(1.0f, [&]() { world->Update(); });
     else
       m_timer.Stop();
   }
@@ -84,10 +84,10 @@ void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo) {
 
   ImGui::Spacing();
 
-  Widget::CellSelector(algo->GetDimensions(), m_setCell);
+  Widget::CellSelector(world->GetDimensions(), m_setCell);
 
   if (ImGui::Button("Set cell")) {
-    algo->SetCell(m_setCell);
+    world->SetCell(m_setCell);
     Cellnta::RenderData* renData = GetContext()->GetRenderer().GetData();
     if (renData != nullptr)
       renData->SetCell(m_setCell);

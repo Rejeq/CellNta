@@ -31,18 +31,18 @@ class Timer {
   std::function<void()> m_res;
 };
 
-class AlgoWindow : public Window {
+class WorldWindow : public Window {
   static constexpr WindowProperties DefaultProperties = {
-      .Name = "Algorithm",
+      .Name = "World",
   };
 
  public:
-  AlgoWindow() : Window(DefaultProperties) {}
+  WorldWindow() : Window(DefaultProperties) {}
 
   void Draw() override;
 
  private:
-  void DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo);
+  void DrawBaseWorldInfo(Cellnta::World*& world);
 
   Cellnta::Cell m_setCell;
   Timer m_timer;

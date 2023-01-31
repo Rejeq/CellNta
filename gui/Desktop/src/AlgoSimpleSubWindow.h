@@ -3,5 +3,5 @@
 #include <Cellnta/World/Impl/Simple.h>
 
 namespace Ui {
-void DrawAlgoSimple(Cellnta::AlgoSimple* algo);
+void DrawWorldImplSimple(Cellnta::WorldImplSimple* world);
 }

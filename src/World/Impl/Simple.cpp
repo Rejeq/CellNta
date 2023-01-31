@@ -22,75 +22,75 @@ static void IteratorNextPosition(const size_t* sizes, Cell::Pos& pos) {
   }
 }
 
-class AlgoSimple::Iterator : public Cellnta::Iterator {
+class WorldImplSimple::Iterator : public Cellnta::Iterator {
  public:
-  Iterator(const AlgoSimple* algo) : m_algo(algo) {
-    if (algo == nullptr)
-      CELLNTA_LOG_ERROR("Passing a not initialized AlgoSimple in Iterator");
-    m_curr.pos = Cell::Pos::Zero(m_algo->GetDimensions());
+  Iterator(const WorldImplSimple* world) : m_world(world) {
+    if (world == nullptr)
+      CELLNTA_LOG_ERROR("Passing a not initialized WorldImplSimple in Iterator");
+    m_curr.pos = Cell::Pos::Zero(m_world->GetDimensions());
   }
 
   const Cell* Next() override {
-    Cell::State* world = m_algo->GetWorld();
-    for (; m_idx < m_algo->GetTotalArea(); ++m_idx) {
+    Cell::State* world = m_world->GetWorld();
+    for (; m_idx < m_world->GetTotalArea(); ++m_idx) {
       if (world[m_idx] != 0) {
         ++m_idx;
-        IteratorNextPosition(m_algo->m_size.data(), m_curr.pos);
+        IteratorNextPosition(m_world->m_size.data(), m_curr.pos);
         break;
       }
 
-      IteratorNextPosition(m_algo->m_size.data(), m_curr.pos);
+      IteratorNextPosition(m_world->m_size.data(), m_curr.pos);
     }
     return nullptr;
   }
 
  private:
-  const AlgoSimple* m_algo;
+  const WorldImplSimple* m_world;
   Cell m_curr;
   size_t m_idx = 0;
 };
 
-class AlgoSimple::AreaIterator : public Cellnta::Iterator {
+class WorldImplSimple::AreaIterator : public Cellnta::Iterator {
  public:
-  AreaIterator(const AlgoSimple* algo, const Area& area)
-      : m_algo(algo), m_area(area) {
-    if (algo == nullptr)
-      CELLNTA_LOG_ERROR("Passing a not initialized AlgoSimple in AreaIterator");
-    m_curr.pos = Cell::Pos::Zero(m_algo->GetDimensions());
+  AreaIterator(const WorldImplSimple* world, const Area& area)
+      : m_world(world), m_area(area) {
+    if (world == nullptr)
+      CELLNTA_LOG_ERROR("Passing a not initialized WorldImplSimple in AreaIterator");
+    m_curr.pos = Cell::Pos::Zero(m_world->GetDimensions());
   }
 
   const Cell* Next() override {
-    Cell::State* world = m_algo->GetWorld();
+    Cell::State* world = m_world->GetWorld();
 
-    for (; m_idx < m_algo->GetTotalArea(); ++m_idx) {
+    for (; m_idx < m_world->GetTotalArea(); ++m_idx) {
       // FIXME: Looks like its not a optimal solution,
       // probably better is using generalized pitch
       if (m_area.PosValid(m_curr.pos)) {
         if (world[m_idx] != 0) {
           m_curr.state = world[m_idx];
           ++m_idx;
-          IteratorNextPosition(m_algo->m_size.data(), m_curr.pos);
+          IteratorNextPosition(m_world->m_size.data(), m_curr.pos);
           return &m_curr;
         }
       }
 
-      IteratorNextPosition(m_algo->m_size.data(), m_curr.pos);
+      IteratorNextPosition(m_world->m_size.data(), m_curr.pos);
     }
     return nullptr;
   }
 
-  const AlgoSimple* m_algo;
+  const WorldImplSimple* m_world;
   Cell m_curr;
   Area m_area;
   size_t m_idx = 0;
 };
 
-void AlgoSimple::Update() {
+void WorldImplSimple::Update() {
   CELLNTA_PROFILE;
 
   if (p_dim == 0 || m_worlds[0] == nullptr || m_worlds[1] == nullptr) {
     CELLNTA_LOG_WARN(
-        "AlgoSimple not properly initiliezed. The Update() has not happened");
+        "WorldImplSimple not properly initiliezed. The Update() has not happened");
     return;
   }
 
@@ -113,7 +113,7 @@ void AlgoSimple::Update() {
   CELLNTA_LOG_INFO("Next generation time: {}", dur);
 }
 
-void AlgoSimple::SetDimension(int dim) {
+void WorldImplSimple::SetDimension(int dim) {
   CELLNTA_PROFILE;
 
   if (dim == p_dim)
@@ -173,7 +173,7 @@ void AlgoSimple::SetDimension(int dim) {
   // p_needLoadInRenderer = true;
 }
 
-void AlgoSimple::SetCell(const Cell& cell) {
+void WorldImplSimple::SetCell(const Cell& cell) {
   CELLNTA_PROFILE;
 
   Cell::State* world = GetWorld();
@@ -185,7 +185,7 @@ void AlgoSimple::SetCell(const Cell& cell) {
   world[idx] = cell.state;
 }
 
-void AlgoSimple::SetCell(const std::vector<Cell>& cells) {
+void WorldImplSimple::SetCell(const std::vector<Cell>& cells) {
   CELLNTA_PROFILE;
 
   Cell::State* world = GetWorld();
@@ -199,7 +199,7 @@ void AlgoSimple::SetCell(const std::vector<Cell>& cells) {
   }
 }
 
-Cell::State AlgoSimple::GetCell(const Cell::Pos& pos) const {
+Cell::State WorldImplSimple::GetCell(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
   Cell::State* world = GetWorld();
@@ -211,16 +211,16 @@ Cell::State AlgoSimple::GetCell(const Cell::Pos& pos) const {
   return world[idx];
 }
 
-std::unique_ptr<Cellnta::Iterator> AlgoSimple::CreateIterator() const {
+std::unique_ptr<Cellnta::Iterator> WorldImplSimple::CreateIterator() const {
   return std::make_unique<Iterator>(this);
 }
 
-std::unique_ptr<Cellnta::Iterator> AlgoSimple::CreateIterator(
+std::unique_ptr<Cellnta::Iterator> WorldImplSimple::CreateIterator(
     const Area& area) const {
   return std::make_unique<AreaIterator>(this, area);
 }
 
-void AlgoSimple::SetSize(const std::vector<size_t>& size) {
+void WorldImplSimple::SetSize(const std::vector<size_t>& size) {
   m_size = size;
 
   m_totalArea = 1;
@@ -229,13 +229,13 @@ void AlgoSimple::SetSize(const std::vector<size_t>& size) {
   CreateWorld();
 }
 
-void AlgoSimple::Step() {
+void WorldImplSimple::Step() {
   CELLNTA_PROFILE;
 
   m_oddGen = !m_oddGen;
 }
 
-size_t AlgoSimple::FindNeighbors(const Cell::State* world, size_t idx) const {
+size_t WorldImplSimple::FindNeighbors(const Cell::State* world, size_t idx) const {
   CELLNTA_PROFILE;
 
   size_t out = 0;
@@ -248,7 +248,7 @@ size_t AlgoSimple::FindNeighbors(const Cell::State* world, size_t idx) const {
   return out;
 }
 
-void AlgoSimple::GenerateNeigbors() {
+void WorldImplSimple::GenerateNeigbors() {
   CELLNTA_PROFILE;
 
   Cell::Pos oneDimNei = Cell::Pos(3);
@@ -264,13 +264,13 @@ void AlgoSimple::GenerateNeigbors() {
   m_neighbors.erase(m_neighbors.begin() + zeroPosIdx);
 }
 
-size_t AlgoSimple::FindIdxInRangedWorld(size_t cellIdx,
+size_t WorldImplSimple::FindIdxInRangedWorld(size_t cellIdx,
                                         size_t neighborIdx) const {
   CELLNTA_PROFILE;
   return cellIdx + neighborIdx;
 }
 
-size_t AlgoSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
+size_t WorldImplSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
   size_t idx = 0;
@@ -284,14 +284,14 @@ size_t AlgoSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
   return idx;
 }
 
-void AlgoSimple::CreateWorld() {
+void WorldImplSimple::CreateWorld() {
   CELLNTA_PROFILE;
 
   for (auto& world : m_worlds) {
     world = std::make_unique<Cell::State[]>(GetTotalArea());
 
     if (world == nullptr) {
-      CELLNTA_LOG_ERROR("Unable to allocate memory for world in SimpleAlgo");
+      CELLNTA_LOG_ERROR("Unable to allocate memory for world in SimpleWorld");
       continue;
     }
 
@@ -299,14 +299,14 @@ void AlgoSimple::CreateWorld() {
   }
 }
 
-void AlgoSimple::DeleteWorld() {
+void WorldImplSimple::DeleteWorld() {
   CELLNTA_PROFILE;
 
   for (auto& world : m_worlds)
     world.reset(nullptr);
 }
 
-void AlgoSimple::CartesianProduct(int repeat, const Cell::Pos& oneDimNei,
+void WorldImplSimple::CartesianProduct(int repeat, const Cell::Pos& oneDimNei,
                                   std::vector<int>& out) {
   CELLNTA_PROFILE;
 
