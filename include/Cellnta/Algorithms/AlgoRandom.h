@@ -14,12 +14,14 @@ class AlgoRandom : public AlgoBase {
   virtual ~AlgoRandom() = default;
 
   void Update() override;
-  void LoadWorld(RenderData* data) override;
   void SetDimension(int dim) override;
 
   void SetCell(const Cell&) override {}
   void SetCell(const std::vector<Cell>&) override {}
   Cell::State GetCell(const Cell::Pos&) override { return 0; }
+
+  std::unique_ptr<Iterator> CreateIterator() const override;
+  std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;
 
   void SetSeed(int seed) { m_gen = std::default_random_engine(seed); }
 
@@ -29,6 +31,9 @@ class AlgoRandom : public AlgoBase {
   int GetRangeMax() const { return m_rangeMax; }
 
  private:
+  class Iterator;
+  class AreaIterator;
+
   std::vector<Cell::Pos> m_data;
   int m_rangeMin = -64;
   int m_rangeMax = 64;

@@ -10,11 +10,87 @@
 
 using namespace Cellnta;
 
+static void IteratorNextPosition(const size_t* sizes, Cell::Pos& pos) {
+  if (sizes == nullptr)
+    return;
+
+  for (int i = pos.size() - 1; i >= 0; --i) {
+    pos[i] += 1;
+    if (pos[i] < (Cell::Pos::Scalar)sizes[i])
+      break;
+    pos[i] = 0;
+  }
+}
+
+class AlgoSimple::Iterator : public Cellnta::Iterator {
+ public:
+  Iterator(const AlgoSimple* algo) : m_algo(algo) {
+    if (algo == nullptr)
+      CELLNTA_LOG_ERROR("Passing a not initialized AlgoSimple in Iterator");
+    m_curr.pos = Cell::Pos::Zero(m_algo->GetDimensions());
+  }
+
+  const Cell* Next() override {
+    Cell::State* world = m_algo->GetWorld();
+    for (; m_idx < m_algo->GetTotalArea(); ++m_idx) {
+      if (world[m_idx] != 0) {
+        ++m_idx;
+        IteratorNextPosition(m_algo->m_size.data(), m_curr.pos);
+        break;
+      }
+
+      IteratorNextPosition(m_algo->m_size.data(), m_curr.pos);
+    }
+    return nullptr;
+  }
+
+ private:
+  const AlgoSimple* m_algo;
+  Cell m_curr;
+  size_t m_idx = 0;
+};
+
+class AlgoSimple::AreaIterator : public Cellnta::Iterator {
+ public:
+  AreaIterator(const AlgoSimple* algo, const Area& area)
+      : m_algo(algo), m_area(area) {
+    if (algo == nullptr)
+      CELLNTA_LOG_ERROR("Passing a not initialized AlgoSimple in AreaIterator");
+    m_curr.pos = Cell::Pos::Zero(m_algo->GetDimensions());
+  }
+
+  const Cell* Next() override {
+    Cell::State* world = m_algo->GetWorld();
+
+    for (; m_idx < m_algo->GetTotalArea(); ++m_idx) {
+      // FIXME: Looks like its not a optimal solution,
+      // probably better is using generalized pitch
+      if (m_area.PosValid(m_curr.pos)) {
+        if (world[m_idx] != 0) {
+          m_curr.state = world[m_idx];
+          ++m_idx;
+          IteratorNextPosition(m_algo->m_size.data(), m_curr.pos);
+          return &m_curr;
+        }
+      }
+
+      IteratorNextPosition(m_algo->m_size.data(), m_curr.pos);
+    }
+    return nullptr;
+  }
+
+  const AlgoSimple* m_algo;
+  Cell m_curr;
+  Area m_area;
+  size_t m_idx = 0;
+};
+
 void AlgoSimple::Update() {
   CELLNTA_PROFILE;
 
   if (p_dim == 0 || m_worlds[0] == nullptr || m_worlds[1] == nullptr) {
-    CELLNTA_LOG_WARN("AlgoSimple not properly initiliezed. The Update() has not happened");
+    CELLNTA_LOG_WARN(
+        "AlgoSimple not properly initiliezed. The Update() has not happened");
     return;
   }
 
@@ -32,36 +108,9 @@ void AlgoSimple::Update() {
     Step();
   }
 
-  p_needLoadInRenderer = true;
-
   auto end = std::chrono::steady_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
   CELLNTA_LOG_INFO("Next generation time: {}", dur);
-}
-
-void AlgoSimple::LoadWorld(RenderData* data) {
-  CELLNTA_PROFILE;
-
-  if (data == nullptr || GetWorld() == nullptr)
-    return;
-
-  Cell::State* world = GetWorld();
-  Cell::Pos pos = Cell::Pos::Zero(GetDimensions());
-
-  data->Clear();
-  for (size_t cellPos = 0; cellPos < GetTotalArea(); ++cellPos) {
-    if (world[cellPos] != 0)
-      data->SetCell(Cell(pos, world[cellPos]));
-
-    for (int i = pos.size() - 1; i >= 0; --i) {
-      pos[i] += 1;
-      if (pos[i] < (Cell::Pos::Scalar)m_size[i])
-        break;
-      pos[i] = 0;
-    }
-  }
-  p_needLoadInRenderer = false;
-  data->DesireAreaProcessed();
 }
 
 void AlgoSimple::SetDimension(int dim) {
@@ -134,7 +183,6 @@ void AlgoSimple::SetCell(const Cell& cell) {
     return;
 
   world[idx] = cell.state;
-  p_needLoadInRenderer = true;
 }
 
 void AlgoSimple::SetCell(const std::vector<Cell>& cells) {
@@ -162,6 +210,15 @@ Cell::State AlgoSimple::GetCell(const Cell::Pos& pos) {
     return 0;
 
   return world[idx];
+}
+
+std::unique_ptr<Cellnta::Iterator> AlgoSimple::CreateIterator() const {
+  return std::make_unique<Iterator>(this);
+}
+
+std::unique_ptr<Cellnta::Iterator> AlgoSimple::CreateIterator(
+    const Area& area) const {
+  return std::make_unique<AreaIterator>(this, area);
 }
 
 void AlgoSimple::SetSize(const std::vector<size_t>& size) {

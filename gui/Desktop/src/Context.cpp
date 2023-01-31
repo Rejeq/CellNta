@@ -8,6 +8,7 @@
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/CameraNd.h>
 #include <Cellnta/Renderer/HypercubeStorage.h>
+#include <Cellnta/Renderer/RenderData.h>
 
 using namespace Ui;
 
@@ -65,8 +66,10 @@ void Context::Update() {
   if (data == nullptr)
     return;
 
-  if (m_algo->NeedLoadWorld() || data->DesireArea())
-    m_algo->LoadWorld(data);
+  if (data->DesireArea()) {
+    data->Update(m_algo.get());
+    data->DesireAreaProcessed();
+  }
 
   m_renderer.Update();
 }
@@ -91,6 +94,20 @@ void Context::Draw() {
       window->Draw();
 
   ImGui::PopID();
+}
+
+void Context::NextGeneration() {
+  CELLNTA_PROFILE;
+
+  if (m_algo == nullptr)
+    return;
+
+  m_algo->Update();
+
+  Cellnta::AlgoSnapshotPtr currSnap =
+      (m_world != nullptr) ? m_world->GetCurrentSnapshot() : nullptr;
+
+  m_renderData->Update(m_algo.get());
 }
 
 void Context::SetupDockspace() {

@@ -1,5 +1,6 @@
 #include "Cellnta/Renderer/RenderData.h"
 
+#include "Cellnta/Algorithms/AlgoBase.h"
 #include "Cellnta/Config.h"
 #include "Cellnta/Log.h"
 #include "Cellnta/LogFormatEigen.h"
@@ -14,6 +15,26 @@ RenderData::RenderData(int dim) : m_d(dim) {
   m_desiredArea.reserve(4);
 }
 
+void RenderData::Update(const AlgoBase* algo) {
+  if (algo == nullptr)
+    return;
+
+  CELLNTA_LOG_TRACE("Updating RenderData");
+
+  NCellStorage::VecList& rawCells = m_cells.GetRaw();
+  for (auto itPos = rawCells.begin(); itPos != rawCells.end(); ++itPos) {
+    if (algo->GetCell(itPos->cast<Cell::Point>()) == 0) {
+      rawCells.erase(itPos);
+      --itPos;
+    }
+  }
+
+  IteratorRef iter = algo->CreateIterator(GetVisibleArea());
+  while (const Cell* cell = iter->Next()) {
+    SetCell(*cell);
+  }
+}
+
 void RenderData::SetDimension(int dim) {
   m_cells.SetDimension(dim);
   m_desiredArea.emplace_back(GetVisibleArea());
@@ -22,6 +43,8 @@ void RenderData::SetDimension(int dim) {
 
 void RenderData::SetCell(const Cell& cell) {
   CELLNTA_PROFILE;
+
+  CELLNTA_LOG_TRACE("Trying to add cell");
 
   if (cell.state == 0)
     return;

@@ -13,14 +13,14 @@ class AlgoSimple : public AlgoBase {
   AlgoSimple() : AlgoBase(AlgoType::SIMPLE) {}
 
   void Update() override;
-  void LoadWorld(RenderData* data) override;
   void SetDimension(int dim) override;
 
   void SetCell(const Cell& cell) override;
   void SetCell(const std::vector<Cell>& cells) override;
   Cell::State GetCell(const Cell::Pos& pos) override;
 
-  void SetCellRandomly();
+  std::unique_ptr<Iterator> CreateIterator() const override;
+  std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;
 
   void SetSize(const std::vector<size_t>& size);
   void SetWorldRepeated(bool state) { m_worldRepeated = state; }
@@ -35,6 +35,9 @@ class AlgoSimple : public AlgoBase {
   boost::dynamic_bitset<> GetSurvive() const { return m_surviveMask; }
 
  private:
+  class Iterator;
+  class AreaIterator;
+
   void Step();
   size_t FindNeighbors(const Cell::State* world, size_t idx);
   void GenerateNeigbors();

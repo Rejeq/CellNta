@@ -1,7 +1,7 @@
 #pragma once
 
-// TODO: Avoid using this
-#include "Cellnta/Renderer/RenderData.h"
+#include <Cellnta/Area.h>
+#include <Cellnta/Iterator.h>
 
 namespace Cellnta {
 
@@ -11,13 +11,12 @@ enum class AlgoType {
   COUNT,
 };
 
-class AlgoBase {
+class AlgoBase : public Iterable {
  public:
   AlgoBase(AlgoType type) : m_type(type) {}
   virtual ~AlgoBase() = default;
 
   virtual void Update() = 0;
-  virtual void LoadWorld(RenderData* data) = 0;
   virtual void SetDimension(int dim) = 0;
 
   virtual void SetCell(const Cell& cell) = 0;
@@ -30,7 +29,6 @@ class AlgoBase {
   int GetStep() const { return m_step; }
 
   AlgoType GetType() const { return m_type; }
-  bool NeedLoadWorld() const { return p_needLoadInRenderer; }
 
   void SetupFrom(const AlgoBase* left) {
     if (left == nullptr)
@@ -41,7 +39,6 @@ class AlgoBase {
   }
 
  protected:
-  bool p_needLoadInRenderer = false;
   int p_dim = 0;
 
  private:

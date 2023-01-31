@@ -2,6 +2,8 @@
 
 #include <array>
 
+#include <Cellnta/Renderer/RenderData.h>
+
 #include "AlgoRandomSubWindow.h"
 #include "AlgoSimpleSubWindow.h"
 #include "Context.h"
@@ -66,7 +68,7 @@ void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo) {
     algo->SetStep(step);
 
   if (ImGui::Button("Next generation"))
-    algo->Update();
+    GetContext()->NextGeneration();
 
   ImGui::SameLine();
 
@@ -84,6 +86,10 @@ void AlgoWindow::DrawBaseAlgoInfo(Cellnta::AlgoBase*& algo) {
 
   Widget::CellSelector(algo->GetDimensions(), m_setCell);
 
-  if (ImGui::Button("Set cell"))
+  if (ImGui::Button("Set cell")) {
     algo->SetCell(m_setCell);
+    Cellnta::RenderData* renData = GetContext()->GetRenderer().GetData();
+    if (renData != nullptr)
+      renData->SetCell(m_setCell);
+  }
 }
