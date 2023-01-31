@@ -21,7 +21,7 @@ class AlgoBase : public Iterable {
 
   virtual void SetCell(const Cell& cell) = 0;
   virtual void SetCell(const std::vector<Cell>& cells) = 0;
-  virtual Cell::State GetCell(const Cell::Pos& pos) = 0;
+  virtual Cell::State GetCell(const Cell::Pos& pos) const = 0;
 
   int GetDimensions() const { return p_dim; }
 

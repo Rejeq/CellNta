@@ -16,9 +16,9 @@ class AlgoRandom : public AlgoBase {
   void Update() override;
   void SetDimension(int dim) override;
 
-  void SetCell(const Cell&) override {}
-  void SetCell(const std::vector<Cell>&) override {}
-  Cell::State GetCell(const Cell::Pos&) override { return 0; }
+  void SetCell(const Cell& cell) override;
+  void SetCell(const std::vector<Cell>& cells) override;
+  Cell::State GetCell(const Cell::Pos&) const override;
 
   std::unique_ptr<Iterator> CreateIterator() const override;
   std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;

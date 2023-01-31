@@ -197,10 +197,9 @@ void AlgoSimple::SetCell(const std::vector<Cell>& cells) {
     if (idx < GetTotalArea())
       world[idx] = cell.state;
   }
-  p_needLoadInRenderer = true;
 }
 
-Cell::State AlgoSimple::GetCell(const Cell::Pos& pos) {
+Cell::State AlgoSimple::GetCell(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
   Cell::State* world = GetWorld();
@@ -236,7 +235,7 @@ void AlgoSimple::Step() {
   m_oddGen = !m_oddGen;
 }
 
-size_t AlgoSimple::FindNeighbors(const Cell::State* world, size_t idx) {
+size_t AlgoSimple::FindNeighbors(const Cell::State* world, size_t idx) const {
   CELLNTA_PROFILE;
 
   size_t out = 0;
@@ -265,12 +264,13 @@ void AlgoSimple::GenerateNeigbors() {
   m_neighbors.erase(m_neighbors.begin() + zeroPosIdx);
 }
 
-size_t AlgoSimple::FindIdxInRangedWorld(size_t cellIdx, size_t neighborIdx) {
+size_t AlgoSimple::FindIdxInRangedWorld(size_t cellIdx,
+                                        size_t neighborIdx) const {
   CELLNTA_PROFILE;
   return cellIdx + neighborIdx;
 }
 
-size_t AlgoSimple::CalculateIdxFromPos(const Cell::Pos& pos) {
+size_t AlgoSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
   size_t idx = 0;

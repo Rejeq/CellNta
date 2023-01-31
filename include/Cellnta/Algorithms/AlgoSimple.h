@@ -17,7 +17,7 @@ class AlgoSimple : public AlgoBase {
 
   void SetCell(const Cell& cell) override;
   void SetCell(const std::vector<Cell>& cells) override;
-  Cell::State GetCell(const Cell::Pos& pos) override;
+  Cell::State GetCell(const Cell::Pos& pos) const override;
 
   std::unique_ptr<Iterator> CreateIterator() const override;
   std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;
@@ -39,12 +39,12 @@ class AlgoSimple : public AlgoBase {
   class AreaIterator;
 
   void Step();
-  size_t FindNeighbors(const Cell::State* world, size_t idx);
+  size_t FindNeighbors(const Cell::State* world, size_t idx) const;
   void GenerateNeigbors();
 
-  inline size_t FindIdxInRangedWorld(size_t cellIdx, size_t neighborIdx);
+  inline size_t FindIdxInRangedWorld(size_t cellIdx, size_t neighborIdx) const;
 
-  size_t CalculateIdxFromPos(const Cell::Pos& pos);
+  size_t CalculateIdxFromPos(const Cell::Pos& pos) const;
 
   void CreateWorld();
   void DeleteWorld();
@@ -52,8 +52,8 @@ class AlgoSimple : public AlgoBase {
   void CartesianProduct(int repeat, const Cell::Pos& oneDimNei,
                         std::vector<int>& out);
 
-  Cell::State* GetWorld() { return m_worlds[m_oddGen].get(); }
-  Cell::State* GetBufferWorld() { return m_worlds[!m_oddGen].get(); }
+  Cell::State* GetWorld() const { return m_worlds[m_oddGen].get(); }
+  Cell::State* GetBufferWorld() const { return m_worlds[!m_oddGen].get(); }
 
   inline size_t GetTotalArea() const { return m_totalArea; }
   inline size_t GetTotalAreaInBytes() const {

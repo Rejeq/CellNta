@@ -113,7 +113,7 @@ void AlgoRandom::SetCell(const std::vector<Cell>& cells) {
     m_data.push_back(cell.pos);
 }
 
-Cell::State AlgoRandom::GetCell(const Cell::Pos& pos) {
+Cell::State AlgoRandom::GetCell(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
   if (pos.size() != p_dim)
