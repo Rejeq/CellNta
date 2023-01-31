@@ -9,10 +9,17 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
-#include <Cellnta/Algorithms/AlgoBase.h>
 #include <Cellnta/Renderer/Renderer.h>
 
 #include "Window.h"
+
+namespace Cellnta {
+
+class AlgoBase;
+enum class AlgoType;
+
+}
+
 
 namespace Ui {
 
