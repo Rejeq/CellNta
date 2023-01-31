@@ -32,6 +32,8 @@ class Context {
   void AddWindow(std::unique_ptr<Window>&& window);
   void SetDimension(int dim);
 
+  void NextGeneration();
+
   void Update();
   void Draw();
 

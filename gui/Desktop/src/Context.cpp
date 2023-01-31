@@ -4,11 +4,11 @@
 #include <vector>
 
 #include <Cellnta/Log.h>
-#include <Cellnta/Algorithms/AlgoList.h>
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/CameraNd.h>
 #include <Cellnta/Renderer/HypercubeStorage.h>
 #include <Cellnta/Renderer/RenderData.h>
+#include <Cellnta/World/WorldList.h>
 
 using namespace Ui;
 
@@ -103,10 +103,6 @@ void Context::NextGeneration() {
     return;
 
   m_algo->Update();
-
-  Cellnta::AlgoSnapshotPtr currSnap =
-      (m_world != nullptr) ? m_world->GetCurrentSnapshot() : nullptr;
-
   m_renderData->Update(m_algo.get());
 }
 
