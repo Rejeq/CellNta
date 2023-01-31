@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include <Cellnta/Algorithms/AlgoBase.h>
+#include <Cellnta/World/World.h>
 
 namespace Ui {
 

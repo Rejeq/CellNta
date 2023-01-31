@@ -50,7 +50,7 @@ target_compile_options(CellNta PRIVATE
 )
 
 foreach(folder ${CELLNTA_FOLDERS})
-  file(GLOB folder_src
+  file(GLOB_RECURSE folder_src
     include/Cellnta/${folder}/*.h
     src/${folder}/*.cpp
   )

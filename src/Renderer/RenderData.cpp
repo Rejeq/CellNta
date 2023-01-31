@@ -1,9 +1,9 @@
 #include "Cellnta/Renderer/RenderData.h"
 
-#include "Cellnta/Algorithms/AlgoBase.h"
 #include "Cellnta/Config.h"
 #include "Cellnta/Log.h"
 #include "Cellnta/LogFormatEigen.h"
+#include "Cellnta/World/World.h"
 
 using namespace Cellnta;
 

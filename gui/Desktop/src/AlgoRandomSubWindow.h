@@ -1,4 +1,6 @@
-#include <Cellnta/Algorithms/AlgoRandom.h>
+#pragma once
+
+#include <Cellnta/World/Impl/Random.h>
 
 namespace Ui {
 

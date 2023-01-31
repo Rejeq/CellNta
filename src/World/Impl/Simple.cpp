@@ -1,4 +1,4 @@
-#include "Cellnta/Algorithms/AlgoSimple.h"
+#include "Cellnta/World/Impl/Simple.h"
 
 // TODO: Delete this
 #include <chrono>

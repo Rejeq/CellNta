@@ -1,4 +1,4 @@
-#include "Cellnta/Algorithms/AlgoRandom.h"
+#include "Cellnta/World/Impl/Random.h"
 
 #include "Cellnta/Config.h"
 #include "Cellnta/Log.h"

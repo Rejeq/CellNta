@@ -4,7 +4,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "AlgoBase.h"
+#include "Cellnta/World/World.h"
 
 namespace Cellnta {
 

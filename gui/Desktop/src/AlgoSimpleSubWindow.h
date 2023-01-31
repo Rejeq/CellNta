@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Cellnta/Algorithms/AlgoSimple.h>
+#include <Cellnta/World/Impl/Simple.h>
 
 namespace Ui {
 void DrawAlgoSimple(Cellnta::AlgoSimple* algo);

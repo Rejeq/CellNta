@@ -7,14 +7,14 @@
 #define CELLNTA_ALGO_RANDOM (CELLNTA_ALL_ALGOS || 1)
 #define CELLNTA_ALGO_SIMPLE (CELLNTA_ALL_ALGOS || 1)
 
-#include "AlgoBase.h"
+#include "Cellnta/World/World.h"
 
 #if CELLNTA_ALGO_RANDOM
-#include "AlgoRandom.h"
+#include "Cellnta/World/Impl/Random.h"
 #endif
 
 #if CELLNTA_ALGO_SIMPLE
-#include "AlgoSimple.h"
+#include "Cellnta/World/Impl/Simple.h"
 #endif
 
 namespace Cellnta {

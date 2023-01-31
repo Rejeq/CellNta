@@ -4,7 +4,7 @@
 #include <random>
 #include <vector>
 
-#include "AlgoBase.h"
+#include "Cellnta/World/World.h"
 
 namespace Cellnta {
 
