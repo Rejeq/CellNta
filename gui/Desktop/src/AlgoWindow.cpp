@@ -3,14 +3,61 @@
 #include <array>
 
 #include <Cellnta/Renderer/RenderData.h>
+#include <Cellnta/World/Impl/Simple.h>
+#include <Cellnta/World/Impl/Random.h>
 
-#include "AlgoRandomSubWindow.h"
-#include "AlgoSimpleSubWindow.h"
 #include "Context.h"
 #include "Widgets/ComboEnum.h"
 #include "Widgets/Utils.h"
 
 using namespace Ui;
+
+static void DrawWorldImplSimple(Cellnta::WorldImplSimple* world) {
+  if (world == nullptr)
+    return;
+
+  bool repeated = world->GetWorldRepeated();
+  if (ImGui::Checkbox("World repeated", &repeated))
+    world->SetWorldRepeated(repeated);
+
+  auto size = world->GetSize();
+  if (Widget::DragN("Size", size.data(), size.size()))
+    world->SetSize(size);
+
+  Widget::Separator();
+
+  boost::dynamic_bitset<> born = world->GetBorn();
+  if (Widget::RuleMask("Born", born))
+    world->SetBorn(born);
+
+  boost::dynamic_bitset<> survive = world->GetSurvive();
+  if (Widget::RuleMask("Survive", survive))
+    world->SetSurvive(survive);
+}
+
+static void DrawWorldImplRandom(Cellnta::WorldImplRandom* world) {
+  if (world == nullptr)
+    return;
+
+  int min = world->GetRangeMin();
+  int max = world->GetRangeMax();
+
+  ImGui::SetNextItemWidth(ImGui::GetWindowWidth() / 3);
+  if (ImGui::DragInt("Min", &min))
+    world->SetRangeMin(min);
+
+  ImGui::SameLine();
+
+  ImGui::SetNextItemWidth(ImGui::GetWindowWidth() / 3);
+  if (ImGui::DragInt("Max", &max))
+    world->SetRangeMax(max);
+
+  ImGui::Spacing();
+
+  static int seed = 0;
+  if (ImGui::InputInt("Seed", &seed))
+    world->SetSeed(seed);
+}
 
 void WorldWindow::Draw() {
   CELLNTA_PROFILE;
@@ -50,7 +97,7 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
   Context* ctx = GetContext();
 
   Cellnta::WorldType res = Cellnta::WorldType::COUNT;
-  if (Widget::ComboEnum("Worldrithm type", world->GetType(), WorldTypeData, res)) {
+  if (Widget::ComboEnum("World type", world->GetType(), WorldTypeData, res)) {
     if (ctx->SetWorld(res))
       assert(0 && "Unable to change worldrithm type");
     world = &ctx->GetWorld();
