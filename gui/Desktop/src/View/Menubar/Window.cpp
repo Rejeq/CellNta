@@ -1,4 +1,4 @@
-#include "MenubarWindow.h"
+#include "View/Menubar/Window.h"
 
 #include "Context.h"
 #include "Widgets/Utils.h"

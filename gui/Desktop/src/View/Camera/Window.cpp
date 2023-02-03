@@ -1,4 +1,4 @@
-#include "CameraWindow.h"
+#include "View/Camera/Window.h"
 
 // FIXME: Need use external fmt
 // Not using std::format because clang still dosen't support it
@@ -124,8 +124,7 @@ void CameraWindow::DrawCameraNd(Cellnta::CameraNd& camNd) {
   ImGui::PopID();
 }
 
-void CameraWindow::DrawCameraController(
-    Cellnta::CameraController& controller) {
+void CameraWindow::DrawCameraController(Cellnta::CameraController& controller) {
   constexpr const char* PerspectiveStr = "Current perspective";
   constexpr const char* OrthoStr = "Current orthographic";
 

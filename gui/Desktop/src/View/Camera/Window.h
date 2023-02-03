@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Window.h"
-
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/CameraNd.h>
+
+#include "WindowBase.h"
 
 namespace Ui {
 

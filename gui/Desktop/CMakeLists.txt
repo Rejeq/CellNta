@@ -21,6 +21,10 @@ target_compile_definitions(GUI PUBLIC
   IMGUI_USER_CONFIG="${IMGUI_CONFIG}"
 )
 
+target_include_directories(GUI PUBLIC
+  ${GUI_DIR}/src
+)
+
 target_link_libraries(GUI PUBLIC
   CellNta
   ImGui::ImGui

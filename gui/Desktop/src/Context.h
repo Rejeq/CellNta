@@ -11,7 +11,7 @@
 
 #include <Cellnta/Renderer/Renderer.h>
 
-#include "Window.h"
+#include "WindowBase.h"
 
 namespace Cellnta {
 

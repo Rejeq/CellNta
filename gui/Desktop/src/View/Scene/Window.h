@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "Window.h"
+#include "WindowBase.h"
 
 namespace Ui {
 

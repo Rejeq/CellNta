@@ -3,7 +3,7 @@
 #include <Cellnta/Renderer/NCellStorage.h>
 #include <Cellnta/Area.h>
 
-#include "Window.h"
+#include "WindowBase.h"
 
 namespace Ui {
 

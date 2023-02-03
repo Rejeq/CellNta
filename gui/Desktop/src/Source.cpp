@@ -10,12 +10,12 @@
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/HypercubeStorage.h>
 
-#include "AlgoWindow.h"
 #include "Context.h"
-#include "MenubarWindow.h"
-#include "CameraWindow.h"
-#include "RendererWindow.h"
-#include "SceneWindow.h"
+#include "View/Camera/Window.h"
+#include "View/Menubar/Window.h"
+#include "View/Renderer/Window.h"
+#include "View/Scene/Window.h"
+#include "View/World/Window.h"
 
 #ifndef RESOURCE_DIR
 #error "Not provided resource directory"

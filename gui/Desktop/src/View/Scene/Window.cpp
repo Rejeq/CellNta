@@ -1,4 +1,4 @@
-#include "SceneWindow.h"
+#include "View/Scene/Window.h"
 
 #include <SDL.h>
 

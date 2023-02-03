@@ -2,8 +2,8 @@
 
 #include <functional>
 
-#include "Window.h"
 #include "Widgets/RightAlign.h"
+#include "WindowBase.h"
 
 namespace Ui {
 
