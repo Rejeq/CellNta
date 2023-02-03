@@ -11,6 +11,7 @@
 
 #include <Cellnta/Renderer/Renderer.h>
 
+#include "ActionBase.h"
 #include "WindowBase.h"
 
 namespace Cellnta {
@@ -18,8 +19,7 @@ namespace Cellnta {
 class World;
 enum class WorldType;
 
-}
-
+}  // namespace Cellnta
 
 namespace Ui {
 
@@ -33,6 +33,8 @@ class Context {
   void SetDimension(int dim);
 
   void NextGeneration();
+
+  void PushAction(Action::BasePtr&& action);
 
   void Update();
   void Draw();

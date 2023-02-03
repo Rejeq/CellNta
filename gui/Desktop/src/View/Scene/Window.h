@@ -22,6 +22,8 @@ class SceneWindow : public Window {
   ImVec2 GetFramebufferSize() const { return m_framebufferSize; }
   uint32_t GetFramebuffer() const { return m_framebuffer; }
   uint32_t GetTexture() const { return m_texture; }
+
+  void SetFocused(bool focused);
   bool GetFocused() const { return m_focused; }
 
  private:

@@ -3,40 +3,41 @@
 #include <array>
 
 #include <Cellnta/Renderer/RenderData.h>
-#include <Cellnta/World/Impl/Simple.h>
 #include <Cellnta/World/Impl/Random.h>
+#include <Cellnta/World/Impl/Simple.h>
 
 #include "Context.h"
+#include "View/World/Action.h"
 #include "Widgets/ComboEnum.h"
 #include "Widgets/Utils.h"
 
 using namespace Ui;
 
-static void DrawWorldImplSimple(Cellnta::WorldImplSimple* world) {
-  if (world == nullptr)
+static void DrawWorldImplSimple(Cellnta::WorldImplSimple* world, Context* ctx) {
+  if (world == nullptr || ctx == nullptr)
     return;
 
   bool repeated = world->GetWorldRepeated();
   if (ImGui::Checkbox("World repeated", &repeated))
-    world->SetWorldRepeated(repeated);
+    ctx->PushAction(Action::Make(Action::SimpleWorld::SetRepeated(repeated)));
 
   auto size = world->GetSize();
   if (Widget::DragN("Size", size.data(), size.size()))
-    world->SetSize(size);
+    ctx->PushAction(Action::Make(Action::SimpleWorld::SetSize(size)));
 
   Widget::Separator();
 
   boost::dynamic_bitset<> born = world->GetBorn();
   if (Widget::RuleMask("Born", born))
-    world->SetBorn(born);
+    ctx->PushAction(Action::Make(Action::SimpleWorld::SetBorn(born)));
 
   boost::dynamic_bitset<> survive = world->GetSurvive();
   if (Widget::RuleMask("Survive", survive))
-    world->SetSurvive(survive);
+    ctx->PushAction(Action::Make(Action::SimpleWorld::SetSurvive(survive)));
 }
 
-static void DrawWorldImplRandom(Cellnta::WorldImplRandom* world) {
-  if (world == nullptr)
+static void DrawWorldImplRandom(Cellnta::WorldImplRandom* world, Context* ctx) {
+  if (world == nullptr || ctx == nullptr)
     return;
 
   int min = world->GetRangeMin();
@@ -44,24 +45,25 @@ static void DrawWorldImplRandom(Cellnta::WorldImplRandom* world) {
 
   ImGui::SetNextItemWidth(ImGui::GetWindowWidth() / 3);
   if (ImGui::DragInt("Min", &min))
-    world->SetRangeMin(min);
+    ctx->PushAction(Action::Make(Action::RandomWorld::SetRangeMin(min)));
 
   ImGui::SameLine();
 
   ImGui::SetNextItemWidth(ImGui::GetWindowWidth() / 3);
   if (ImGui::DragInt("Max", &max))
-    world->SetRangeMax(max);
+    ctx->PushAction(Action::Make(Action::RandomWorld::SetRangeMax(max)));
 
   ImGui::Spacing();
 
   static int seed = 0;
   if (ImGui::InputInt("Seed", &seed))
-    world->SetSeed(seed);
+    ctx->PushAction(Action::Make(Action::RandomWorld::SetSeed(seed)));
 }
 
 void WorldWindow::Draw() {
   CELLNTA_PROFILE;
 
+  Context* ctx = GetContext();
   Cellnta::World* world = &GetContext()->GetWorld();
 
   if (ImGui::Begin(p_prop.Name, &p_prop.Opened)) {
@@ -71,10 +73,10 @@ void WorldWindow::Draw() {
 
     switch (world->GetType()) {
       case Cellnta::WorldType::RANDOM:
-        DrawWorldImplRandom((Cellnta::WorldImplRandom*)world);
+        DrawWorldImplRandom((Cellnta::WorldImplRandom*)world, ctx);
         break;
       case Cellnta::WorldType::SIMPLE:
-        DrawWorldImplSimple((Cellnta::WorldImplSimple*)world);
+        DrawWorldImplSimple((Cellnta::WorldImplSimple*)world, ctx);
         break;
       default: break;
     }
@@ -98,24 +100,24 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
 
   Cellnta::WorldType res = Cellnta::WorldType::COUNT;
   if (Widget::ComboEnum("World type", world->GetType(), WorldTypeData, res)) {
-    if (ctx->SetWorld(res))
-      assert(0 && "Unable to change worldrithm type");
-    world = &ctx->GetWorld();
+    ctx->PushAction(Action::Make(Action::World::SetWorldType(res)));
+    world = &ctx->GetWorld();  // FIXME: Remove this, when used the Action will
+                               // be performed at the next frame
   }
 
   size_t dim = world->GetDimensions();
   if (ImGui::DragInt("Dimensions", (int*)&dim, 0.125f, 0, INT_MAX))
-    world->SetDimension(dim);
+    ctx->PushAction(Action::Make(Action::World::SetDimension(dim)));
 
   ImGui::Spacing();
 
   int32_t step = world->GetStep();
   if (ImGui::DragInt("Step", (int*)&step, 1.0f, 0, INT32_MAX, nullptr,
                      ImGuiSliderFlags_AlwaysClamp))
-    world->SetStep(step);
+    ctx->PushAction(Action::Make(Action::World::SetStep(step)));
 
   if (ImGui::Button("Next generation"))
-    GetContext()->NextGeneration();
+    ctx->PushAction(Action::Make(Action::World::NextGeneration()));
 
   ImGui::SameLine();
 
@@ -134,9 +136,6 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
   Widget::CellSelector(world->GetDimensions(), m_setCell);
 
   if (ImGui::Button("Set cell")) {
-    world->SetCell(m_setCell);
-    Cellnta::RenderData* renData = GetContext()->GetRenderer().GetData();
-    if (renData != nullptr)
-      renData->SetCell(m_setCell);
+    ctx->PushAction(Action::Make(Action::World::SetCell(m_setCell)));
   }
 }

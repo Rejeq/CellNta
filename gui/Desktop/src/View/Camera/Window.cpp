@@ -5,6 +5,7 @@
 #include <spdlog/fmt/fmt.h>
 
 #include "Context.h"
+#include "View/Camera/Action.h"
 #include "Widgets/Utils.h"
 
 using namespace Ui;
@@ -37,24 +38,27 @@ void CameraWindow::Draw() {
 void CameraWindow::DrawCameraOptions(Cellnta::Camera3d& camera) {
   CELLNTA_PROFILE;
 
+  Context* ctx = GetContext();
+
   float mouseSpeed = camera.GetMouseSpeed();
   if (ImGui::DragFloat("Mouse sensitivity", &mouseSpeed, 0.001f, 0.0f, 100.0f))
-    camera.SetMouseSpeed(mouseSpeed);
+    ctx->PushAction(Action::Make(Action::Camera3d::SetMouseSpeed(mouseSpeed)));
 
   float moveSpeed = camera.GetMoveSpeed();
   if (ImGui::DragFloat("Move speed", &moveSpeed, 0.001f, 0.0f, 100.0f))
-    camera.SetMoveSpeed(moveSpeed);
+    ctx->PushAction(Action::Make(Action::Camera3d::SetMoveSpeed(moveSpeed)));
 }
 
 void CameraWindow::DrawCamera3d(Cellnta::Camera3d& cam3d) {
   CELLNTA_PROFILE;
 
+  Context* ctx = GetContext();
+
   ImGui::PushID(3);  // 3 is dimension
 
   Eigen::VectorXf pos = cam3d.GetPosition();
-  Eigen::VectorXf front = cam3d.GetFront();
   if (ImGui::DragFloat3("Position##CameraPos", pos.data(), 0.01f))
-    cam3d.SetPosition(pos);
+    ctx->PushAction(Action::Make(Action::Camera3d::SetPosition(pos)));
 
   constexpr float ItemWidth = 75.0f;
   constexpr float DragRotateSpeed = 0.002f;
@@ -62,18 +66,20 @@ void CameraWindow::DrawCamera3d(Cellnta::Camera3d& cam3d) {
   float yaw = cam3d.GetYaw();
   ImGui::SetNextItemWidth(ItemWidth);
   if (ImGui::DragFloat("Yaw##Camera", &yaw, DragRotateSpeed))
-    cam3d.SetYaw(yaw);
+    ctx->PushAction(Action::Make(Action::Camera3d::SetYaw(yaw)));
 
   ImGui::SameLine();
 
   float pitch = cam3d.GetPitch();
   ImGui::SetNextItemWidth(ItemWidth);
   if (ImGui::DragFloat("Pitch##Camera", &pitch, DragRotateSpeed))
-    cam3d.SetPitch(pitch);
+    ctx->PushAction(Action::Make(Action::Camera3d::SetPitch(pitch)));
 
   ImGui::Spacing();
 
-  DrawCameraController(cam3d);
+  DrawCameraController(cam3d, [](bool perspective) -> Action::BasePtr {
+    return Action::Make(Action::Camera3d::SetUsePerspective(perspective));
+  });
 
   ImGui::PopID();
 }
@@ -81,24 +87,27 @@ void CameraWindow::DrawCamera3d(Cellnta::Camera3d& cam3d) {
 void CameraWindow::DrawCameraNdList(Cellnta::CameraNdList& list) {
   CELLNTA_PROFILE;
 
-  for (Cellnta::CameraNd& cam : list) {
+  for (int i = 0; i < list.size(); ++i) {
+    Cellnta::CameraNd& cam = list[i];
     std::string camName = fmt::format("{} Camera", cam.GetDimensions());
 
     if (ImGui::TreeNodeEx(camName.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-      DrawCameraNd(cam);
+      DrawCameraNd(i, cam);
       ImGui::TreePop();
     }
   }
 }
 
-void CameraWindow::DrawCameraNd(Cellnta::CameraNd& camNd) {
+void CameraWindow::DrawCameraNd(int idx, Cellnta::CameraNd& camNd) {
   CELLNTA_PROFILE;
+
+  Context* ctx = GetContext();
 
   ImGui::PushID(camNd.GetDimensions());
 
   bool skip = camNd.WantSkip();
   if (ImGui::Checkbox("Skip", &skip))
-    camNd.NeedSkip(skip);
+    ctx->PushAction(Action::Make(Action::CameraNd::SetNeedSkip(idx, skip)));
 
   if (skip)
     ImGui::BeginDisabled();
@@ -106,17 +115,18 @@ void CameraWindow::DrawCameraNd(Cellnta::CameraNd& camNd) {
   constexpr float DragSpeed = 0.01f;
 
   Eigen::VectorXf pos = camNd.GetPosition();
-  Eigen::VectorXf front = camNd.GetFront();
-
   if (Widget::DragN("Position##CameraPos", pos.data(), pos.size(), DragSpeed))
-    camNd.SetPosition(pos);
+    ctx->PushAction(Action::Make(Action::CameraNd::SetPosition(idx, pos)));
 
+  Eigen::VectorXf front = camNd.GetFront();
   if (Widget::DragN("Target##CameraPos", front.data(), front.size(), DragSpeed))
-    camNd.SetFront(front);
+    ctx->PushAction(Action::Make(Action::CameraNd::SetFront(idx, front)));
 
   ImGui::Spacing();
 
-  DrawCameraController(camNd);
+  DrawCameraController(camNd, [&](bool perspective) -> Action::BasePtr {
+    return Action::Make(Action::CameraNd::SetUsePerspective(idx, perspective));
+  });
 
   if (skip)
     ImGui::EndDisabled();
@@ -124,13 +134,17 @@ void CameraWindow::DrawCameraNd(Cellnta::CameraNd& camNd) {
   ImGui::PopID();
 }
 
-void CameraWindow::DrawCameraController(Cellnta::CameraController& controller) {
+template <typename PerspectiveLambda>
+void CameraWindow::DrawCameraController(
+    Cellnta::CameraController& controller,
+    PerspectiveLambda&& usePrespectiveAction) {
   constexpr const char* PerspectiveStr = "Current perspective";
   constexpr const char* OrthoStr = "Current orthographic";
 
+  Context* ctx = GetContext();
   bool perspective = controller.GetUsePerspective();
   const char* perspectiveName = (perspective) ? PerspectiveStr : OrthoStr;
 
   if (ImGui::Checkbox(perspectiveName, &perspective))
-    controller.SetUsePerspective(perspective);
+    ctx->PushAction(usePrespectiveAction(perspective));
 }

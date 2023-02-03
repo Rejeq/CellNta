@@ -96,14 +96,9 @@ void Context::Draw() {
   ImGui::PopID();
 }
 
-void Context::NextGeneration() {
-  CELLNTA_PROFILE;
-
-  if (m_world == nullptr)
-    return;
-
-  m_world->Update();
-  m_renderData->Update(m_world.get());
+void Context::PushAction(Action::BasePtr&& action) {
+  action->SetContext(this);
+  action->Execute();
 }
 
 void Context::SetupDockspace() {
@@ -128,16 +123,22 @@ bool Context::SetWorld(const Cellnta::WorldType type) {
   CELLNTA_PROFILE;
 
   std::unique_ptr<Cellnta::World> tmp = Cellnta::CreateWorldInstance(type);
-  if (tmp == nullptr)
+  if (tmp == nullptr) {
+    CELLNTA_LOG_ERROR(
+        "Unable to create new world instance when changing world");
     return true;
+  }
 
   tmp->SetupFrom(m_world.get());
   m_world = std::move(tmp);
 
   Cellnta::RenderData* data = m_renderer.GetData();
-  if (data != nullptr)
-    data->GetCells().clear();
+  if (data == nullptr) {
+    CELLNTA_LOG_WARN("Unable to clear RenderData in when changing world");
+    return false;
+  }
 
+  data->GetCells().clear();
   return false;
 }
 

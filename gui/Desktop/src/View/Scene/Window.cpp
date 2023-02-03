@@ -73,6 +73,16 @@ void SceneWindow::DrawGlScene() {
   CELLNTA_LOG_TRACE("Scene drawed");
 }
 
+void SceneWindow::SetFocused(bool focused) {
+  if (focused == m_focused)
+    return;
+
+  if (focused)
+    OnEnterFocus();
+  else
+    OnLeaveFocus();
+}
+
 void SceneWindow::OnEnterFocus() {
   CELLNTA_PROFILE;
 
@@ -92,7 +102,8 @@ void SceneWindow::OnLeaveFocus() {
 void SceneWindow::HandleInput() {
   CELLNTA_PROFILE;
 
-  Cellnta::Renderer& ren = GetContext()->GetRenderer();
+  Context* ctx = GetContext();
+  Cellnta::Renderer& ren = ctx->GetRenderer();
   ImGuiIO io = ImGui::GetIO();
 
   if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {

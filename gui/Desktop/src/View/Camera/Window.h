@@ -22,8 +22,11 @@ class CameraWindow : public Window {
   void DrawCameraOptions(Cellnta::Camera3d& camera);
   void DrawCamera3d(Cellnta::Camera3d& cam3d);
   void DrawCameraNdList(Cellnta::CameraNdList& list);
-  void DrawCameraNd(Cellnta::CameraNd& camNd);
-  void DrawCameraController(Cellnta::CameraController& controller);
+  void DrawCameraNd(int idx, Cellnta::CameraNd& camNd);
+
+  template <typename PerspectiveLambda>
+  void DrawCameraController(Cellnta::CameraController& controller,
+                            PerspectiveLambda&& usePrespectiveAction);
 };
 
 }  // namespace Ui

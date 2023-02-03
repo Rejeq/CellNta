@@ -9,6 +9,7 @@
 #include <Cellnta/Renderer/Renderer.h>
 
 #include "Context.h"
+#include "View/Renderer/Action.h"
 #include "Widgets/ComboEnum.h"
 #include "Widgets/Eigen.h"
 #include "Widgets/Utils.h"
@@ -20,6 +21,7 @@ void RendererWindow::Draw() {
 
   constexpr ImGuiWindowFlags WinFlags = ImGuiWindowFlags_HorizontalScrollbar;
 
+  Context* ctx = GetContext();
   Cellnta::Renderer& ren = GetContext()->GetRenderer();
   Cellnta::RenderData* data = ren.GetData();
   Cellnta::HypercubeStorage* cube = ren.GetHypercube();
@@ -31,14 +33,16 @@ void RendererWindow::Draw() {
     uint32_t dimensions = ren.GetDimensions();
     if (Widget::Input("Cube dimensions", &dimensions, 1,
                       ImGuiInputTextFlags_CharsDecimal)) {
-      ren.SetDimension(dimensions);
+      ctx->PushAction(
+          Action::Make(Action::Renderer::SetHypercubeDimension(dimensions)));
     }
 
     uint32_t renderDistance = data->GetDistance();
     // TODO: from keyboard input negative number not clamped
     if (Widget::Input("Render distance", &renderDistance, 1,
                       ImGuiInputTextFlags_CharsDecimal))
-      ren.SetRenderDistance(renderDistance);
+      ctx->PushAction(
+          Action::Make(Action::Renderer::SetRenderDistance(renderDistance)));
 
     static const std::array<ComboData<Cellnta::CubeMode>, 3> CubeModeData = {
         ComboData(Cellnta::CubeMode::POINTS, "Points"),
@@ -48,7 +52,7 @@ void RendererWindow::Draw() {
 
     Cellnta::CubeMode res = Cellnta::CubeMode::NONE;
     if (Widget::ComboEnum("Cube mode", cube->GetMode(), CubeModeData, res))
-      cube->SetMode(res);
+      ctx->PushAction(Action::Make(Action::Renderer::SetHypercubeMode(res)));
 
     Widget::Separator();
 
@@ -57,7 +61,7 @@ void RendererWindow::Draw() {
     ImGui::Spacing();
 
     if (ImGui::Button("Add cell (Only for renderer)"))
-      data->SetCell(m_selectedCell);
+      ctx->PushAction(Action::Make(Action::Renderer::SetCell(m_selectedCell)));
 
     Widget::Separator();
 
