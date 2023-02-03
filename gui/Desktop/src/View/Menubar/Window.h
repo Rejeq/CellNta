@@ -21,10 +21,16 @@ class MenubarWindow : public Window {
   void Draw() override;
 
  private:
-  void DrawWindowsButtons();
+  void DrawFileMenu();
+  void DrawEditMenu();
+  void DrawViewMenu();
+
+  void DrawWindowsList();
 
   std::function<void(const Context&)> m_OnResetLayout;
   Widget::RightAlign m_rAlign;
+
+  bool m_showFramerate = true;
 };
 
 }  // namespace Ui
