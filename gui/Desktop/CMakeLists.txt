@@ -31,3 +31,8 @@ target_link_libraries(GUI PUBLIC
   SDL2::SDL2
   ${CMAKE_DL_LIBS}
 )
+
+if(COMMAND target_precompile_headers AND CELLNTA_PCH)
+  configure_file(${CELLNTA_DIR}/cmake/DesktopPch.h.in ${CMAKE_CURRENT_BINARY_DIR}/DesktopPch.h @ONLY)
+  target_precompile_headers(GUI PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/DesktopPch.h)
+endif()
