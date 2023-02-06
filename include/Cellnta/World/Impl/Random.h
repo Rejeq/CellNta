@@ -16,10 +16,6 @@ class WorldImplRandom : public World {
   void Update() override;
   void SetDimension(int dim) override;
 
-  void SetCell(const Cell& cell) override;
-  void SetCell(const std::vector<Cell>& cells) override;
-  Cell::State GetCell(const Cell::Pos&) const override;
-
   std::unique_ptr<Iterator> CreateIterator() const override;
   std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;
 
@@ -29,6 +25,10 @@ class WorldImplRandom : public World {
   void SetRangeMax(int max);
   int GetRangeMin() const { return m_rangeMin; }
   int GetRangeMax() const { return m_rangeMax; }
+
+ protected:
+  bool OnSetCell(const Cell& cell) override;
+  Cell::State OnGetCell(const Cell::Pos&) const override;
 
  private:
   class Iterator;

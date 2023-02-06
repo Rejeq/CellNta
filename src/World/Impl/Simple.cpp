@@ -173,33 +173,20 @@ void WorldImplSimple::SetDimension(int dim) {
   // p_needLoadInRenderer = true;
 }
 
-void WorldImplSimple::SetCell(const Cell& cell) {
+bool WorldImplSimple::OnSetCell(const Cell& cell) {
   CELLNTA_PROFILE;
 
   Cell::State* world = GetWorld();
   size_t idx = CalculateIdxFromPos(cell.pos);
 
   if (world == nullptr || idx >= GetTotalArea())
-    return;
+    return true;
 
   world[idx] = cell.state;
+  return false;
 }
 
-void WorldImplSimple::SetCell(const std::vector<Cell>& cells) {
-  CELLNTA_PROFILE;
-
-  Cell::State* world = GetWorld();
-  if (world == nullptr)
-    return;
-
-  for (const auto& cell : cells) {
-    size_t idx = CalculateIdxFromPos(cell.pos);
-    if (idx < GetTotalArea())
-      world[idx] = cell.state;
-  }
-}
-
-Cell::State WorldImplSimple::GetCell(const Cell::Pos& pos) const {
+Cell::State WorldImplSimple::OnGetCell(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
   Cell::State* world = GetWorld();

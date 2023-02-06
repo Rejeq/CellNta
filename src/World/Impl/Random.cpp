@@ -22,9 +22,11 @@ struct RandomRange {
 
 class WorldImplRandom::Iterator : public Cellnta::Iterator {
  public:
-  Iterator(const WorldImplRandom* world) : m_world(const_cast<WorldImplRandom*>(world)) {
+  Iterator(const WorldImplRandom* world)
+      : m_world(const_cast<WorldImplRandom*>(world)) {
     if (world == nullptr)
-      CELLNTA_LOG_ERROR("Passing a not initialized WorldImplRandom in Iterator");
+      CELLNTA_LOG_ERROR(
+          "Passing a not initialized WorldImplRandom in Iterator");
     m_iter = m_world->m_data.begin();
   }
 
@@ -50,7 +52,8 @@ class WorldImplRandom::AreaIterator : public Cellnta::Iterator {
   AreaIterator(const WorldImplRandom* world, const Area& area)
       : m_world(const_cast<WorldImplRandom*>(world)), m_area(area) {
     if (world == nullptr)
-      CELLNTA_LOG_ERROR("Passing a not initialized WorldImplRandom in AreaIterator");
+      CELLNTA_LOG_ERROR(
+          "Passing a not initialized WorldImplRandom in AreaIterator");
     m_iter = m_world->m_data.begin();
   }
 
@@ -100,20 +103,14 @@ void WorldImplRandom::SetDimension(int dim) {
   m_data.clear();
 }
 
-void WorldImplRandom::SetCell(const Cell& cell) {
+bool WorldImplRandom::OnSetCell(const Cell& cell) {
   CELLNTA_PROFILE;
 
   m_data.push_back(cell.pos);
+  return false;
 }
 
-void WorldImplRandom::SetCell(const std::vector<Cell>& cells) {
-  CELLNTA_PROFILE;
-
-  for (const auto& cell : cells)
-    m_data.push_back(cell.pos);
-}
-
-Cell::State WorldImplRandom::GetCell(const Cell::Pos& pos) const {
+Cell::State WorldImplRandom::OnGetCell(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
   if (pos.size() != p_dim)
@@ -131,7 +128,8 @@ std::unique_ptr<Cellnta::Iterator> WorldImplRandom::CreateIterator() const {
   return std::make_unique<WorldImplRandom::Iterator>(this);
 }
 
-std::unique_ptr<Cellnta::Iterator> WorldImplRandom::CreateIterator(const Area& area) const {
+std::unique_ptr<Cellnta::Iterator> WorldImplRandom::CreateIterator(
+    const Area& area) const {
   return std::make_unique<WorldImplRandom::AreaIterator>(this, area);
 }
 

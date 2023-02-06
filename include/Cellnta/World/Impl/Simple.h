@@ -15,10 +15,6 @@ class WorldImplSimple : public World {
   void Update() override;
   void SetDimension(int dim) override;
 
-  void SetCell(const Cell& cell) override;
-  void SetCell(const std::vector<Cell>& cells) override;
-  Cell::State GetCell(const Cell::Pos& pos) const override;
-
   std::unique_ptr<Iterator> CreateIterator() const override;
   std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;
 
@@ -33,6 +29,10 @@ class WorldImplSimple : public World {
   bool GetWorldRepeated() const { return m_worldRepeated; }
   boost::dynamic_bitset<> GetBorn() const { return m_bornMask; }
   boost::dynamic_bitset<> GetSurvive() const { return m_surviveMask; }
+
+ protected:
+  bool OnSetCell(const Cell& cell) override;
+  Cell::State OnGetCell(const Cell::Pos& pos) const override;
 
  private:
   class Iterator;

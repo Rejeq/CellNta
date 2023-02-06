@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Cellnta/Adjustable.h"
 #include "Cellnta/Area.h"
 #include "Cellnta/Iterator.h"
 
@@ -11,17 +12,13 @@ enum class WorldType {
   COUNT,
 };
 
-class World : public Iterable {
+class World : public Adjustable, public Iterable {
  public:
   World(WorldType type) : m_type(type) {}
   virtual ~World() = default;
 
   virtual void Update() = 0;
   virtual void SetDimension(int dim) = 0;
-
-  virtual void SetCell(const Cell& cell) = 0;
-  virtual void SetCell(const std::vector<Cell>& cells) = 0;
-  virtual Cell::State GetCell(const Cell::Pos& pos) const = 0;
 
   int GetDimensions() const { return p_dim; }
 
