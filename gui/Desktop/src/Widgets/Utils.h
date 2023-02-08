@@ -15,6 +15,7 @@ constexpr ImGuiDataType GetImGuiDataType();
 void Separator();
 bool ToggleButton(const char* label, bool& v);
 
+void PositionSelector(size_t d, Cellnta::Cell::Pos& pos);
 void CellSelector(size_t d, Cellnta::Cell& cell);
 void CellSelectorHomogeneous(size_t d, Cellnta::Cell& cell);
 

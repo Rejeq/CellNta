@@ -130,47 +130,6 @@ void WorldImplSimple::SetDimension(int dim) {
 
   SetSize(std::vector<size_t>(p_dim, 30));
   GenerateNeigbors();
-
-  // constexpr size_t posX = 27;
-  // constexpr size_t posY = 15;
-  // std::vector<Cell> glider2D(5, Cell(Eigen::VectorXi::Zero(3), 1));
-  // glider2D[0].pos.block(0, 0, 3, 1) = Eigen::Vector3i(posX    , 15, posY );
-  // glider2D[1].pos.block(0, 0, 3, 1) = Eigen::Vector3i(posX    , 15, posY +
-  // 1); glider2D[2].pos.block(0, 0, 3, 1) = Eigen::Vector3i(posX + 1, 15, posY
-  // + 2); glider2D[3].pos.block(0, 0, 3, 1) = Eigen::Vector3i(posX + 1, 15,
-  // posY    ); glider2D[4].pos.block(0, 0, 3, 1) = Eigen::Vector3i(posX + 2,
-  // 15, posY    ); SetCell(glider2D);
-
-  // std::vector<Cell> stair(4, Cell(Eigen::VectorXi::Zero(dim), 1));
-  // stair[0].pos.block(0, 0, 3, 1) = Eigen::Vector3i(2, 2, 3);
-  // stair[1].pos.block(0, 0, 3, 1) = Eigen::Vector3i(2, 3, 3);
-  // stair[2].pos.block(0, 0, 3, 1) = Eigen::Vector3i(2, 3, 2);
-
-  // stair[3].pos.block(0, 0, 3, 1) = Eigen::Vector3i(3, 2, 2);
-
-  // SetCell(stair);
-
-  if (p_dim == 3) {
-    const int a = GetSize()[0] / 2;
-    std::vector<Cell> blinker(7, Cell(Eigen::VectorXi::Zero(p_dim), 1));
-    blinker[0].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a, a, a);
-    blinker[1].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a - 1, a, a);
-    blinker[2].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a + 1, a, a);
-    blinker[3].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a, a - 1, a);
-    blinker[4].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a, a + 1, a);
-    blinker[5].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a, a, a - 1);
-    blinker[6].pos.block(0, 0, 3, 1) = Eigen::Vector3i(a, a, a + 1);
-    SetCell(blinker);
-  }
-
-  // constexpr int a = 15;
-  // std::vector<Cell> line(3, Cell(Eigen::VectorXi::Zero(p_dim), 1));
-  // line[0].pos.block(0, 0, 3, 1) = Eigen::Vector3i(5, 0, 0);
-  // line[1].pos.block(0, 0, 3, 1) = Eigen::Vector3i(6, 0, 0);
-  // line[2].pos.block(0, 0, 3, 1) = Eigen::Vector3i(7, 0, 0);
-  // SetCell(line);
-
-  // p_needLoadInRenderer = true;
 }
 
 bool WorldImplSimple::OnSetCell(const Cell& cell) {

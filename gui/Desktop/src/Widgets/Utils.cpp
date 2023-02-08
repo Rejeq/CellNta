@@ -30,35 +30,46 @@ bool Widget::ToggleButton(const char* label, bool& v) {
   return out;
 }
 
-static void CellSelectorEx(size_t targetSize, Cellnta::Cell& cell,
-                           bool shiftLastPoint) {
-  const size_t realSize = cell.pos.size();
+static void PositionSelectorEx(size_t targetSize, Cellnta::Cell::Pos& pos,
+                               bool shiftLastPoint) {
+  const size_t realSize = pos.size();
 
   if (realSize != targetSize) {
     Cellnta::Cell::Pos tmp = Cellnta::Cell::Pos::Zero(targetSize);
     const int minSize = std::min(realSize, targetSize);
-    memcpy(tmp.data(), cell.pos.data(), minSize * sizeof(Cellnta::Cell::Point));
+    memcpy(tmp.data(), pos.data(), minSize * sizeof(Cellnta::Cell::Point));
 
     if (shiftLastPoint) {
       if (realSize < targetSize && realSize != 0)
         tmp(realSize - 1) = 0.0f;
       tmp(targetSize - 1) = 1.0f;
     }
-    cell.pos = tmp;
+    pos = tmp;
   }
 
-  ImGui::PushID("CellSelector");
-  Widget::DragN("Position", cell.pos.data(), cell.pos.size());
-  Widget::Input("State", &cell.state);
+  ImGui::PushID("PositionSelector");
+  Widget::DragN("Position", pos.data(), pos.size());
   ImGui::PopID();
 }
 
+void Widget::PositionSelector(size_t d, Cellnta::Cell::Pos& pos) {
+  PositionSelectorEx(d, pos, false);
+}
+
 void Widget::CellSelector(size_t d, Cellnta::Cell& cell) {
-  CellSelectorEx(d, cell, false);
+  ImGui::PushID("CellSelector");
+  PositionSelectorEx(d, cell.pos, false);
+  Widget::Input("State", &cell.state);
+  ImGui::PopID();
+  // CellSelectorEx(d, cell, false);
 }
 
 void Widget::CellSelectorHomogeneous(size_t d, Cellnta::Cell& cell) {
-  CellSelectorEx(d + 1, cell, true);
+  ImGui::PushID("CellSelector");
+  PositionSelectorEx(d + 1, cell.pos, true);
+  Widget::Input("State", &cell.state);
+  ImGui::PopID();
+  // CellSelectorEx(d + 1, cell, true);
 }
 
 bool Widget::RuleMask(const char* label, boost::dynamic_bitset<>& mask) {
@@ -68,7 +79,8 @@ bool Widget::RuleMask(const char* label, boost::dynamic_bitset<>& mask) {
        i = mask.find_next(i))
     maskStr.push_back(i + '0');
 
-  bool changed = ImGui::InputText(label, &maskStr, ImGuiInputTextFlags_CharsDecimal);
+  bool changed =
+      ImGui::InputText(label, &maskStr, ImGuiInputTextFlags_CharsDecimal);
 
   if (changed) {
     if (maskStr.size() >= mask.size())

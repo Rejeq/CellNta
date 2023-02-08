@@ -2,10 +2,23 @@
 
 #include <Cellnta/Log.h>
 #include <Cellnta/Renderer/Renderer.h>
+#include <Cellnta/World/World.h>
 
 #include "Context.h"
 
 using namespace Ui::Action::Renderer;
+
+void Update::Execute() {
+  Cellnta::Renderer& ren = p_ctx->GetRenderer();
+  Cellnta::RenderData* data = ren.GetData();
+
+  if (data == nullptr) {
+    CELLNTA_LOG_ERROR("Unable to determine RenderData");
+    return;
+  }
+
+  data->Update(&p_ctx->GetWorld());
+}
 
 void SetHypercubeDimension::Execute() {
   Cellnta::Renderer& ren = p_ctx->GetRenderer();

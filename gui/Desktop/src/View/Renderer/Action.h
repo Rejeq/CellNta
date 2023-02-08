@@ -9,6 +9,11 @@ namespace Ui {
 namespace Action {
 namespace Renderer {
 
+class Update : public Action::Base {
+ public:
+  void Execute() override;
+};
+
 class SetHypercubeDimension : public Action::Base {
  public:
   SetHypercubeDimension(int dim) : m_dim(dim) {}

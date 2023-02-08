@@ -13,6 +13,7 @@
 #include "Context.h"
 #include "View/Camera/Window.h"
 #include "View/Menubar/Window.h"
+#include "View/Pattern/Window.h"
 #include "View/Renderer/Window.h"
 #include "View/Scene/Window.h"
 #include "View/World/Window.h"
@@ -233,6 +234,7 @@ bool CreateContextLayout(Ui::Context& ctx) {
   ctx.AddWindow(std::make_unique<Ui::WorldWindow>());
   ctx.AddWindow(std::make_unique<Ui::SceneWindow>());
   ctx.AddWindow(std::make_unique<Ui::MenubarWindow>(ResetContextLayout));
+  ctx.AddWindow(std::make_unique<Ui::PatternWindow>());
 
   return false;
 }
