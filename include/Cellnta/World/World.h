@@ -20,7 +20,7 @@ class World : public Adjustable, public Iterable {
   virtual void Update() = 0;
   virtual void SetDimension(int dim) = 0;
 
-  int GetDimensions() const { return p_dim; }
+  int GetDimension() const { return p_dim; }
 
   void SetStep(int step) { m_step = step; }
   int GetStep() const { return m_step; }

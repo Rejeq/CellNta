@@ -105,7 +105,7 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
                                // be performed at the next frame
   }
 
-  size_t dim = world->GetDimensions();
+  size_t dim = world->GetDimension();
   if (ImGui::DragInt("Dimensions", (int*)&dim, 0.125f, 0, INT_MAX))
     ctx->PushAction(Action::Make(Action::World::SetDimension(dim)));
 
@@ -133,7 +133,7 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
 
   ImGui::Spacing();
 
-  Widget::CellSelector(world->GetDimensions(), m_setCell);
+  Widget::CellSelector(world->GetDimension(), m_setCell);
 
   if (ImGui::Button("Set cell")) {
     ctx->PushAction(Action::Make(Action::World::SetCell(m_setCell)));
