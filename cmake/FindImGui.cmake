@@ -1,6 +1,7 @@
 if (NOT IMGUI_DIR AND CELLNTA_FETCHING)
-  set(IMGUI_URL "https://github.com/ocornut/imgui/archive/docking.tar.gz")
-  message(STATUS "Loading ImGui from ${IMGUI_URL}")
+  set(IMGUI_URL  "https://github.com/ocornut/imgui/archive/d822c65317ba881798bed8fce9ffba267d27dada.tar.gz")
+  set(IMGUI_VERSION "v1.89.2 - docking branch")
+  message(STATUS "Loading ImGui from ${IMGUI_URL} (${IMGUI_VERSION})")
 
   include(FetchContent)
   FetchContent_Declare(ImGui
