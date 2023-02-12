@@ -2,8 +2,7 @@
 
 #include <imgui.h>
 
-#include <Cellnta/Log.h>
-
+#include "Log.h"
 #include "View/Pattern/Action.h"
 #include "Widgets/Utils.h"
 

@@ -1,8 +1,7 @@
 #include "View/Scene/Action.h"
 
-#include <Cellnta/Log.h>
-
 #include "Context.h"
+#include "Log.h"
 #include "View/Scene/Window.h"  // FIXME: Delete this
 
 using namespace Ui;
@@ -14,7 +13,7 @@ static SceneWindow* GetSceneWindow(Context* ctx) {
 
   Window* win = ctx->GetWindowByName("Scene");
   if (win == nullptr) {
-    CELLNTA_LOG_WARN("Scene window not exist");
+    DESKTOP_LOG_WARN("Scene window not exist");
     return nullptr;
   }
   return (SceneWindow*)win;
@@ -23,7 +22,7 @@ static SceneWindow* GetSceneWindow(Context* ctx) {
 void ToggleFocus::Execute() {
   SceneWindow* win = GetSceneWindow(p_ctx);
   if (win == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute Scene::ToggleFocus action");
+    DESKTOP_LOG_ERROR("Unable to execute Scene::ToggleFocus action");
     return;
   }
 
@@ -35,7 +34,7 @@ void ToggleFocus::Execute() {
 void LeaveFocus::Execute() {
   SceneWindow* win = GetSceneWindow(p_ctx);
   if (win == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute Scene::ToggleFocus action");
+    DESKTOP_LOG_ERROR("Unable to execute Scene::ToggleFocus action");
     return;
   }
 
@@ -45,7 +44,7 @@ void LeaveFocus::Execute() {
 void EnterFocus::Execute() {
   SceneWindow* win = GetSceneWindow(p_ctx);
   if (win == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute Scene::ToggleFocus action");
+    DESKTOP_LOG_ERROR("Unable to execute Scene::ToggleFocus action");
     return;
   }
 

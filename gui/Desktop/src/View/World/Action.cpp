@@ -1,11 +1,11 @@
 #include "View/World/Action.h"
 
-#include <Cellnta/Log.h>
 #include <Cellnta/Renderer/RenderData.h>
 #include <Cellnta/Renderer/Renderer.h>
 #include <Cellnta/World/WorldList.h>
 
 #include "Context.h"
+#include "Log.h"
 
 using namespace Ui;
 using namespace Ui::Action::World;
@@ -18,7 +18,7 @@ void NextGeneration::Execute() {
   Cellnta::Renderer& ren = p_ctx->GetRenderer();
   Cellnta::RenderData* renData = ren.GetData();
   if (renData == nullptr) {
-    CELLNTA_LOG_WARN("Unable to update RenderData in NextGeneration action");
+    DESKTOP_LOG_WARN("Unable to update RenderData in NextGeneration action");
     return;
   }
   renData->Update(&world);
@@ -26,7 +26,7 @@ void NextGeneration::Execute() {
 
 void SetWorldType::Execute() {
   if (p_ctx->SetWorld(m_type))
-    CELLNTA_LOG_ERROR("Unable to execute SetWorldType action");
+    DESKTOP_LOG_ERROR("Unable to execute SetWorldType action");
 }
 
 void SetDimension::Execute() {
@@ -46,7 +46,7 @@ void SetCell::Execute() {
   Cellnta::Renderer& ren = p_ctx->GetRenderer();
   Cellnta::RenderData* renData = ren.GetData();
   if (renData == nullptr) {
-    CELLNTA_LOG_WARN("Unable to set RenderData cell in World::SetCell action");
+    DESKTOP_LOG_WARN("Unable to set RenderData cell in World::SetCell action");
     return;
   }
   renData->SetCell(m_cell);
@@ -56,7 +56,7 @@ using namespace Ui::Action::SimpleWorld;
 
 static Cellnta::WorldImplSimple* GetSimpleWorld(Cellnta::World& world) {
   if (world.GetType() != Cellnta::WorldType::SIMPLE) {
-    CELLNTA_LOG_WARN("WorldType is not a SIMPLE");
+    DESKTOP_LOG_WARN("WorldType is not a SIMPLE");
     return nullptr;
   }
 
@@ -66,7 +66,7 @@ static Cellnta::WorldImplSimple* GetSimpleWorld(Cellnta::World& world) {
 void SetRepeated::Execute() {
   Cellnta::WorldImplSimple* world = GetSimpleWorld(p_ctx->GetWorld());
   if (world == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute SimpleWorld::SetRepeated action");
+    DESKTOP_LOG_ERROR("Unable to execute SimpleWorld::SetRepeated action");
     return;
   }
 
@@ -76,7 +76,7 @@ void SetRepeated::Execute() {
 void SetSize::Execute() {
   Cellnta::WorldImplSimple* world = GetSimpleWorld(p_ctx->GetWorld());
   if (world == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute SimpleWorld::SetSize action");
+    DESKTOP_LOG_ERROR("Unable to execute SimpleWorld::SetSize action");
     return;
   }
 
@@ -86,7 +86,7 @@ void SetSize::Execute() {
 void SetBorn::Execute() {
   Cellnta::WorldImplSimple* world = GetSimpleWorld(p_ctx->GetWorld());
   if (world == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute SimpleWorld::SetBorn action");
+    DESKTOP_LOG_ERROR("Unable to execute SimpleWorld::SetBorn action");
     return;
   }
 
@@ -96,7 +96,7 @@ void SetBorn::Execute() {
 void SetSurvive::Execute() {
   Cellnta::WorldImplSimple* world = GetSimpleWorld(p_ctx->GetWorld());
   if (world == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute SimpleWorld::SetSurvive action");
+    DESKTOP_LOG_ERROR("Unable to execute SimpleWorld::SetSurvive action");
     return;
   }
 
@@ -107,7 +107,7 @@ using namespace Ui::Action::RandomWorld;
 
 static Cellnta::WorldImplRandom* GetRandomWorld(Cellnta::World& world) {
   if (world.GetType() != Cellnta::WorldType::RANDOM) {
-    CELLNTA_LOG_WARN("WorldType is not a RANOM");
+    DESKTOP_LOG_WARN("WorldType is not a RANOM");
     return nullptr;
   }
 
@@ -117,7 +117,7 @@ static Cellnta::WorldImplRandom* GetRandomWorld(Cellnta::World& world) {
 void SetRangeMin::Execute() {
   Cellnta::WorldImplRandom* world = GetRandomWorld(p_ctx->GetWorld());
   if (world == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute RandomWorld::SetRangeMin action");
+    DESKTOP_LOG_ERROR("Unable to execute RandomWorld::SetRangeMin action");
     return;
   }
 
@@ -127,7 +127,7 @@ void SetRangeMin::Execute() {
 void SetRangeMax::Execute() {
   Cellnta::WorldImplRandom* world = GetRandomWorld(p_ctx->GetWorld());
   if (world == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute RandomWorld::SetRangeMax action");
+    DESKTOP_LOG_ERROR("Unable to execute RandomWorld::SetRangeMax action");
     return;
   }
 
@@ -137,7 +137,7 @@ void SetRangeMax::Execute() {
 void SetSeed::Execute() {
   Cellnta::WorldImplRandom* world = GetRandomWorld(p_ctx->GetWorld());
   if (world == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute RandomWorld::SetSeed action");
+    DESKTOP_LOG_ERROR("Unable to execute RandomWorld::SetSeed action");
     return;
   }
 

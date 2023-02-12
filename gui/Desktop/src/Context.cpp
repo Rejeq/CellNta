@@ -3,12 +3,13 @@
 #include <memory>
 #include <vector>
 
-#include <Cellnta/Log.h>
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/CameraNd.h>
 #include <Cellnta/Renderer/HypercubeStorage.h>
 #include <Cellnta/Renderer/RenderData.h>
 #include <Cellnta/World/WorldList.h>
+
+#include "Log.h"
 
 using namespace Ui;
 
@@ -17,22 +18,22 @@ static std::unique_ptr<Context> s_ctx;
 Context::Context() {
   m_camera3d = std::make_shared<Cellnta::Camera3d>();
   if (m_camera3d == nullptr)
-    CELLNTA_LOG_ERROR("Unable to create 3d camera");
+    DESKTOP_LOG_ERROR("Unable to create 3d camera");
   m_renderer.SetCamera3d(m_camera3d);
 
   m_cameraNd = std::make_shared<Cellnta::CameraNdList>();
   if (m_cameraNd == nullptr)
-    CELLNTA_LOG_ERROR("Unable to create Nd camera");
+    DESKTOP_LOG_ERROR("Unable to create Nd camera");
   m_renderer.SetCameraNd(m_cameraNd);
 
   m_hypercube = std::make_shared<Cellnta::HypercubeStorage>();
   if (m_hypercube == nullptr)
-    CELLNTA_LOG_ERROR("Unable to create hypercube");
+    DESKTOP_LOG_ERROR("Unable to create hypercube");
   m_renderer.SetHypercube(m_hypercube);
 
   m_renderData = std::make_shared<Cellnta::RenderData>();
   if (m_renderData == nullptr)
-    CELLNTA_LOG_ERROR("Unable to create hypercube");
+    DESKTOP_LOG_ERROR("Unable to create hypercube");
   m_renderer.SetData(m_renderData);
 
   ImGuiContext* imguiCtx = ImGui::GetCurrentContext();
@@ -124,7 +125,7 @@ bool Context::SetWorld(const Cellnta::WorldType type) {
 
   std::unique_ptr<Cellnta::World> tmp = Cellnta::CreateWorldInstance(type);
   if (tmp == nullptr) {
-    CELLNTA_LOG_ERROR(
+    DESKTOP_LOG_ERROR(
         "Unable to create new world instance when changing world");
     return true;
   }
@@ -134,7 +135,7 @@ bool Context::SetWorld(const Cellnta::WorldType type) {
 
   Cellnta::RenderData* data = m_renderer.GetData();
   if (data == nullptr) {
-    CELLNTA_LOG_WARN("Unable to clear RenderData in when changing world");
+    DESKTOP_LOG_WARN("Unable to clear RenderData in when changing world");
     return false;
   }
 

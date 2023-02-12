@@ -2,11 +2,11 @@
 
 #include <SDL.h>
 
-#include <Cellnta/Log.h>
 #include <Cellnta/Renderer/GlBackend.h>
 #include <Cellnta/Renderer/Camera3d.h>
 
 #include "Context.h"
+#include "Log.h"
 
 using namespace Ui;
 
@@ -70,7 +70,7 @@ void SceneWindow::DrawGlScene() {
   ren.Draw();
   ren.DrawGrid();
 
-  CELLNTA_LOG_TRACE("Scene drawed");
+  DESKTOP_LOG_TRACE("Scene drawed");
 }
 
 void SceneWindow::SetFocused(bool focused) {
@@ -171,7 +171,7 @@ void SceneWindow::HandleCameraInput() {
 void SceneWindow::ResizeFramebuffer(int width, int height) {
   CELLNTA_PROFILE;
 
-  CELLNTA_LOG_TRACE("Resizing framebuffer to: ({}; {})", width, height);
+  DESKTOP_LOG_TRACE("Resizing framebuffer to: ({}; {})", width, height);
 
   glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 
@@ -191,7 +191,7 @@ void SceneWindow::ResizeFramebuffer(int width, int height) {
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_renBuffer);
 
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    CELLNTA_LOG_ERROR("Could not create scene framebuffer");
+    DESKTOP_LOG_ERROR("Could not create scene framebuffer");
 
   m_framebufferSize = ImVec2(width, height);
 }

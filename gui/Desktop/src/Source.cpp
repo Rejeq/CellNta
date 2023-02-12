@@ -5,12 +5,12 @@
 #include <imgui.h>
 
 #include <Cellnta/Config.h>
-#include <Cellnta/Log.h>
-#include <Cellnta/Renderer/GlBackend.h>
 #include <Cellnta/Renderer/Camera3d.h>
+#include <Cellnta/Renderer/GlBackend.h>
 #include <Cellnta/Renderer/HypercubeStorage.h>
 
 #include "Context.h"
+#include "Log.h"
 #include "View/Camera/Window.h"
 #include "View/Menubar/Window.h"
 #include "View/Pattern/Window.h"
@@ -64,15 +64,18 @@ void GlMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
   if (source == GL_DEBUG_SOURCE_SHADER_COMPILER)
     return;
 
-  constexpr std::string_view msg = "GL_Message: {}: {}: [{}]:\n{}\n";
+  constexpr std::string_view msg = "{}: {}: [{}]:\n{}\n";
 #define MESSAGE_ARGS \
   GlDebugSourceToString(source), GlDebugTypeToString(type), id, message
+
   switch (severity) {
-    case GL_DEBUG_SEVERITY_HIGH: CELLNTA_LOG_ERROR(msg, MESSAGE_ARGS); break;
-    case GL_DEBUG_SEVERITY_MEDIUM: CELLNTA_LOG_WARN(msg, MESSAGE_ARGS); break;
-    case GL_DEBUG_SEVERITY_LOW: CELLNTA_LOG_INFO(msg, MESSAGE_ARGS); break;
+    case GL_DEBUG_SEVERITY_HIGH: DESKTOP_GL_LOG_ERROR(msg, MESSAGE_ARGS); break;
+    case GL_DEBUG_SEVERITY_MEDIUM:
+      DESKTOP_GL_LOG_WARN(msg, MESSAGE_ARGS);
+      break;
+    case GL_DEBUG_SEVERITY_LOW: DESKTOP_GL_LOG_INFO(msg, MESSAGE_ARGS); break;
     case GL_DEBUG_SEVERITY_NOTIFICATION:
-      CELLNTA_LOG_TRACE(msg, MESSAGE_ARGS);
+      DESKTOP_GL_LOG_TRACE(msg, MESSAGE_ARGS);
       break;
   }
 #undef MESSAGE_ARGS
@@ -81,7 +84,7 @@ void GlMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
 void Shutdown(SDL_Window* win, SDL_GLContext glCtx) {
   CELLNTA_PROFILE;
 
-  CELLNTA_LOG_INFO("Shutting down the application");
+  DESKTOP_LOG_INFO("Shutting down the application");
 
   if (ImGui::GetCurrentContext()) {
     ImGui_ImplOpenGL3_Shutdown();
@@ -95,10 +98,18 @@ void Shutdown(SDL_Window* win, SDL_GLContext glCtx) {
 }
 
 bool InitLogging() {
-  if (Cellnta::Log::InitDefault())
+  if (Log::InitDefault())
     return true;
+  Log::GetLogger()->set_level(spdlog::level::trace);
 
+  if (LogGL::InitDefault())
+    DESKTOP_LOG_ERROR("Unable to initilize OpenGL logger");
+  LogGL::GetLogger()->set_level(spdlog::level::trace);
+
+  if (Cellnta::Log::InitDefault())
+    DESKTOP_LOG_ERROR("Unable to initilize Cellnta logger");
   Cellnta::Log::GetLogger()->set_level(spdlog::level::trace);
+
   return false;
 }
 
@@ -133,20 +144,20 @@ bool CreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx) {
                          SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT,
                          winFlags);
   if (win == nullptr) {
-    CELLNTA_LOG_CRITICAL("Unable to create window: {}", SDL_GetError());
+    DESKTOP_LOG_CRITICAL("Unable to create window: {}", SDL_GetError());
     return true;
   }
 
   glCtx = SDL_GL_CreateContext(win);
   if (glCtx == nullptr) {
-    CELLNTA_LOG_CRITICAL("Unable to create gl context: {}", SDL_GetError());
+    DESKTOP_LOG_CRITICAL("Unable to create gl context: {}", SDL_GetError());
     return true;
   }
 
 #ifdef CELLNTA_RENDERER_GL
   GLint glewError = glewInit();
   if (glewError != GLEW_OK) {
-    CELLNTA_LOG_CRITICAL("Unable to initialize GLEW: {}",
+    DESKTOP_LOG_CRITICAL("Unable to initialize GLEW: {}",
                          (const char*)glewGetErrorString(glewError));
     return true;
   }
@@ -187,10 +198,10 @@ void ResetContextLayout(const Ui::Context& ctx) {
       ~ImGuiDockNodeFlags_CentralNode;
 
   constexpr float size = 0.25f;
-  ImGuiID dockIdLeft =
-      ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Left, size, nullptr, &dockId);
-  ImGuiID dockIdRem = ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Right,
-                                                  1.0f - size, nullptr, &dockId);
+  ImGuiID dockIdLeft = ImGui::DockBuilderSplitNode(dockId, ImGuiDir_Left, size,
+                                                   nullptr, &dockId);
+  ImGuiID dockIdRem = ImGui::DockBuilderSplitNode(
+      dockId, ImGuiDir_Right, 1.0f - size, nullptr, &dockId);
 
   // TODO: Make independent of window name
   ImGui::DockBuilderDockWindow("Scene", dockIdRem);
@@ -214,18 +225,20 @@ bool CreateContextLayout(Ui::Context& ctx) {
   bool err = ren.CreateShaders(RESOURCE_DIR "Shaders/Grid.glsl",
                                RESOURCE_DIR "Shaders/Cell.glsl");
   if (err) {
-    CELLNTA_LOG_CRITICAL("Unable to load shaders");
+    DESKTOP_LOG_CRITICAL("Unable to load shaders");
     return true;
   }
 
   if (cam3d == nullptr)
-    CELLNTA_LOG_ERROR("Camera not initialized");
-  else cam3d->SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
+    DESKTOP_LOG_ERROR("Camera not initialized");
+  else
+    cam3d->SetPosition(Eigen::Vector3f(0.0f, 2.0f, 0.0f));
 
   ren.SetRenderDistance(256);
   if (cube == nullptr)
-    CELLNTA_LOG_ERROR("Hypercube not initialized");
-  else cube->GenerateCube(ren.GetDimensions(), 0.5f, Cellnta::CubeMode::WIREFRAME);
+    DESKTOP_LOG_ERROR("Hypercube not initialized");
+  else
+    cube->GenerateCube(ren.GetDimensions(), 0.5f, Cellnta::CubeMode::WIREFRAME);
 
   ctx.SetOnFirstStartup(ResetContextLayout);
 
@@ -249,7 +262,7 @@ int main(int /*unused*/, char** /*unused*/) {
   }
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-    CELLNTA_LOG_CRITICAL("Unable to initialize SDL2: {}", SDL_GetError());
+    DESKTOP_LOG_CRITICAL("Unable to initialize SDL2: {}", SDL_GetError());
     return EXIT_FAILURE;
   }
 

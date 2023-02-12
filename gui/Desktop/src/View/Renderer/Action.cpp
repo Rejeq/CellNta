@@ -1,10 +1,10 @@
 #include "View/Renderer/Action.h"
 
-#include <Cellnta/Log.h>
 #include <Cellnta/Renderer/Renderer.h>
 #include <Cellnta/World/World.h>
 
 #include "Context.h"
+#include "Log.h"
 
 using namespace Ui::Action::Renderer;
 
@@ -13,7 +13,7 @@ void Update::Execute() {
   Cellnta::RenderData* data = ren.GetData();
 
   if (data == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to determine RenderData");
+    DESKTOP_LOG_ERROR("Unable to determine RenderData");
     return;
   }
 
@@ -35,7 +35,7 @@ void SetHypercubeMode::Execute() {
   Cellnta::HypercubeStorage* cube = ren.GetHypercube();
 
   if (cube == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to execute SetHypercubeMode action");
+    DESKTOP_LOG_ERROR("Unable to execute SetHypercubeMode action");
     return;
   }
 
@@ -47,7 +47,7 @@ void SetCell::Execute() {
   Cellnta::RenderData* data = ren.GetData();
 
   if (data == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to determine RenderData");
+    DESKTOP_LOG_ERROR("Unable to determine RenderData");
     return;
   }
 

@@ -1,10 +1,10 @@
 #include "View/Pattern/Action.h"
 
 #include <Cellnta/Config.h>
-#include <Cellnta/Log.h>
 #include <Cellnta/Snapshot.h>
 #include <Cellnta/World/World.h>
 
+#include "Log.h"
 #include "View/Pattern/Window.h"
 #include "View/Renderer/Action.h"
 
@@ -14,7 +14,7 @@ using namespace Ui::Action::Pattern;
 #define CHECK_DIMENSION(_ActionName, _actualDim, _excpetedDim) \
   {                                                            \
     if (m_pos.size() != 3)                                     \
-      CELLNTA_LOG_WARN(                                        \
+      DESKTOP_LOG_WARN(                                        \
           "{} action excpect {}d position, but actual - {}. "  \
           "Other dimension will be ignored",                   \
           _ActionName, _excpetedDim, _actualDim);              \
@@ -27,7 +27,7 @@ void SetMiddlePosition::Execute() {
 
   Window* win = p_ctx->GetWindowByName("Pattern");
   if (win == nullptr) {
-    CELLNTA_LOG_ERROR(
+    DESKTOP_LOG_ERROR(
         "Unable to execute SetMiddlePosition action, because cannot find "
         "'Pattern' window");
     return;
@@ -43,19 +43,19 @@ static bool AddSnapshot(Context* ctx, const Cellnta::Snapshot& snapshot) {
   CELLNTA_PROFILE;
 
   if (ctx == nullptr) {
-    CELLNTA_LOG_ERROR("Unable to determie the context");
+    DESKTOP_LOG_ERROR("Unable to determie the context");
     return true;
   }
 
   Cellnta::World* world = &ctx->GetWorld();
   if (world == nullptr) {
-    CELLNTA_LOG_WARN(
+    DESKTOP_LOG_WARN(
         "Unable to add pattern to the world, because world is nullptr");
     return true;
   }
 
   if (world->GetDimension() != snapshot.GetDimension()) {
-    CELLNTA_LOG_ERROR("World and snapshot dimension mismatch");
+    DESKTOP_LOG_ERROR("World and snapshot dimension mismatch");
     return true;
   }
 
@@ -85,7 +85,7 @@ void CreateBlinker::Execute() {
   blinker.SetCell(Eigen::Vector3i(x, y, z + 1), 1);
 
   if (AddSnapshot(p_ctx, blinker))
-    CELLNTA_LOG_ERROR("Unable to add snapshot in CreateBlinker action");
+    DESKTOP_LOG_ERROR("Unable to add snapshot in CreateBlinker action");
 }
 
 void CreateStair::Execute() {
@@ -107,7 +107,7 @@ void CreateStair::Execute() {
   stair.SetCell(Eigen::Vector3i(x, y, z + 1), 1);
 
   if (AddSnapshot(p_ctx, stair))
-    CELLNTA_LOG_ERROR("Unable to add snapshot in CreateStair action");
+    DESKTOP_LOG_ERROR("Unable to add snapshot in CreateStair action");
 }
 
 void Create1dLine::Execute() {
@@ -128,7 +128,7 @@ void Create1dLine::Execute() {
   line.SetCell(Eigen::Vector3i(x + 2, y, z), 1);
 
   if (AddSnapshot(p_ctx, line))
-    CELLNTA_LOG_ERROR("Unable to add snapshot in CreateStair action");
+    DESKTOP_LOG_ERROR("Unable to add snapshot in CreateStair action");
 }
 
 void Create2dGlider::Execute() {
@@ -151,5 +151,5 @@ void Create2dGlider::Execute() {
   glider.SetCell(Eigen::Vector3i(x + 2, y, z), 1);
 
   if (AddSnapshot(p_ctx, glider))
-    CELLNTA_LOG_ERROR("Unable to add snapshot in CreateStair action");
+    DESKTOP_LOG_ERROR("Unable to add snapshot in CreateStair action");
 }
