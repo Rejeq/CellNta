@@ -22,9 +22,24 @@ class LogBase {
 
 }  // namespace Cellnta
 
+#ifndef CELLNTA_LOGGING_DISABLED
+
 #define _CELLNTA_LOGBASE_C(log, ...) SPDLOG_LOGGER_CRITICAL(log, __VA_ARGS__)
 #define _CELLNTA_LOGBASE_E(log, ...) SPDLOG_LOGGER_ERROR(log, __VA_ARGS__)
 #define _CELLNTA_LOGBASE_W(log, ...) SPDLOG_LOGGER_WARN(log, __VA_ARGS__)
 #define _CELLNTA_LOGBASE_I(log, ...) SPDLOG_LOGGER_INFO(log, __VA_ARGS__)
 #define _CELLNTA_LOGBASE_D(log, ...) SPDLOG_LOGGER_DEBUG(log, __VA_ARGS__)
 #define _CELLNTA_LOGBASE_T(log, ...) SPDLOG_LOGGER_TRACE(log, __VA_ARGS__)
+
+#else
+
+// clang-format off
+#define _CELLNTA_LOGBASE_C(log, ...) do {} while(false)
+#define _CELLNTA_LOGBASE_E(log, ...) do {} while(false)
+#define _CELLNTA_LOGBASE_W(log, ...) do {} while(false)
+#define _CELLNTA_LOGBASE_I(log, ...) do {} while(false)
+#define _CELLNTA_LOGBASE_D(log, ...) do {} while(false)
+#define _CELLNTA_LOGBASE_T(log, ...) do {} while(false)
+// clang-format on
+
+#endif  // CELLNTA_LOGGING_DISABLED
