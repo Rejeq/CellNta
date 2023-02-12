@@ -11,7 +11,11 @@
 #define CELLNTA_PROFILE_NAMED(name) ZoneScopedN(name)
 #define CELLNTA_PROFILE_FRAME FrameMark
 #else
-#define CELLNTA_PROFILE
-#define CELLNTA_PROFILE_NAMED(x)
-#define CELLNTA_PROFILE_FRAME
+
+// clang-format off
+#define CELLNTA_PROFILE do { } while (false)
+#define CELLNTA_PROFILE_NAMED(x) do { } while (false)
+#define CELLNTA_PROFILE_FRAME do { } while (false)
+// clang-format on
+
 #endif /* CELLNTA_PROFILING_ENABLED */
