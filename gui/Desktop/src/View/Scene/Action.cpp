@@ -12,19 +12,16 @@ static SceneWindow* GetSceneWindow(Context* ctx) {
     return nullptr;
 
   Window* win = ctx->GetWindowByName("Scene");
-  if (win == nullptr) {
-    DESKTOP_LOG_WARN("Scene window not exist");
+  if(Action::CheckLogWarn(!win, "Scene window not exist"))
     return nullptr;
-  }
+
   return (SceneWindow*)win;
 }
 
 void ToggleFocus::Execute() {
   SceneWindow* win = GetSceneWindow(p_ctx);
-  if (win == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute Scene::ToggleFocus action");
+  if(Action::CheckLogDErr(!win, "Scene::ToggleFocus"))
     return;
-  }
 
   bool focus = win->GetFocused();
   focus = !focus;
@@ -33,20 +30,16 @@ void ToggleFocus::Execute() {
 
 void LeaveFocus::Execute() {
   SceneWindow* win = GetSceneWindow(p_ctx);
-  if (win == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute Scene::ToggleFocus action");
+  if(Action::CheckLogDErr(!win, "Scene::LeaveFocus"))
     return;
-  }
 
   win->SetFocused(false);
 }
 
 void EnterFocus::Execute() {
   SceneWindow* win = GetSceneWindow(p_ctx);
-  if (win == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute Scene::ToggleFocus action");
+  if(Action::CheckLogDErr(!win, "Scene::EnterFocus"))
     return;
-  }
 
   win->SetFocused(true);
 }

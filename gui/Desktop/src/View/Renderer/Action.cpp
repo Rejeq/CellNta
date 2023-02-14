@@ -11,11 +11,8 @@ using namespace Ui::Action::Renderer;
 void Update::Execute() {
   Cellnta::Renderer& ren = p_ctx->GetRenderer();
   Cellnta::RenderData* data = ren.GetData();
-
-  if (data == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to determine RenderData");
+  if(Action::CheckLogDErr(!data, "Renderer::Update"))
     return;
-  }
 
   data->Update(&p_ctx->GetWorld());
 }
@@ -33,11 +30,8 @@ void SetRenderDistance::Execute() {
 void SetHypercubeMode::Execute() {
   Cellnta::Renderer& ren = p_ctx->GetRenderer();
   Cellnta::HypercubeStorage* cube = ren.GetHypercube();
-
-  if (cube == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute SetHypercubeMode action");
+  if(Action::CheckLogDErr(!cube, "Renderer::SetHypercubeMode"))
     return;
-  }
 
   cube->SetMode(m_mode);
 }
@@ -45,11 +39,8 @@ void SetHypercubeMode::Execute() {
 void SetCell::Execute() {
   Cellnta::Renderer& ren = p_ctx->GetRenderer();
   Cellnta::RenderData* data = ren.GetData();
-
-  if (data == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to determine RenderData");
+  if(Action::CheckLogDErr(!data, "Renderer::SetCell"))
     return;
-  }
 
   data->SetCell(m_cell);
 }

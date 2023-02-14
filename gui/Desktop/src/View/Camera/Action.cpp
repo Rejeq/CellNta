@@ -21,60 +21,48 @@ static Cellnta::Camera3d* GetCamera3d(Context* ctx) {
 
 void SetMouseSpeed::Execute() {
   Cellnta::Camera3d* cam = GetCamera3d(p_ctx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute Camera3d::SetMouseSpeed action");
+  if (Action::CheckLogDErr(!cam, "Camera3d::SetMouseSpeed"))
     return;
-  }
 
   cam->SetMouseSpeed(m_speed);
 }
 
 void SetMoveSpeed::Execute() {
   Cellnta::Camera3d* cam = GetCamera3d(p_ctx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute Camera3d::SetMoveSpeed action");
+  if (Action::CheckLogDErr(!cam, "Camera3d::SetMoveSpeed"))
     return;
-  }
 
   cam->SetMoveSpeed(m_speed);
 }
 
 void SetPosition::Execute() {
   Cellnta::Camera3d* cam = GetCamera3d(p_ctx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute Camera3d::SetPosition action");
+  if (Action::CheckLogDErr(!cam, "Camera3d::SetPosition"))
     return;
-  }
 
   cam->SetPosition(m_pos);
 }
 
 void SetYaw::Execute() {
   Cellnta::Camera3d* cam = GetCamera3d(p_ctx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute Camera3d::SetYaw action");
+  if (Action::CheckLogDErr(!cam, "Camera3d::SetYaw"))
     return;
-  }
 
   cam->SetYaw(m_yaw);
 }
 
 void SetPitch::Execute() {
   Cellnta::Camera3d* cam = GetCamera3d(p_ctx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute Camera3d::SetPitch action");
+  if (Action::CheckLogDErr(!cam, "Camera3d::SetPitch"))
     return;
-  }
 
   cam->SetPitch(m_pitch);
 }
 
 void SetUsePerspective::Execute() {
   Cellnta::Camera3d* cam = GetCamera3d(p_ctx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute Camera3d::SetUsePerspective action");
+  if (Action::CheckLogDErr(!cam, "Camera3d::SetUsePerspective"))
     return;
-  }
 
   cam->SetUsePerspective(m_perspective);
 }
@@ -93,10 +81,8 @@ static Cellnta::CameraNd* GetCameraNd(Context* ctx, int idx) {
 
 void ToggleNeedSkip::Execute() {
   Cellnta::CameraNd* cam = GetCameraNd(p_ctx, m_idx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute CameraNd::ToggleNeedSkip action");
+  if (Action::CheckLogDErr(!cam, "CameraNd::ToggleNeedSkip"))
     return;
-  }
 
   bool skip = cam->WantSkip();
   skip = !skip;
@@ -105,40 +91,32 @@ void ToggleNeedSkip::Execute() {
 
 void SetNeedSkip::Execute() {
   Cellnta::CameraNd* cam = GetCameraNd(p_ctx, m_idx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute CameraNd::SetNeedSkip action");
+  if (Action::CheckLogDErr(!cam, "CameraNd::SetNeedSkip"))
     return;
-  }
 
   cam->NeedSkip(m_skip);
 }
 
 void SetPosition::Execute() {
   Cellnta::CameraNd* cam = GetCameraNd(p_ctx, m_idx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute CameraNd::SetPosition action");
+  if (Action::CheckLogDErr(!cam, "CameraNd::SetPositon"))
     return;
-  }
 
   cam->SetPosition(m_pos);
 }
 
 void SetFront::Execute() {
   Cellnta::CameraNd* cam = GetCameraNd(p_ctx, m_idx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute CameraNd::SetPosition action");
+  if (Action::CheckLogDErr(!cam, "CameraNd::SetFront"))
     return;
-  }
 
   cam->SetFront(m_front);
 }
 
 void SetUsePerspective::Execute() {
   Cellnta::CameraNd* cam = GetCameraNd(p_ctx, m_idx);
-  if (cam == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to execute CameraNd::SetUsePerspective action");
+  if (Action::CheckLogDErr(!cam, "CameraNd::SetUsePerspective"))
     return;
-  }
 
   cam->SetUsePerspective(m_perspective);
 }

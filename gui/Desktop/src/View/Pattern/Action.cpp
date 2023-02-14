@@ -11,27 +11,28 @@
 using namespace Ui;
 using namespace Ui::Action::Pattern;
 
-#define CHECK_DIMENSION(_ActionName, _actualDim, _excpetedDim) \
+#define CHECK_DIMENSION(_actionName, _excpetedDim, _actualDim) \
   {                                                            \
     if (m_pos.size() != 3)                                     \
       DESKTOP_LOG_WARN(                                        \
-          "{} action excpect {}d position, but actual - {}. "  \
-          "Other dimension will be ignored",                   \
-          _ActionName, _excpetedDim, _actualDim);              \
+          "{} action excpect {}d position, but actual - "      \
+          "{}. Other dimension will be ignored",               \
+          _actionName, _excpetedDim, _actualDim);              \
   }                                                            \
   do {                                                         \
   } while (false)
+
+#define UNABLE_ADD_SNAPSHOT_MSG(_actionName) \
+  DESKTOP_ACTION_DERR_MSG _actionName ": Cannot add snapshot"
 
 void SetMiddlePosition::Execute() {
   CELLNTA_PROFILE;
 
   Window* win = p_ctx->GetWindowByName("Pattern");
-  if (win == nullptr) {
-    DESKTOP_LOG_ERROR(
-        "Unable to execute SetMiddlePosition action, because cannot find "
-        "'Pattern' window");
+  if (Action::CheckLogErr(!win, DESKTOP_ACTION_DERR_MSG
+                          "Pattern::SetMiddlePosition: "
+                          "Cannot find 'Pattern' window"))
     return;
-  }
   PatternWindow* patternWin = (PatternWindow*)win;
 
   // FIXME: Hard coded
@@ -42,22 +43,18 @@ void SetMiddlePosition::Execute() {
 static bool AddSnapshot(Context* ctx, const Cellnta::Snapshot& snapshot) {
   CELLNTA_PROFILE;
 
-  if (ctx == nullptr) {
-    DESKTOP_LOG_ERROR("Unable to determie the context");
+  if (Action::CheckLogErr(!ctx, "Unable to determie the context"))
     return true;
-  }
 
   Cellnta::World* world = &ctx->GetWorld();
-  if (world == nullptr) {
-    DESKTOP_LOG_WARN(
-        "Unable to add pattern to the world, because world is nullptr");
+  if (Action::CheckLogErr(!world,
+                          "Unable to add pattern to the world: World is "
+                          "nullptr"))
     return true;
-  }
 
-  if (world->GetDimension() != snapshot.GetDimension()) {
-    DESKTOP_LOG_ERROR("World and snapshot dimension mismatch");
+  if (Action::CheckLogErr(world->GetDimension() != snapshot.GetDimension(),
+                          "World and snapshot dimension mismatch"))
     return true;
-  }
 
   world->SetCell(snapshot.CreateIterator());
   ctx->PushAction(Action::Make(Action::Renderer::Update()));
@@ -85,7 +82,7 @@ void CreateBlinker::Execute() {
   blinker.SetCell(Eigen::Vector3i(x, y, z + 1), 1);
 
   if (AddSnapshot(p_ctx, blinker))
-    DESKTOP_LOG_ERROR("Unable to add snapshot in CreateBlinker action");
+    DESKTOP_LOG_ERROR(UNABLE_ADD_SNAPSHOT_MSG("Pattern::CreateBlinker"));
 }
 
 void CreateStair::Execute() {
@@ -107,7 +104,7 @@ void CreateStair::Execute() {
   stair.SetCell(Eigen::Vector3i(x, y, z + 1), 1);
 
   if (AddSnapshot(p_ctx, stair))
-    DESKTOP_LOG_ERROR("Unable to add snapshot in CreateStair action");
+    DESKTOP_LOG_ERROR(UNABLE_ADD_SNAPSHOT_MSG("Pattern::CreateStair"));
 }
 
 void Create1dLine::Execute() {
@@ -128,7 +125,7 @@ void Create1dLine::Execute() {
   line.SetCell(Eigen::Vector3i(x + 2, y, z), 1);
 
   if (AddSnapshot(p_ctx, line))
-    DESKTOP_LOG_ERROR("Unable to add snapshot in CreateStair action");
+    DESKTOP_LOG_ERROR(UNABLE_ADD_SNAPSHOT_MSG("Pattern::Create1dLine"));
 }
 
 void Create2dGlider::Execute() {
@@ -137,7 +134,7 @@ void Create2dGlider::Execute() {
   CHECK_DIMENSION("Create2dGlider", 3, m_pos.size());
 
   Cellnta::Snapshot glider;
-  glider.SetDimension(3);
+  glider.SetDimension(3);  // TODO: Use 2d
   // glider.SetRule(); // TODO: Add rule setter
 
   int x = m_pos.x();
@@ -151,5 +148,8 @@ void Create2dGlider::Execute() {
   glider.SetCell(Eigen::Vector3i(x + 2, y, z), 1);
 
   if (AddSnapshot(p_ctx, glider))
-    DESKTOP_LOG_ERROR("Unable to add snapshot in CreateStair action");
+    DESKTOP_LOG_ERROR(UNABLE_ADD_SNAPSHOT_MSG("Pattern::Create2dGlider"));
 }
+
+#undef UNABLE_ADD_SNAPSHOT_MSG
+#undef CHECK_DIMENSION
