@@ -55,7 +55,7 @@ static void DrawWorldImplRandom(Cellnta::WorldImplRandom* world, Context* ctx) {
 
   ImGui::Spacing();
 
-  static int seed = 0;
+  int seed = world->GetSeed();
   if (ImGui::InputInt("Seed", &seed))
     ctx->PushAction(Action::Make(Action::RandomWorld::SetSeed(seed)));
 }

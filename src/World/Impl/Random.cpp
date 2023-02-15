@@ -133,6 +133,11 @@ std::unique_ptr<Cellnta::Iterator> WorldImplRandom::CreateIterator(
   return std::make_unique<WorldImplRandom::AreaIterator>(this, area);
 }
 
+void WorldImplRandom::SetSeed(int seed) {
+  m_seed = seed;
+  m_gen = std::default_random_engine(seed);
+}
+
 void WorldImplRandom::SetRangeMin(int min) {
   if (min > m_rangeMax)
     return;

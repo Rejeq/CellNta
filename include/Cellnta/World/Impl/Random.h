@@ -19,7 +19,8 @@ class WorldImplRandom : public World {
   std::unique_ptr<Iterator> CreateIterator() const override;
   std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;
 
-  void SetSeed(int seed) { m_gen = std::default_random_engine(seed); }
+  void SetSeed(int seed);
+  int GetSeed() { return m_seed; }
 
   void SetRangeMin(int min);
   void SetRangeMax(int max);
@@ -37,6 +38,7 @@ class WorldImplRandom : public World {
   std::vector<Cell::Pos> m_data;
   int m_rangeMin = -64;
   int m_rangeMax = 64;
+  int m_seed = 123;
   std::default_random_engine m_gen{123};
 };
 
