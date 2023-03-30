@@ -7,7 +7,7 @@ option(CELLNTA_TIDY "Enable clang-tidy checks" OFF)
 option(CELLNTA_LOGGING "Enable logging" ON)
 option(CELLNTA_TRACE_LOGGING "Enable detailed logging. Causes performance issues" OFF)
 option(CELLNTA_FETCHING "Enable fetching third-party libraries" ON)
-option(CELLNTA_PCH "Enable building using a precompiled header to speed up compilation time")
+option(CELLNTA_PCH "Enable building using a precompiled header to speed up compilation time" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
@@ -29,7 +29,6 @@ if(CELLNTA_TIDY)
 
   message(STATUS "Enabled clang-tidy: ${CLANG_TIDY_BIN}")
 endif()
-
 
 list(APPEND CMAKE_MODULE_PATH "${CELLNTA_DIR}/cmake")
 find_package(OpenGL REQUIRED)
