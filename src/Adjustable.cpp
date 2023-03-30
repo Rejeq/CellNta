@@ -1,4 +1,5 @@
 #include "Cellnta/Adjustable.h"
+#include "Cellnta/Config.h"
 
 using namespace Cellnta;
 

@@ -5,6 +5,7 @@
 #include <imgui.h>
 
 #include <Cellnta/Config.h>
+#include <Cellnta/Log.h>
 #include <Cellnta/Renderer/Camera3d.h>
 #include <Cellnta/Renderer/GlBackend.h>
 #include <Cellnta/Renderer/HypercubeStorage.h>

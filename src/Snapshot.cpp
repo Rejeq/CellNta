@@ -1,5 +1,6 @@
 #include "Cellnta/Snapshot.h"
 #include "Cellnta/Config.h"
+#include "Cellnta/Log.h"
 
 using namespace Cellnta;
 

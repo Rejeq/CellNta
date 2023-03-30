@@ -4,6 +4,7 @@
 #include <Cellnta/Snapshot.h>
 #include <Cellnta/World/World.h>
 
+#include "Context.h"
 #include "Log.h"
 #include "View/Pattern/Window.h"
 #include "View/Renderer/Action.h"
