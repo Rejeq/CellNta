@@ -15,8 +15,8 @@ Area::Area(const Eigen::Vector3i& min, const Eigen::Vector3i& max) {
 }
 
 Area::Area(const int min, const int max) {
-  this->min.array() = min;
-  this->max.array() = max;
+  this->min = Eigen::Vector3i::Constant(min);
+  this->max = Eigen::Vector3i::Constant(max);
 }
 
 bool Area::PosValid(const Eigen::VectorXi& pos) const {
@@ -34,6 +34,9 @@ bool Area::PosValid(const Eigen::VectorXi& pos) const {
 
 std::vector<Area> Area::InverseClip(const Area& clipper, const Area& subject) {
   CELLNTA_PROFILE;
+
+  if (!clipper.Valid())
+    return {};
 
   Area inter = Area::Intersection(clipper, subject);
   if (!inter.Valid())
