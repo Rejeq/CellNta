@@ -116,3 +116,11 @@ Area Area::operator-(const Area& r) const {
 Area Area::operator-(const Eigen::Vector3i& r) const {
   return Area(min - r, max - r);
 }
+
+bool Area::operator==(const Area& r) const {
+  return (min == r.min && max == r.max);
+}
+
+bool Area::operator!=(const Area& r) const {
+  return !(*this == r);
+}

@@ -37,6 +37,9 @@ struct Area {
   Area operator+(const Eigen::Vector3i& r) const;
   Area operator-(const Area& r) const;
   Area operator-(const Eigen::Vector3i& r) const;
+
+  bool operator==(const Area& r) const;
+  bool operator!=(const Area& r) const;
 };
 
 }  // namespace Cellnta
