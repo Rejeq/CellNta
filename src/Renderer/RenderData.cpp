@@ -24,7 +24,7 @@ void RenderData::Update(const World* world) {
   NCellStorage::VecList& rawCells = m_cells.GetRaw();
   for (auto itPos = rawCells.begin(); itPos != rawCells.end(); ++itPos) {
     if (world->GetCell(itPos->cast<Cell::Point>()) == 0) {
-      rawCells.erase(itPos);
+      m_cells.Erase(itPos);
       --itPos;
     }
   }

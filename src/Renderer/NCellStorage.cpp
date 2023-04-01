@@ -26,7 +26,8 @@ void NCellStorage::Add(const Vec& pos) {
   CELLNTA_PROFILE;
 
   Vec tmp = Vec::Zero(m_d + 1);
-  memcpy(tmp.data(), pos.data(), std::min(m_d, (int) pos.size()) * sizeof(Point));
+  memcpy(tmp.data(), pos.data(),
+         std::min(m_d, (int)pos.size()) * sizeof(Point));
   tmp(m_d) = 1;
 
   m_cells.push_back(tmp);
@@ -38,8 +39,48 @@ void NCellStorage::AddHomogeneous(const Vec& pos) {
   CELLNTA_PROFILE;
 
   Vec tmp = Vec::Zero(m_d + 1);
-  memcpy(tmp.data(), pos.data(), std::min(m_d + 1, (int) pos.size()) * sizeof(Point));
+  memcpy(tmp.data(), pos.data(),
+         std::min(m_d + 1, (int)pos.size()) * sizeof(Point));
   m_cells.push_back(pos);
+
+  m_needUpdate = true;
+}
+
+void NCellStorage::Erase(const VecList::iterator& pos) {
+  CELLNTA_PROFILE;
+
+  m_cells.erase(pos);
+  m_needUpdate = true;
+}
+
+void NCellStorage::Erase(const Vec& pos) {
+  CELLNTA_PROFILE;
+
+  // In future i want to make m_cells as a hash map
+  // So its temporary
+  auto it = m_cells.begin();
+  while (it != m_cells.end()) {
+    if (it->block(0, 0, 1, m_d) == pos) {
+      m_cells.erase(it);
+      break;
+    }
+    ++it;
+  }
+
+  m_needUpdate = true;
+}
+
+void NCellStorage::EraseHomogeneous(const Vec& pos) {
+  CELLNTA_PROFILE;
+
+  auto it = m_cells.begin();
+  while (it != m_cells.end()) {
+    if (*it == pos) {
+      m_cells.erase(it);
+      break;
+    }
+    ++it;
+  }
 
   m_needUpdate = true;
 }
@@ -75,7 +116,6 @@ size_t NCellStorage::size() const {
   return m_cells.size();
 }
 
-
 void NCellStorage::UpdateBuffer() {
   CELLNTA_PROFILE;
 
@@ -95,9 +135,8 @@ void NCellStorage::UpdateBuffer() {
   if (capacity != m_oldCapacity) {
     m_oldCapacity = capacity;
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
-    glBufferData(GL_ARRAY_BUFFER,
-                 3 * capacity * sizeof(NCellStorage::Point), nullptr,
-                 GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, 3 * capacity * sizeof(NCellStorage::Point),
+                 nullptr, GL_DYNAMIC_DRAW);
   }
 
   float* dst =

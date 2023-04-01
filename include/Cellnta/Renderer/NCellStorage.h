@@ -31,6 +31,10 @@ class NCellStorage {
   void Add(const Vec& pos);
   void AddHomogeneous(const Vec& pos);
 
+  void Erase(const VecList::iterator& pos);
+  void Erase(const Vec& pos);
+  void EraseHomogeneous(const Vec& pos);
+
   void SetDimension(int dim);
 
   void clear();
