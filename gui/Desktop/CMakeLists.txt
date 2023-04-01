@@ -8,12 +8,29 @@ find_package(SDL2 REQUIRED)
 find_package(ImGui REQUIRED)
 
 
-file(GLOB_RECURSE SOURCE_LIST
-  src/*.h
-  src/*.cpp
+add_executable(GUI
+  ./src/Context.cpp
+  ./src/Log.cpp
+  ./src/Source.cpp
+  ./src/UndoRedo.cpp
+
+  ./src/View/Camera/Action.cpp
+  ./src/View/Camera/Window.cpp
+  ./src/View/Menubar/Action.cpp
+  ./src/View/Menubar/Window.cpp
+  ./src/View/Pattern/Action.cpp
+  ./src/View/Pattern/Window.cpp
+  ./src/View/Renderer/Action.cpp
+  ./src/View/Renderer/Window.cpp
+  ./src/View/Scene/Action.cpp
+  ./src/View/Scene/Window.cpp
+  ./src/View/World/Action.cpp
+  ./src/View/World/Window.cpp
+
+  ./src/Widgets/RightAlign.cpp
+  ./src/Widgets/Utils.cpp
 )
 
-add_executable(GUI ${SOURCE_LIST})
 target_compile_features(GUI PRIVATE cxx_std_20)
 
 target_compile_definitions(GUI PUBLIC
