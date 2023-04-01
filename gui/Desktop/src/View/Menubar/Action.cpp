@@ -1,6 +1,6 @@
 #include "View/Menubar/Action.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "Log.h"
 
