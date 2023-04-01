@@ -9,22 +9,26 @@ namespace Action {
 
 namespace Camera3d {
 
-class SetMouseSpeed : public Action::Base {
+class SetMouseSpeed : public Action::UndoBase {
  public:
   SetMouseSpeed(float speed) : m_speed(speed) {}
   void Execute() override;
+  void Undo() override;
 
  private:
   float m_speed;
+  float m_prevSpeed;
 };
 
-class SetMoveSpeed : public Action::Base {
+class SetMoveSpeed : public Action::UndoBase {
  public:
   SetMoveSpeed(float speed) : m_speed(speed) {}
   void Execute() override;
+  void Undo() override;
 
  private:
   float m_speed;
+  float m_prevSpeed;
 };
 
 class SetPosition : public Action::Base {
@@ -54,36 +58,41 @@ class SetPitch : public Action::Base {
   float m_pitch;
 };
 
-class SetUsePerspective : public Action::Base {
+class SetUsePerspective : public Action::UndoBase {
  public:
   SetUsePerspective(bool perspective) : m_perspective(perspective) {}
   void Execute() override;
+  void Undo() override;
 
  private:
   int m_perspective;
+  int m_prevPerspective;
 };
 
 }  // namespace Camera3d
 
 namespace CameraNd {
 
-class ToggleNeedSkip : public Action::Base {
+class ToggleNeedSkip : public Action::UndoBase {
  public:
   ToggleNeedSkip(int idx) : m_idx(idx) {}
   void Execute() override;
+  void Undo() override { Execute(); }
 
  private:
   int m_idx;
 };
 
-class SetNeedSkip : public Action::Base {
+class SetNeedSkip : public Action::UndoBase {
  public:
   SetNeedSkip(int idx, bool skip) : m_idx(idx), m_skip(skip) {}
   void Execute() override;
+  void Undo() override;
 
  private:
   int m_idx;
   bool m_skip;
+  bool m_prevSkip;
 };
 
 class SetPosition : public Action::Base {
@@ -107,15 +116,17 @@ class SetFront : public Action::Base {
   Eigen::VectorXf m_front;
 };
 
-class SetUsePerspective : public Action::Base {
+class SetUsePerspective : public Action::UndoBase {
  public:
   SetUsePerspective(int idx, bool perspective)
       : m_idx(idx), m_perspective(perspective) {}
   void Execute() override;
+  void Undo() override;
 
  private:
   int m_idx;
   int m_perspective;
+  int m_prevPerspective;
 };
 
 }  // namespace CameraNd

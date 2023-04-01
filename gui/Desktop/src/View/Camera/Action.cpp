@@ -24,7 +24,16 @@ void SetMouseSpeed::Execute() {
   if (Action::CheckLogDErr(!cam, "Camera3d::SetMouseSpeed"))
     return;
 
+  m_prevSpeed = cam->GetMouseSpeed();
   cam->SetMouseSpeed(m_speed);
+}
+
+void SetMouseSpeed::Undo() {
+  Cellnta::Camera3d* cam = GetCamera3d(p_ctx);
+  if (Action::CheckLogDErr(!cam, "Camera3d::SetMouseSpeed"))
+    return;
+
+  cam->SetMouseSpeed(m_prevSpeed);
 }
 
 void SetMoveSpeed::Execute() {
@@ -32,7 +41,16 @@ void SetMoveSpeed::Execute() {
   if (Action::CheckLogDErr(!cam, "Camera3d::SetMoveSpeed"))
     return;
 
+  m_prevSpeed = cam->GetMoveSpeed();
   cam->SetMoveSpeed(m_speed);
+}
+
+void SetMoveSpeed::Undo() {
+  Cellnta::Camera3d* cam = GetCamera3d(p_ctx);
+  if (Action::CheckLogDErr(!cam, "Camera3d::SetMoveSpeed"))
+    return;
+
+  cam->SetMoveSpeed(m_prevSpeed);
 }
 
 void SetPosition::Execute() {
@@ -64,7 +82,16 @@ void SetUsePerspective::Execute() {
   if (Action::CheckLogDErr(!cam, "Camera3d::SetUsePerspective"))
     return;
 
+  m_prevPerspective = cam->GetUsePerspective();
   cam->SetUsePerspective(m_perspective);
+}
+
+void SetUsePerspective::Undo() {
+  Cellnta::Camera3d* cam = GetCamera3d(p_ctx);
+  if (Action::CheckLogDErr(!cam, "Camera3d::SetUsePerspective"))
+    return;
+
+  cam->SetUsePerspective(m_prevPerspective);
 }
 
 }  // namespace Ui::Action::Camera3d
@@ -94,7 +121,16 @@ void SetNeedSkip::Execute() {
   if (Action::CheckLogDErr(!cam, "CameraNd::SetNeedSkip"))
     return;
 
+  m_prevSkip = cam->WantSkip();
   cam->NeedSkip(m_skip);
+}
+
+void SetNeedSkip::Undo() {
+  Cellnta::CameraNd* cam = GetCameraNd(p_ctx, m_idx);
+  if (Action::CheckLogDErr(!cam, "CameraNd::SetNeedSkip"))
+    return;
+
+  cam->NeedSkip(m_prevSkip);
 }
 
 void SetPosition::Execute() {
@@ -118,7 +154,16 @@ void SetUsePerspective::Execute() {
   if (Action::CheckLogDErr(!cam, "CameraNd::SetUsePerspective"))
     return;
 
+  m_prevPerspective = cam->GetUsePerspective();
   cam->SetUsePerspective(m_perspective);
+}
+
+void SetUsePerspective::Undo() {
+  Cellnta::CameraNd* cam = GetCameraNd(p_ctx, m_idx);
+  if (Action::CheckLogDErr(!cam, "CameraNd::SetUsePerspective"))
+    return;
+
+  cam->SetUsePerspective(m_prevPerspective);
 }
 
 }  // namespace Ui::Action::CameraNd

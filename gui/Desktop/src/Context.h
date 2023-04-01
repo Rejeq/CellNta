@@ -13,6 +13,7 @@
 
 #include "ActionBase.h"
 #include "WindowBase.h"
+#include "UndoRedo.h"
 
 namespace Cellnta {
 
@@ -52,6 +53,9 @@ class Context {
   const Cellnta::Renderer& GetRenderer() const { return m_renderer; }
   Cellnta::Renderer& GetRenderer() { return m_renderer; }
 
+  const UndoRedo& GetUndoRedo() const { return m_undoRedo; }
+  UndoRedo& GetUndoRedo() { return m_undoRedo; }
+
   void SetOnFirstStartup(
       const std::function<void(const Context&)>& onFirstStartup) {
     m_OnFirstStartup = onFirstStartup;
@@ -79,6 +83,8 @@ class Context {
   std::shared_ptr<Cellnta::CameraNdList> m_cameraNd;
   std::shared_ptr<Cellnta::HypercubeStorage> m_hypercube;
   std::shared_ptr<Cellnta::RenderData> m_renderData;
+
+  UndoRedo m_undoRedo;
 
   std::string m_currentWindow;
 

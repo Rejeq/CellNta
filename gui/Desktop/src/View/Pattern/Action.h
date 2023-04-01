@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Cellnta/Area.h>
+#include <Cellnta/Snapshot.h>
 #include <Cellnta/World/WorldList.h>
 
 #include "ActionBase.h"
@@ -9,12 +10,23 @@ namespace Ui {
 namespace Action {
 namespace Pattern {
 
+class Base : public Action::UndoBase {
+ public:
+  void Undo() override;
+
+ protected:
+  void MakeUndoAble(const Cellnta::Snapshot& snap);
+
+ private:
+  Cellnta::Snapshot m_prevSnap;
+};
+
 class SetMiddlePosition : public Action::Base {
  public:
   void Execute() override;
 };
 
-class CreateBlinker : public Action::Base {
+class CreateBlinker : public Action::Pattern::Base {
  public:
   CreateBlinker(const Eigen::VectorXi& pos) : m_pos(pos) {}
   void Execute() override;
@@ -23,7 +35,7 @@ class CreateBlinker : public Action::Base {
   Eigen::VectorXi m_pos;
 };
 
-class CreateStair : public Action::Base {
+class CreateStair : public Action::Pattern::Base {
  public:
   CreateStair(const Eigen::VectorXi& pos) : m_pos(pos) {}
   void Execute() override;
@@ -32,7 +44,7 @@ class CreateStair : public Action::Base {
   Eigen::VectorXi m_pos;
 };
 
-class Create1dLine : public Action::Base {
+class Create1dLine : public Action::Pattern::Base {
  public:
   Create1dLine(const Eigen::VectorXi& pos) : m_pos(pos) {}
   void Execute() override;
@@ -41,7 +53,7 @@ class Create1dLine : public Action::Base {
   Eigen::VectorXi m_pos;
 };
 
-class Create2dGlider : public Action::Base {
+class Create2dGlider : public Action::Pattern::Base {
  public:
   Create2dGlider(const Eigen::VectorXi& pos) : m_pos(pos) {}
   void Execute() override;
@@ -50,6 +62,6 @@ class Create2dGlider : public Action::Base {
   Eigen::VectorXi m_pos;
 };
 
-}  // namespace World
+}  // namespace Pattern
 }  // namespace Action
 }  // namespace Ui

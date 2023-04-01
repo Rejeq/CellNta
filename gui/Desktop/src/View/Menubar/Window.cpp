@@ -1,6 +1,7 @@
 #include "View/Menubar/Window.h"
 
 #include "Context.h"
+#include "View/Menubar/Action.h"
 #include "Widgets/Utils.h"
 
 using namespace Ui;
@@ -62,8 +63,13 @@ void MenubarWindow::DrawFileMenu() {
 
 void MenubarWindow::DrawEditMenu() {
   bool opened = false;
-  ImGui::MenuItem("Undo", "Ctrl+Z", &opened, false);
-  ImGui::MenuItem("Redo", "Ctrl+Y", &opened, false);
+  auto& undoRedo = GetContext()->GetUndoRedo();
+
+  if (ImGui::MenuItem("Undo", "Ctrl+Z", &opened, undoRedo.CanUndo()))
+    undoRedo.Undo();
+  if (ImGui::MenuItem("Redo", "Ctrl+Y", &opened, undoRedo.CanRedo()))
+    undoRedo.Redo();
+
 
   ImGui::Separator();
   ImGui::MenuItem("Cut", "Ctrl+X", &opened, false);
@@ -93,6 +99,7 @@ void MenubarWindow::DrawViewMenu() {
 }
 
 void MenubarWindow::DrawWindowsList() {
+  CELLNTA_PROFILE;
 
   for (const auto& window : GetContext()->GetWindows()) {
     WindowProperties& prop = window->GetProperties();

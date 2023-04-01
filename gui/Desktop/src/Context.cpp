@@ -100,6 +100,10 @@ void Context::Draw() {
 void Context::PushAction(Action::BasePtr&& action) {
   action->SetContext(this);
   action->Execute();
+
+  if (action->CanUndo()) {
+    m_undoRedo.PushAction(std::move(action));
+  }
 }
 
 void Context::SetupDockspace() {

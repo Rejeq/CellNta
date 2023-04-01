@@ -21,8 +21,18 @@ class Base {
 
   virtual void Execute() = 0;
 
+  virtual bool CanUndo() { return false; }
+  virtual void Undo() {}
+
  protected:
   Context* p_ctx;
+};
+
+class UndoBase : public Action::Base {
+ public:
+  virtual ~UndoBase() = default;
+
+  bool CanUndo() override { return true; }
 };
 
 using BasePtr = std::unique_ptr<Action::Base>;
