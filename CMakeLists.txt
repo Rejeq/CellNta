@@ -9,6 +9,7 @@ option(CELLNTA_TRACE_LOGGING "Enable detailed logging. Causes performance issues
 option(CELLNTA_TESTS "Enable google test" OFF)
 option(CELLNTA_FETCHING "Enable fetching third-party libraries" ON)
 option(CELLNTA_PCH "Enable building using a precompiled header to speed up compilation time" ON)
+option(CELLNTA_GUI "Enable building gui targets" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
@@ -35,4 +36,7 @@ if(CELLNTA_TESTS)
 endif()
 
 add_subdirectory(src)
-add_subdirectory(gui)
+
+if(CELLNTA_GUI)
+  add_subdirectory(gui)
+endif()
