@@ -14,7 +14,10 @@ class Base {
  public:
   virtual ~Base() = default;
 
-  void SetContext(Context* ctx) { p_ctx = ctx; }
+  Base& SetContext(Context* ctx) {
+    p_ctx = ctx;
+    return *this;
+  }
 
   virtual void Execute() = 0;
 
