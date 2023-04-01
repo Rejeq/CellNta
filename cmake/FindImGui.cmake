@@ -44,6 +44,7 @@ add_imgui_library(
   DEPS SDL2::SDL2
 )
 
+find_package(OpenGL)
 add_imgui_library(
   SOURCES ${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.cpp
   HEADERS ${IMGUI_BACKEND_DIR}

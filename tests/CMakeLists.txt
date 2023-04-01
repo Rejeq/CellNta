@@ -1,15 +1,13 @@
-file(GLOB_RECURSE TEST_SOURCE_LIST
-  src/*.h
-  src/*.cpp
-)
-
 find_package(GTest)
 
-add_executable(CellNta_Tests ${TEST_SOURCE_LIST})
-target_link_libraries(CellNta_Tests PRIVATE
-  CellNta
+add_executable(CellntaBaseTests
+  src/AreaTest.cpp
+)
+
+target_link_libraries(CellntaBaseTests PRIVATE
+  CellntaBase
   GTest::gtest_main
 )
 
 include(GoogleTest)
-gtest_discover_tests(CellNta_Tests)
+gtest_discover_tests(CellntaBaseTests)

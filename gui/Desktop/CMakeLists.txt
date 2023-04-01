@@ -26,7 +26,8 @@ target_include_directories(GUI PUBLIC
 )
 
 target_link_libraries(GUI PUBLIC
-  CellNta
+  CellntaWorld
+  CellntaRenderer
   ImGui::ImGui
   SDL2::SDL2
   ${CMAKE_DL_LIBS}
