@@ -30,6 +30,11 @@ if(CELLNTA_TIDY)
 endif()
 
 if(CELLNTA_TESTS)
+  if(CELLNTA_LOGGING)
+    set(CELLNTA_LOGGING OFF)
+    message(WARNING "Logging will be disabled due to enabled tests")
+  endif()
+
   enable_testing()
   add_subdirectory(tests)
   message(STATUS "Tests enabled")
