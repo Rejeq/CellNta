@@ -5,7 +5,7 @@ add_executable(CellntaBaseTests
 )
 
 target_link_libraries(CellntaBaseTests PRIVATE
-  CellntaBase
+  Cellnta::Base
   GTest::gtest_main
 )
 

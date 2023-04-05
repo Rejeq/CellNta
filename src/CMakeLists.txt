@@ -8,6 +8,7 @@ add_library(CellntaBase STATIC
   ./LogBase.cpp
   ./Snapshot.cpp
 )
+add_library(Cellnta::Base ALIAS CellntaBase)
 
 target_include_directories(CellntaBase PUBLIC
   ${CELLNTA_DIR}/include

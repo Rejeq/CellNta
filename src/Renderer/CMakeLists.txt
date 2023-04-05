@@ -14,9 +14,10 @@ add_library(CellntaRenderer STATIC
   ./Shader.cpp
   ./Transform.cpp
 )
+add_library(Cellnta::Renderer ALIAS CellntaRenderer)
 
 target_link_libraries(CellntaRenderer PUBLIC
-  CellntaBase
+  Cellnta::Base
   OpenGL::GL
   GLEW::GLEW
 )

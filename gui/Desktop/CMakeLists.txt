@@ -43,8 +43,8 @@ target_include_directories(CellntaDesktop PUBLIC
 )
 
 target_link_libraries(CellntaDesktop PUBLIC
-  CellntaWorld
-  CellntaRenderer
+  Cellnta::World
+  Cellnta::Renderer
   ImGui::ImGui
   SDL2::SDL2
   ${CMAKE_DL_LIBS}
