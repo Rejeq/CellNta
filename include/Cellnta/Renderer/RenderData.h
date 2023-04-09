@@ -19,7 +19,7 @@ class RenderData {
   RenderData();
   RenderData(int dim);
 
-  void Update(const World* world);
+  void Update(const World& world);
 
   void SetDimension(int dim);
 

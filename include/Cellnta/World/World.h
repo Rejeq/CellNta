@@ -27,12 +27,9 @@ class World : public Adjustable, public Iterable {
 
   WorldType GetType() const { return m_type; }
 
-  void SetupFrom(const World* left) {
-    if (left == nullptr)
-      return;
-
-    m_step = left->m_step;
-    SetDimension(left->p_dim);
+  void SetupFrom(const World& left) {
+    m_step = left.m_step;
+    SetDimension(left.p_dim);
   }
 
  protected:

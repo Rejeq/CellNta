@@ -15,21 +15,18 @@ RenderData::RenderData(int dim) : m_d(dim) {
   m_desiredArea.reserve(4);
 }
 
-void RenderData::Update(const World* world) {
-  if (world == nullptr)
-    return;
-
+void RenderData::Update(const World& world) {
   CELLNTA_LOG_TRACE("Updating RenderData");
 
   NCellStorage::VecList& rawCells = m_cells.GetRaw();
   for (auto itPos = rawCells.begin(); itPos != rawCells.end(); ++itPos) {
-    if (world->GetCell(itPos->cast<Cell::Point>()) == 0) {
+    if (world.GetCell(itPos->cast<Cell::Point>()) == 0) {
       m_cells.Erase(itPos);
       --itPos;
     }
   }
 
-  IteratorRef iter = world->CreateIterator(GetVisibleArea());
+  IteratorRef iter = world.CreateIterator(GetVisibleArea());
   while (const Cell* cell = iter->Next()) {
     SetCell(*cell);
   }

@@ -14,7 +14,7 @@ void Update::Execute() {
   if (Action::CheckLogDErr(!data, "Renderer::Update"))
     return;
 
-  data->Update(&p_ctx->GetWorld());
+  data->Update(p_ctx->GetWorld());
 }
 
 void SetHypercubeDimension::Execute() {

@@ -221,9 +221,9 @@ void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
     const bool usePerspective = camera.GetUsePerspective();
 
     if (projectCube)
-      NProject(m_cube.get(), dim, viewProj, usePerspective);
+      NProject(*m_cube, dim, viewProj, usePerspective);
     if (projectCells)
-      NProject(&cells, dim, viewProj, usePerspective);
+      NProject(cells, dim, viewProj, usePerspective);
   }
 
   if (projectCube)

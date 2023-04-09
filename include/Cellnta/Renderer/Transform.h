@@ -12,9 +12,9 @@ Eigen::MatrixXf LookAt(int N, const Eigen::VectorXf& from,
 Eigen::MatrixXf Perspective(int N, double eyeAngle, double nearPlane,
                             double farPlane, double aspect);
 
-void NProject(NCellStorage* cells, int cameraDim,
+void NProject(NCellStorage& cells, int cameraDim,
               const Eigen::MatrixXf& viewProj, bool perspective);
-void NProject(HypercubeStorage* cube, int cameraDim,
+void NProject(HypercubeStorage& cube, int cameraDim,
               const Eigen::MatrixXf& viewProj, bool perspective);
 
 Eigen::MatrixXf NRotate(int N, int axis1, int axis2, float angle);

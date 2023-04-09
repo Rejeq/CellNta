@@ -68,7 +68,11 @@ void Context::Update() {
     return;
 
   if (data->DesireArea()) {
-    data->Update(m_world.get());
+    if (m_world == nullptr)
+      DESKTOP_LOG_ERROR(
+          "Unable to update world in RenderData: m_world was nullptr");
+    else
+      data->Update(*m_world);
     data->DesireAreaProcessed();
   }
 
@@ -134,7 +138,8 @@ bool Context::SetWorld(const Cellnta::WorldType type) {
     return true;
   }
 
-  tmp->SetupFrom(m_world.get());
+  if (m_world != nullptr)
+    tmp->SetupFrom(*m_world);
   m_world = std::move(tmp);
 
   Cellnta::RenderData* data = m_renderer.GetData();
