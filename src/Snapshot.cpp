@@ -9,6 +9,10 @@ class Snapshot::Iterator : public Cellnta::Iterator {
   Iterator(const Snapshot* snap) : m_snap(snap) {
     if (snap == nullptr)
       CELLNTA_LOG_ERROR("Passing a not initialized Snapshot in Iterator");
+    Reset();
+  }
+
+  void Reset() override {
     m_curr.pos = Cell::Pos::Zero(0);
     m_iter = m_snap->m_data.begin();
   }
@@ -34,6 +38,10 @@ class Snapshot::AreaIterator : public Cellnta::Iterator {
       : m_snap(snap), m_area(area) {
     if (snap == nullptr)
       CELLNTA_LOG_ERROR("Passing a not initialized Snapshot in Iterator");
+    Reset();
+  }
+
+  void Reset() override {
     m_curr.pos = Cell::Pos::Zero(0);
     m_iter = m_snap->m_data.begin();
   }

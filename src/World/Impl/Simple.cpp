@@ -27,6 +27,10 @@ class WorldImplSimple::Iterator : public Cellnta::Iterator {
   Iterator(const WorldImplSimple* world) : m_world(world) {
     if (world == nullptr)
       CELLNTA_LOG_ERROR("Passing a not initialized WorldImplSimple in Iterator");
+    Reset();
+  }
+
+  void Reset() override {
     m_curr.pos = Cell::Pos::Zero(m_world->GetDimension());
   }
 
@@ -56,6 +60,10 @@ class WorldImplSimple::AreaIterator : public Cellnta::Iterator {
       : m_world(world), m_area(area) {
     if (world == nullptr)
       CELLNTA_LOG_ERROR("Passing a not initialized WorldImplSimple in AreaIterator");
+    Reset();
+  }
+
+  void Reset() override {
     m_curr.pos = Cell::Pos::Zero(m_world->GetDimension());
   }
 

@@ -10,6 +10,7 @@ class Iterator {
  public:
   virtual ~Iterator() = default;
 
+  virtual void Reset() = 0;
   virtual const Cell* Next() = 0;
 };
 

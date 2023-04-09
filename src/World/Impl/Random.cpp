@@ -27,6 +27,10 @@ class WorldImplRandom::Iterator : public Cellnta::Iterator {
     if (world == nullptr)
       CELLNTA_LOG_ERROR(
           "Passing a not initialized WorldImplRandom in Iterator");
+    Reset();
+  }
+
+  void Reset() override {
     m_iter = m_world->m_data.begin();
   }
 
@@ -54,6 +58,10 @@ class WorldImplRandom::AreaIterator : public Cellnta::Iterator {
     if (world == nullptr)
       CELLNTA_LOG_ERROR(
           "Passing a not initialized WorldImplRandom in AreaIterator");
+    Reset();
+  }
+
+  void Reset() override {
     m_iter = m_world->m_data.begin();
   }
 
