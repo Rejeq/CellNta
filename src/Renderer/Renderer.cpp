@@ -230,6 +230,7 @@ void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
     m_cubeDrawer.UpdatePoints(*m_cube);
   if (projectCells)
     m_cellDrawer.Update(cells);
+  m_wantDraw = true;
 }
 
 void Renderer::SetHypercube(const std::shared_ptr<HypercubeStorage>& cube) {
