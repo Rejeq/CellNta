@@ -3,32 +3,29 @@
 #include <cstddef>
 #include <vector>
 
-#include "Cellnta/Renderer/GlBackend.h"
-
 namespace Cellnta {
 
 class ColorStorage {
+public:
   using Type = float;
   constexpr static int SIZE = 4;
 
-public:
   ColorStorage();
-  ~ColorStorage();
+
+  bool NeedUpdate() const { return m_needUpdate; }
+  void Handled() { m_needUpdate = false; }
 
   void Generate(int maxIter, int polygons);
   void SetSeed(float seed) { m_seedHue = seed; }
 
-  void Clear() { return m_data.clear(); }
+  void Clear() { return m_data.clear(); m_needUpdate = true; }
 
   int GetSize() const { return m_data.size(); }
 
-  GLuint GetTexture() const { return m_textureId; }
   const float* GetData() const { return m_data.data(); }
 
  private:
   void GenerateRandomRGBAColor(Type* dst, Type alpha);
-
-  void UpdateColorBuffer();
 
   float m_seedHue = 0;
 
@@ -37,9 +34,7 @@ public:
   float m_brightness = 0.9f;  // 0.5f
 
   std::vector<Type> m_data;
-
-  GLuint m_colorBuffer = 0;
-  GLuint m_textureId = 0;
+  bool m_needUpdate = false;
 };
 
 }  // namespace Cellnta

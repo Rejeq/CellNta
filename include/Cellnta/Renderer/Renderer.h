@@ -5,6 +5,8 @@
 
 #include "Cellnta/Renderer/GlBackend.h"
 #include "Cellnta/Renderer/Shader.h"
+#include "Cellnta/Renderer/Drawer/NCell.h"
+#include "Cellnta/Renderer/Drawer/Hypercube.h"
 
 namespace Cellnta {
 
@@ -70,6 +72,9 @@ class Renderer {
   std::shared_ptr<CameraNdList> m_cameraNd;
   std::shared_ptr<HypercubeStorage> m_cube;
   std::shared_ptr<RenderData> m_data;
+
+  NCellDrawer m_cellDrawer;
+  HypercubeDrawer m_cubeDrawer;
 
   Shader m_cellShader;
   Shader m_gridShader;

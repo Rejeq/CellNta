@@ -25,19 +25,6 @@
 
 using namespace Cellnta;
 
-HypercubeStorage::HypercubeStorage() {
-  glGenBuffers(1, &m_pointsBuffer);
-  glGenBuffers(1, &m_indicesBuffer);
-}
-
-HypercubeStorage::~HypercubeStorage() {
-  if (m_pointsBuffer != 0)
-    glDeleteBuffers(1, &m_pointsBuffer);
-
-  if (m_indicesBuffer != 0)
-    glDeleteBuffers(1, &m_indicesBuffer);
-}
-
 void HypercubeStorage::Restore() {
   CELLNTA_PROFILE;
 
@@ -87,7 +74,7 @@ void HypercubeStorage::SetSize(Point size) {
   m_cubeSize = size;
   GenerateVertices();
 
-  UpdatePointsBuffer();
+  m_needUpdatePoints = true;
 }
 
 void HypercubeStorage::SetMode(CubeMode mode) {
@@ -109,7 +96,7 @@ void HypercubeStorage::SetMode(CubeMode mode) {
     default: break;
   }
 
-  UpdateIndicesBuffer();
+  m_needUpdateIndices = true;
 }
 
 void HypercubeStorage::GenerateVertices() {
@@ -281,66 +268,6 @@ void HypercubeStorage::GenerateIndicesPoints() {
   m_ind.resize(GetVerticesCount());
   for (int i = 0; i < GetVerticesCount(); ++i)
     m_ind[i] = i;
-}
-
-void HypercubeStorage::UpdatePointsBuffer() {
-  CELLNTA_PROFILE;
-
-  CELLNTA_LOG_TRACE("Updating points buffer");
-
-  glBindBuffer(GL_ARRAY_BUFFER, m_pointsBuffer);
-
-  const int size = GetPointsSize();
-  if (size != m_pointsBufferSize) {
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(Point), nullptr,
-                 GL_DYNAMIC_DRAW);
-    m_pointsBufferSize = size;
-  }
-
-  const int pointsCount = GetVerticesCount() * 3;
-  float* pnt = GetPoints();
-
-  if (pnt == nullptr)
-    return;
-
-  float* dst = BeginArrayBufferSource(0, GetPointsSize() * sizeof(Point));
-
-  if (dst == nullptr)
-    return;
-
-  const float* end = dst + pointsCount;
-  while (dst < end) {
-    dst[0] = pnt[0];
-    dst[1] = pnt[1];
-    dst[2] = pnt[2];
-
-    pnt += GetVertexSize();
-    dst += 3;
-  }
-
-  EndArrayBufferSource();
-  m_needUpdate = true;
-}
-
-void HypercubeStorage::UpdateIndicesBuffer() {
-  CELLNTA_PROFILE;
-
-  UpdateColor();
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indicesBuffer);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, GetIndicesSize() * sizeof(Ind),
-               GetIndices(), GL_DYNAMIC_DRAW);
-  m_needUpdate = true;
-}
-
-void HypercubeStorage::UpdateColor() {
-  switch (GetMode()) {
-    case CubeMode::POINTS: m_color.Generate(GetVerticesCount(), 1); break;
-    case CubeMode::WIREFRAME: m_color.Generate(GetEdgesCount(), 1); break;
-    case CubeMode::POLYGON: m_color.Generate(GetFacesCount(), 2); break;
-    default: assert(0 && "Unreachable"); break;
-  }
-  m_needUpdate = true;
 }
 
 int HypercubeStorage::GetPlanesCount(int dim) const {

@@ -7,15 +7,6 @@
 
 using namespace Cellnta;
 
-NCellStorage::NCellStorage() {
-  glGenBuffers(1, &m_buffer);
-}
-
-NCellStorage::~NCellStorage() {
-  if (m_buffer != 0)
-    glDeleteBuffers(1, &m_buffer);
-}
-
 void NCellStorage::Restore() {
   CELLNTA_PROFILE;
 
@@ -114,47 +105,4 @@ size_t NCellStorage::capacity() const {
 
 size_t NCellStorage::size() const {
   return m_cells.size();
-}
-
-void NCellStorage::UpdateBuffer() {
-  CELLNTA_PROFILE;
-
-  CELLNTA_LOG_TRACE("Updating cell buffer");
-  if (m_visibleCells.empty())
-    return;
-
-  int pointsCount = m_visibleCells.size() * 3;
-  Eigen::VectorXf* pnt = m_visibleCells.data();
-
-  if (pnt == nullptr)
-    return;
-
-  glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
-
-  size_t capacity = m_visibleCells.capacity();
-  if (capacity != m_oldCapacity) {
-    m_oldCapacity = capacity;
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
-    glBufferData(GL_ARRAY_BUFFER, 3 * capacity * sizeof(NCellStorage::Point),
-                 nullptr, GL_DYNAMIC_DRAW);
-  }
-
-  float* dst =
-      BeginArrayBufferSource(0, pointsCount * sizeof(NCellStorage::Point));
-
-  if (dst == nullptr)
-    return;
-
-  const float* end = dst + pointsCount;
-
-  // memset(dst, 0, GetTotalAllocatedMemoryForPoints());
-  while (dst < end) {
-    dst[0] = (*pnt)(0);
-    dst[1] = (*pnt)(1);
-    dst[2] = (*pnt)(2);
-    ++pnt;
-    dst += 3;
-  }
-
-  EndArrayBufferSource();
 }

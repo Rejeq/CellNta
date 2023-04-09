@@ -13,6 +13,10 @@ add_library(CellntaRenderer STATIC
   ./Renderer.cpp
   ./Shader.cpp
   ./Transform.cpp
+
+  ./Drawer/Color.cpp
+  ./Drawer/Hypercube.cpp
+  ./Drawer/NCell.cpp
 )
 add_library(Cellnta::Renderer ALIAS CellntaRenderer)
 

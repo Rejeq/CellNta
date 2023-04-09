@@ -71,9 +71,23 @@ void Renderer::Update() {
   UpdateCamera();
 
   if (m_cube != nullptr) {
-    if (m_cube->NeedUpdate()) {
+    if (m_cube->NeedUpdatePoints()) {
+      ProjectBuffers(true, false);
       m_wantDraw = true;
-      m_cube->Handled();
+      m_cube->PointsHandled();
+    }
+
+    if (m_cube->NeedUpdateIndices()) {
+      m_cubeDrawer.UpdateIndices(*m_cube);
+      m_wantDraw = true;
+      m_cube->IndicesHandled();
+    }
+
+    ColorStorage& color = m_cube->GetColor();
+    if (color.NeedUpdate()) {
+      m_cubeDrawer.GetColor().Update(color);
+      m_wantDraw = true;
+      color.Handled();
     }
   }
 
@@ -109,7 +123,7 @@ void Renderer::Draw() {
 
   m_cellShader.Use();
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_BUFFER, m_cube->GetColor().GetTexture());
+  glBindTexture(GL_TEXTURE_BUFFER, m_cubeDrawer.GetColor().GetTexture());
 
   GLenum renderMode = 0;
   switch (m_cube->GetMode()) {
@@ -213,9 +227,9 @@ void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
   }
 
   if (projectCube)
-    m_cube->UpdatePointsBuffer();
+    m_cubeDrawer.UpdatePoints(*m_cube);
   if (projectCells)
-    cells.UpdateBuffer();
+    m_cellDrawer.Update(cells);
 }
 
 void Renderer::SetHypercube(const std::shared_ptr<HypercubeStorage>& cube) {
@@ -230,7 +244,7 @@ void Renderer::SetHypercube(const std::shared_ptr<HypercubeStorage>& cube) {
 
   static_assert(std::is_same<HypercubeStorage::Point, float>::value,
                 "glVertexAttribute has another type");
-  glBindBuffer(GL_ARRAY_BUFFER, m_cube->GetPointsBuffer());
+  glBindBuffer(GL_ARRAY_BUFFER, m_cubeDrawer.GetPointsBuffer());
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
                         3 * sizeof(HypercubeStorage::Point), nullptr);
   glEnableVertexAttribArray(0);
@@ -248,7 +262,7 @@ void Renderer::SetData(const std::shared_ptr<RenderData>& data) {
 
   static_assert(std::is_same<NCellStorage::Point, float>::value,
                 "glVertexAttribute has another type");
-  glBindBuffer(GL_ARRAY_BUFFER, m_data->GetCells().GetBuffer());
+  glBindBuffer(GL_ARRAY_BUFFER, m_cellDrawer.GetBuffer());
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
                         3 * sizeof(NCellStorage::Point), nullptr);
   glVertexAttribDivisor(1, 1);
