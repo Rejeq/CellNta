@@ -22,72 +22,78 @@ static void IteratorNextPosition(const size_t* sizes, Cell::Pos& pos) {
   }
 }
 
+static void IteratorSetPosition(const size_t* sizes, size_t idx,
+                                Cell::Pos& pos) {
+  for (int i = pos.size() - 1; i >= 0; --i) {
+    const size_t size = sizes[i];
+    uint32_t tmp = idx / size;
+    pos[i] = idx - size * tmp;
+    idx = tmp;
+  }
+}
+
 class WorldImplSimple::Iterator : public Cellnta::Iterator {
  public:
-  Iterator(const WorldImplSimple* world) : m_world(world) {
-    if (world == nullptr)
-      CELLNTA_LOG_ERROR("Passing a not initialized WorldImplSimple in Iterator");
-    Reset();
-  }
+  Iterator(const WorldImplSimple& world) : m_world(world) { Reset(); }
 
   void Reset() override {
-    m_curr.pos = Cell::Pos::Zero(m_world->GetDimension());
+    m_curr.pos = Cell::Pos::Zero(m_world.GetDimension());
+    m_idx = 0;
   }
 
   const Cell* Next() override {
-    Cell::State* world = m_world->GetWorld();
-    for (; m_idx < m_world->GetTotalArea(); ++m_idx) {
-      if (world[m_idx] != 0) {
-        ++m_idx;
-        IteratorNextPosition(m_world->m_size.data(), m_curr.pos);
-        break;
-      }
+    Cell::State* data = m_world.GetWorld();
 
-      IteratorNextPosition(m_world->m_size.data(), m_curr.pos);
+    for (; m_idx < m_world.GetTotalArea(); ++m_idx) {
+      if (data[m_idx] != 0) {
+        IteratorSetPosition(m_world.m_size.data(), m_idx, m_curr.pos);
+        m_curr.state = data[m_idx];
+
+        ++m_idx;  // Since would be infinity loop occured
+        return &m_curr;
+      }
     }
     return nullptr;
   }
 
  private:
-  const WorldImplSimple* m_world;
+  const WorldImplSimple& m_world;
   Cell m_curr;
   size_t m_idx = 0;
 };
 
 class WorldImplSimple::AreaIterator : public Cellnta::Iterator {
  public:
-  AreaIterator(const WorldImplSimple* world, const Area& area)
+  AreaIterator(const WorldImplSimple& world, const Area& area)
       : m_world(world), m_area(area) {
-    if (world == nullptr)
-      CELLNTA_LOG_ERROR("Passing a not initialized WorldImplSimple in AreaIterator");
     Reset();
   }
 
   void Reset() override {
-    m_curr.pos = Cell::Pos::Zero(m_world->GetDimension());
+    m_idx = m_world.CalculateIdxFromPos(m_area.min);
+    m_curr.pos = Cell::Pos::Zero(m_world.GetDimension());
+    IteratorSetPosition(m_world.m_size.data(), m_idx - 1, m_curr.pos);
   }
 
   const Cell* Next() override {
-    Cell::State* world = m_world->GetWorld();
+    Cell::State* data = m_world.GetWorld();
 
-    for (; m_idx < m_world->GetTotalArea(); ++m_idx) {
+    for (; m_idx < m_world.GetTotalArea(); ++m_idx) {
+      IteratorNextPosition(m_world.m_size.data(), m_curr.pos);
+
       // FIXME: Looks like its not a optimal solution,
       // probably better is using generalized pitch
-      if (m_area.PosValid(m_curr.pos)) {
-        if (world[m_idx] != 0) {
-          m_curr.state = world[m_idx];
-          ++m_idx;
-          IteratorNextPosition(m_world->m_size.data(), m_curr.pos);
-          return &m_curr;
-        }
-      }
+      if (m_area.PosValid(m_curr.pos) && data[m_idx] != 0) {
+        m_curr.state = data[m_idx];
 
-      IteratorNextPosition(m_world->m_size.data(), m_curr.pos);
+        ++m_idx;  // Since would be infinity loop occured
+        return &m_curr;
+      }
     }
     return nullptr;
   }
 
-  const WorldImplSimple* m_world;
+  const WorldImplSimple& m_world;
   Cell m_curr;
   Area m_area;
   size_t m_idx = 0;
@@ -98,7 +104,8 @@ void WorldImplSimple::Update() {
 
   if (p_dim == 0 || m_worlds[0] == nullptr || m_worlds[1] == nullptr) {
     CELLNTA_LOG_WARN(
-        "WorldImplSimple not properly initiliezed. The Update() has not happened");
+        "WorldImplSimple not properly initiliezed. The Update() has not "
+        "happened");
     return;
   }
 
@@ -166,12 +173,12 @@ Cell::State WorldImplSimple::OnGetCell(const Cell::Pos& pos) const {
 }
 
 std::unique_ptr<Cellnta::Iterator> WorldImplSimple::CreateIterator() const {
-  return std::make_unique<Iterator>(this);
+  return std::make_unique<Iterator>(*this);
 }
 
 std::unique_ptr<Cellnta::Iterator> WorldImplSimple::CreateIterator(
     const Area& area) const {
-  return std::make_unique<AreaIterator>(this, area);
+  return std::make_unique<AreaIterator>(*this, area);
 }
 
 void WorldImplSimple::SetSize(const std::vector<size_t>& size) {
@@ -189,7 +196,8 @@ void WorldImplSimple::Step() {
   m_oddGen = !m_oddGen;
 }
 
-size_t WorldImplSimple::FindNeighbors(const Cell::State* world, size_t idx) const {
+size_t WorldImplSimple::FindNeighbors(const Cell::State* world,
+                                      size_t idx) const {
   CELLNTA_PROFILE;
 
   size_t out = 0;
@@ -219,13 +227,19 @@ void WorldImplSimple::GenerateNeigbors() {
 }
 
 size_t WorldImplSimple::FindIdxInRangedWorld(size_t cellIdx,
-                                        size_t neighborIdx) const {
+                                             size_t neighborIdx) const {
   CELLNTA_PROFILE;
   return cellIdx + neighborIdx;
 }
 
 size_t WorldImplSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
+
+  if ((pos.size() - 2) > (int)m_size.size()) {
+    CELLNTA_LOG_ERROR(
+        "Unable to determine index from position: target pos > current dim");
+    return 0;
+  }
 
   size_t idx = 0;
   size_t size = 1;
@@ -261,7 +275,7 @@ void WorldImplSimple::DeleteWorld() {
 }
 
 void WorldImplSimple::CartesianProduct(int repeat, const Cell::Pos& oneDimNei,
-                                  std::vector<int>& out) {
+                                       std::vector<int>& out) {
   CELLNTA_PROFILE;
 
   // https://stackoverflow.com/a/5279601
