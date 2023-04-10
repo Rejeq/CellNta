@@ -44,7 +44,11 @@ class WorldImplSimple : public World {
 
   inline size_t FindIdxInRangedWorld(size_t cellIdx, size_t neighborIdx) const;
 
+  // With checking, return GetTotalArea() on failure
   size_t CalculateIdxFromPos(const Cell::Pos& pos) const;
+
+  // Without any checking, can be return garbage
+  size_t CalculateIdxFromPosRaw(const Cell::Pos& pos) const;
 
   void CreateWorld();
   void DeleteWorld();

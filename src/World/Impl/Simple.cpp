@@ -70,8 +70,15 @@ class WorldImplSimple::AreaIterator : public Cellnta::Iterator {
   }
 
   void Reset() override {
-    m_idx = m_world.CalculateIdxFromPos(m_area.min);
     m_curr.pos = Cell::Pos::Zero(m_world.GetDimension());
+    m_idx = m_world.CalculateIdxFromPos(m_area.min);
+
+    if (m_idx >= m_world.GetTotalArea()) {
+      m_idx = 0;
+      m_curr.pos[m_curr.pos.size() - 1] = -1; // Anyway i rewrite this soon
+      return;
+    }
+
     IteratorSetPosition(m_world.m_size.data(), m_idx - 1, m_curr.pos);
   }
 
@@ -238,13 +245,22 @@ size_t WorldImplSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
   if ((pos.size() - 2) > (int)m_size.size()) {
     CELLNTA_LOG_ERROR(
         "Unable to determine index from position: target pos > current dim");
-    return 0;
+    return GetTotalArea();
   }
+
+  for (auto i = 0; i < pos.size(); ++i)
+    if (pos[i] < 0)
+      return GetTotalArea();
+  return CalculateIdxFromPosRaw(pos);
+}
+
+size_t WorldImplSimple::CalculateIdxFromPosRaw(const Cell::Pos& pos) const {
+  CELLNTA_PROFILE;
 
   size_t idx = 0;
   size_t size = 1;
 
-  idx += pos[pos.size() - 1];
+  idx = pos[pos.size() - 1];
   for (int i = pos.size() - 2; i >= 0; --i) {
     size *= m_size[m_size.size() - 1 - i];
     idx += size * pos[i];
@@ -293,7 +309,7 @@ void WorldImplSimple::CartesianProduct(int repeat, const Cell::Pos& oneDimNei,
     Cell::Pos result = Cell::Pos::Zero(NDimNei.size());
     for (int i = vd.size() - 1; i >= 0; --i)
       result[result.size() - i - 1] = (*(vd[i]));
-    out.push_back(CalculateIdxFromPos(result));
+    out.push_back(CalculateIdxFromPosRaw(result));
 
     auto it = vd.begin();
     int i = 0;
