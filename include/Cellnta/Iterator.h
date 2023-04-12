@@ -12,6 +12,8 @@ class Iterator {
 
   virtual void Reset() = 0;
   virtual const Cell* Next() = 0;
+
+  const Cell* Nth(int n);
 };
 
 using IteratorRef = std::unique_ptr<Iterator>;
