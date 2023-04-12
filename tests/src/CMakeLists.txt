@@ -1,4 +1,5 @@
 add_executable(CellntaBaseTests
+  ./Main.cpp
   ./AreaTest.cpp
 )
 
