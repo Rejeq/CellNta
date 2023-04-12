@@ -42,7 +42,7 @@ class WorldImplSimple::Iterator : public Cellnta::Iterator {
   }
 
   const Cell* Next() override {
-    Cell::State* data = m_world.GetWorld();
+    const Cell::State* data = m_world.GetWorld();
 
     for (; m_idx < m_world.GetTotalArea(); ++m_idx) {
       if (data[m_idx] != 0) {
@@ -75,7 +75,7 @@ class WorldImplSimple::AreaIterator : public Cellnta::Iterator {
 
     if (m_idx >= m_world.GetTotalArea()) {
       m_idx = 0;
-      m_curr.pos[m_curr.pos.size() - 1] = -1; // Anyway i rewrite this soon
+      m_curr.pos[m_curr.pos.size() - 1] = -1;  // Anyway i rewrite this soon
       return;
     }
 
@@ -83,7 +83,7 @@ class WorldImplSimple::AreaIterator : public Cellnta::Iterator {
   }
 
   const Cell* Next() override {
-    Cell::State* data = m_world.GetWorld();
+    const Cell::State* data = m_world.GetWorld();
 
     for (; m_idx < m_world.GetTotalArea(); ++m_idx) {
       IteratorNextPosition(m_world.m_size.data(), m_curr.pos);
