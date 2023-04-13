@@ -171,10 +171,12 @@ void WorldImplSimple::Update() {
   for (int i = 0; i < GetStep(); ++i) {
     const Cell::State* world = GetWorld();
     Cell::State* buffWorld = GetBufferWorld();
+    m_population = 0;
 
     for (size_t cellPos = 0; cellPos < GetTotalArea(); ++cellPos) {
       size_t neiMask = FindNeighbors(world, cellPos);
       buffWorld[cellPos] = m_bornMask[neiMask] || m_surviveMask[neiMask];
+      m_population += m_bornMask[neiMask] || m_surviveMask[neiMask];
     }
 
     Step();
@@ -213,6 +215,8 @@ bool WorldImplSimple::OnSetCell(const Cell& cell) {
   if (world == nullptr || idx >= GetTotalArea())
     return true;
 
+  if (world[idx] == 0)
+    m_population += 1;
   world[idx] = cell.state;
   return false;
 }
@@ -321,6 +325,7 @@ size_t WorldImplSimple::CalculateIdxFromPosRaw(const Cell::Pos& pos) const {
 void WorldImplSimple::CreateWorld() {
   CELLNTA_PROFILE;
 
+  m_population = 0;
   for (auto& world : m_worlds) {
     world = std::make_unique<Cell::State[]>(GetTotalArea());
 
@@ -336,6 +341,7 @@ void WorldImplSimple::CreateWorld() {
 void WorldImplSimple::DeleteWorld() {
   CELLNTA_PROFILE;
 
+  m_population = 0;
   for (auto& world : m_worlds)
     world.reset(nullptr);
 }

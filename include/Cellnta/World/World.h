@@ -19,6 +19,7 @@ class World : public Adjustable, public Iterable {
 
   virtual void Update() = 0;
   virtual void SetDimension(int dim) = 0;
+  virtual size_t GetPopulation() const = 0;
 
   int GetDimension() const { return p_dim; }
 

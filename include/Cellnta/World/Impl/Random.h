@@ -15,6 +15,7 @@ class WorldImplRandom : public World {
 
   void Update() override;
   void SetDimension(int dim) override;
+  size_t GetPopulation() const override { return m_data.size(); }
 
   std::unique_ptr<Iterator> CreateIterator() const override;
   std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;

@@ -14,6 +14,7 @@ class WorldImplSimple : public World {
 
   void Update() override;
   void SetDimension(int dim) override;
+  size_t GetPopulation() const override { return m_population; }
 
   std::unique_ptr<Iterator> CreateIterator() const override;
   std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;
@@ -67,6 +68,7 @@ class WorldImplSimple : public World {
   std::array<std::unique_ptr<Cell::State[]>, 2> m_worlds;
   std::vector<size_t> m_size;
   size_t m_totalArea = 0;
+  size_t m_population = 0;
 
   bool m_oddGen = false;
   bool m_worldRepeated = true;

@@ -138,4 +138,6 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
   if (ImGui::Button("Set cell")) {
     ctx->PushAction(Action::Make(Action::World::SetCell(m_setCell)));
   }
+
+  ImGui::Text("Population: %zu", world->GetPopulation());
 }
