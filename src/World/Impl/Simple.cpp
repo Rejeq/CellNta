@@ -10,18 +10,6 @@
 
 using namespace Cellnta;
 
-static void IteratorNextPosition(const size_t* sizes, Cell::Pos& pos) {
-  if (sizes == nullptr)
-    return;
-
-  for (int i = pos.size() - 1; i >= 0; --i) {
-    pos[i] += 1;
-    if (pos[i] < (Cell::Pos::Scalar)sizes[i])
-      break;
-    pos[i] = 0;
-  }
-}
-
 static void IteratorSetPosition(const size_t* stride, size_t idx,
                                 Cell::Pos& pos) {
   CELLNTA_PROFILE;
@@ -81,44 +69,91 @@ class WorldImplSimple::AreaIterator : public Cellnta::Iterator {
 
   void Reset() override {
     if (!m_area.Valid()) {
+      m_firstIter = -1;
       CELLNTA_LOG_ERROR("Unable to create AreaIterator: Area is invalid");
       return;
     }
 
     m_curr.pos = Cell::Pos::Zero(m_world.GetDimension());
     m_idx = m_world.CalculateIdxFromPos(m_area.min);
+    // Since InrementPosition resets m_idx to intial state when it
+    // reaches the end of
+    m_idxEnd = m_idx;
+    m_firstIter = true;
 
-    if (m_idx >= m_world.GetTotalArea()) {
-      m_idx = 0;
-      m_curr.pos[m_curr.pos.size() - 1] = -1;  // Anyway i rewrite this soon
+    if (m_idx < m_world.GetTotalArea()) {
+      IteratorSetPosition(m_world.m_size.data(), m_idx - 1, m_curr.pos);
       return;
     }
 
-    IteratorSetPosition(m_world.m_size.data(), m_idx - 1, m_curr.pos);
+    m_idx = m_idxEnd = 0;
+    // Its needed because IteratorNextPosition will be called before m_idx + 1
+    m_curr.pos[m_curr.pos.size() - 1] = -1;
   }
 
   const Cell* Next() override {
+    CELLNTA_PROFILE;
+
+    // Like in WorldImplSimple::Iterator it must be slower
+    // when active cells < disabled cells.
+    // But determining population in area will be much slower
     const Cell::State* data = m_world.GetWorld();
 
-    for (; m_idx < m_world.GetTotalArea(); ++m_idx) {
-      IteratorNextPosition(m_world.m_size.data(), m_curr.pos);
+    if (m_firstIter == -1)
+      return nullptr;
 
-      // FIXME: Looks like its not a optimal solution,
-      // probably better is using generalized pitch
-      if (m_area.PosValid(m_curr.pos) && data[m_idx] != 0) {
+    while (true) {
+      IncrementPosition(m_world.m_size.data(), m_area, m_idx, m_curr.pos);
+      assert(m_area.PosValid(m_curr.pos) &&
+             "m_curr.pos in AreaIterator must be always valid");
+
+      if (m_idx == m_idxEnd && !m_firstIter)
+        break;
+      m_firstIter = false;
+
+      if (data[m_idx] != 0) {
         m_curr.state = data[m_idx];
-
-        ++m_idx;  // Since would be infinity loop occured
         return &m_curr;
       }
     }
     return nullptr;
   }
 
+ private:
+  static void IncrementPosition(const size_t* stride, const Area& area,
+                                size_t& idx, Cell::Pos& pos) {
+    CELLNTA_PROFILE;
+
+    for (int i = pos.size() - 1; i >= 0; --i) {
+      const int min = std::max(area.min[i], 0);
+      const int max = std::min(area.max[i], (Cell::Pos::Scalar)stride[i]);
+      const int rowIdx = std::pow(stride[i], pos.size() - 1 - i);
+
+      assert(max > min && "Max must > min. Otherwise negative idx occured");
+
+      if (pos[i] < min) {
+        pos[i] = min;
+        // Should modify idx in this case?
+        idx += rowIdx * (min - pos[i]);
+        break;
+      }
+
+      pos[i] += 1;
+      idx += rowIdx;
+      if (pos[i] < max)
+        break;
+
+      pos[i] = min;
+      idx -= rowIdx * (max - min);
+    }
+  }
+
   const WorldImplSimple& m_world;
   Cell m_curr;
   Area m_area;
   size_t m_idx = 0;
+  size_t m_idxEnd = 0;
+  int m_firstIter = true;
 };
 
 void WorldImplSimple::Update() {
@@ -264,7 +299,7 @@ size_t WorldImplSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
   }
 
   for (auto i = 0; i < pos.size(); ++i)
-    if (pos[i] < 0)
+    if (pos[i] < 0 || pos[i] >= (int)m_size[i])
       return GetTotalArea();
   return CalculateIdxFromPosRaw(pos);
 }

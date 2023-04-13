@@ -200,14 +200,14 @@ TEST(WorldImplSimple, AreaIterator) {
 
   auto iter = world.CreateIterator(Area(4, 7));
   const Cell* cell = nullptr;
-  int i = 4;
+  int i = 3;
 
   while ((cell = iter->Next()) != nullptr) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
-  if (i < 4 || i > 7)
-    ASSERT_TRUE(false) << "Iterator was out of range";
+  if (i != 6)
+    ASSERT_TRUE(false) << "Iterator did not go through all the values";
 
   // Testing out of range area
   iter = world.CreateIterator(Area(-1234, 1234));
@@ -218,8 +218,8 @@ TEST(WorldImplSimple, AreaIterator) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
-  if (i == 0)
-    ASSERT_TRUE(false) << "Iterator no have any value";
+  if (i != 9)
+    ASSERT_TRUE(false) << "Iterator did not go through all the values";
 
   // Testing invalid area
   iter = world.CreateIterator(Area(4321, -128));
