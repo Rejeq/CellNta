@@ -22,12 +22,13 @@ static void IteratorNextPosition(const size_t* sizes, Cell::Pos& pos) {
   }
 }
 
-static void IteratorSetPosition(const size_t* sizes, size_t idx,
+static void IteratorSetPosition(const size_t* stride, size_t idx,
                                 Cell::Pos& pos) {
+  CELLNTA_PROFILE;
+
   for (int i = pos.size() - 1; i >= 0; --i) {
-    const size_t size = sizes[i];
-    uint32_t tmp = idx / size;
-    pos[i] = idx - size * tmp;
+    const uint32_t tmp = idx / stride[i];
+    pos[i] = idx - stride[i] * tmp;
     idx = tmp;
   }
 }
@@ -42,6 +43,15 @@ class WorldImplSimple::Iterator : public Cellnta::Iterator {
   }
 
   const Cell* Next() override {
+    CELLNTA_PROFILE;
+
+    // TODO: Probaly previous algorithm must be more efficient when
+    // active cells > disabled cells.
+    // Because IteratorSetPosition() has always O(n) time and
+    // IteratotNextPosition() has O(1) average and O(n) worst.
+    // So maybe better to work with this algo when
+    // population count is <= (GetTotalArea() / 2)
+    // and use previous otherwise
     const Cell::State* data = m_world.GetWorld();
 
     for (; m_idx < m_world.GetTotalArea(); ++m_idx) {
