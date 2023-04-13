@@ -65,7 +65,7 @@ TEST(Area, PosValid) {
 
   area = Area(10, 100);
   CheckPosValid(area, 50, false, true);
-  CheckPosValid(area, 10, false, false);
+  CheckPosValid(area, 10, false, true);
   CheckPosValid(area, 100, false, false);
 
   area = Area(-100, 100);

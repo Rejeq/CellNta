@@ -33,7 +33,7 @@ bool Area::PosValid(const Eigen::VectorXi& pos) const {
   for (int i = 0; i < 3 /* min.size() */; ++i) {
     int point = (i < pos.size()) ? pos(i) : 0;
 
-    if ((point <= min(i)) || (point >= max(i)))
+    if ((point < min(i)) || (point >= max(i)))
       return false;
   }
 
