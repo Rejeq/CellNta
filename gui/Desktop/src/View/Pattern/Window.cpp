@@ -16,7 +16,7 @@ void PatternWindow::Draw() {
   if (ImGui::Begin(p_prop.Name, &p_prop.Opened)) {
     Widget::PositionSelector(ctx->GetWorld().GetDimension(), m_pos);
     if (ImGui::Button("Reset to middle")) {
-      ctx->PushAction(Action::Make(Action::Pattern::SetMiddlePosition()));
+      Action::Pattern::SetMiddlePosition(m_pos).SetContext(ctx).Execute();
     }
 
     if (ImGui::Button("Blinker")) {

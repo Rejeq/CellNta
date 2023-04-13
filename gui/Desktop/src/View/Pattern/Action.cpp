@@ -69,16 +69,11 @@ void Pattern::Base::MakeUndoAble(const Cellnta::Snapshot& snap) {
 void SetMiddlePosition::Execute() {
   CELLNTA_PROFILE;
 
-  Window* win = p_ctx->GetWindowByName("Pattern");
-  if (Action::CheckLogErr(!win, DESKTOP_ACTION_DERR_MSG
-                          "Pattern::SetMiddlePosition: "
-                          "Cannot find 'Pattern' window"))
-    return;
-  PatternWindow* patternWin = (PatternWindow*)win;
-
   // FIXME: Hard coded
   // TODO: Need provide GetRange() in base world class
-  patternWin->SetPosition(Eigen::Vector3i(15, 15, 15));
+  for (int i = 0; i < m_pos.size(); ++i) {
+    m_pos[i] = 15;
+  }
 }
 
 void CreateBlinker::Execute() {

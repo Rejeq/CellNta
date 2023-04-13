@@ -23,7 +23,11 @@ class Base : public Action::UndoBase {
 
 class SetMiddlePosition : public Action::Base {
  public:
+  SetMiddlePosition(Eigen::VectorXi& pos) : m_pos(pos) {}
   void Execute() override;
+
+ private:
+  Eigen::VectorXi& m_pos;
 };
 
 class CreateBlinker : public Action::Pattern::Base {

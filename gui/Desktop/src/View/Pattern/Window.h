@@ -17,8 +17,6 @@ class PatternWindow : public Window {
 
   void Draw() override;
 
-  void SetPosition(const Cellnta::Cell::Pos& pos) { m_pos = pos; }
-  Cellnta::Cell::Pos GetPosition() const { return m_pos; }
  private:
   Cellnta::Cell::Pos m_pos;
 };
