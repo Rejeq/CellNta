@@ -220,4 +220,8 @@ TEST(WorldImplSimple, AreaIterator) {
   }
   if (i == 0)
     ASSERT_TRUE(false) << "Iterator no have any value";
+
+  // Testing invalid area
+  iter = world.CreateIterator(Area(4321, -128));
+  ASSERT_FALSE(iter->Next()) << "Iterator contain value, but area is invalid";
 }

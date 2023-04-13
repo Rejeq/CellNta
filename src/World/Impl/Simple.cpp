@@ -70,6 +70,11 @@ class WorldImplSimple::AreaIterator : public Cellnta::Iterator {
   }
 
   void Reset() override {
+    if (!m_area.Valid()) {
+      CELLNTA_LOG_ERROR("Unable to create AreaIterator: Area is invalid");
+      return;
+    }
+
     m_curr.pos = Cell::Pos::Zero(m_world.GetDimension());
     m_idx = m_world.CalculateIdxFromPos(m_area.min);
 
