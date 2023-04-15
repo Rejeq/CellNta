@@ -15,6 +15,8 @@ class HypercubeDrawer {
   void UpdateIndices(HypercubeStorage& cube);
   void UpdateColor(HypercubeStorage& cube);
 
+  GLenum GetMode() const { return m_mode; }
+
   GLuint GetPointsBuffer() const { return m_points; }
 
   GLuint GetIndicesBuffer() const { return m_indices; }
@@ -24,6 +26,10 @@ class HypercubeDrawer {
   ColorDrawer& GetColor() { return m_color; }
 
  private:
+  bool ChangeMode(CubeMode mode);
+
+  GLenum m_mode = 0;
+
   GLuint m_points = 0;
   int m_pointsCapacity = 0;
 

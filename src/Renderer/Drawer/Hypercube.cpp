@@ -21,8 +21,8 @@ void HypercubeDrawer::UpdatePoints(const HypercubeStorage& cube) {
 
   const int size = cube.GetPointsSize();
   if (size != m_pointsCapacity) {
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(HypercubeStorage::Point), nullptr,
-                 GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, size * sizeof(HypercubeStorage::Point),
+                 nullptr, GL_DYNAMIC_DRAW);
     m_pointsCapacity = size;
   }
 
@@ -32,7 +32,8 @@ void HypercubeDrawer::UpdatePoints(const HypercubeStorage& cube) {
   if (pnt == nullptr)
     return;
 
-  float* dst = BeginArrayBufferSource(0, size * sizeof(HypercubeStorage::Point));
+  float* dst =
+      BeginArrayBufferSource(0, size * sizeof(HypercubeStorage::Point));
 
   if (dst == nullptr)
     return;
@@ -53,12 +54,15 @@ void HypercubeDrawer::UpdatePoints(const HypercubeStorage& cube) {
 void HypercubeDrawer::UpdateIndices(HypercubeStorage& cube) {
   CELLNTA_PROFILE;
 
+  ChangeMode(cube.GetMode());
+
   UpdateColor(cube);
   m_indicesSize = cube.GetIndicesSize();
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indices);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indicesSize * sizeof(HypercubeStorage::Ind),
-               cube.GetIndices(), GL_DYNAMIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               m_indicesSize * sizeof(HypercubeStorage::Ind), cube.GetIndices(),
+               GL_DYNAMIC_DRAW);
 }
 
 void HypercubeDrawer::UpdateColor(HypercubeStorage& cube) {
@@ -69,4 +73,21 @@ void HypercubeDrawer::UpdateColor(HypercubeStorage& cube) {
     case CubeMode::POLYGON: color.Generate(cube.GetFacesCount(), 2); break;
     default: assert(0 && "Unreachable"); break;
   }
+}
+
+bool HypercubeDrawer::ChangeMode(CubeMode mode) {
+  GLenum res = 0;
+
+  switch (mode) {
+    case CubeMode::POINTS: res = GL_POINTS; break;
+    case CubeMode::WIREFRAME: res = GL_LINES; break;
+    case CubeMode::POLYGON: res = GL_TRIANGLES; break;
+    default: assert(0 && "Unreachable"); break;
+  }
+
+  if (res == m_mode)
+    return 1;
+
+  m_mode = res;
+  return 0;
 }
