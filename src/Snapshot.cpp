@@ -93,6 +93,13 @@ bool Snapshot::OnSetCell(const Cell& cell) {
 Cell::State Snapshot::OnGetCell(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
+  if (pos.size() != m_dim) {
+    CELLNTA_LOG_WARN(
+        "Not expected cell dimension: actually - {}, expected - {}", pos.size(),
+        m_dim);
+    return 0;
+  }
+
   for (const Cell& cell : m_data)
     if (cell.pos == pos)
       return cell.state;
