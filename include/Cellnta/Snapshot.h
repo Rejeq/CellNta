@@ -25,7 +25,7 @@ class Snapshot : public Adjustable, public Iterable {
   class AreaIterator;
 
   CellList m_data;
-  int m_dim;
+  int m_dim = 0;
 };
 
 }  // namespace Cellnta
