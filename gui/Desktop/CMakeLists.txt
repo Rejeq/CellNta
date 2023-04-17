@@ -10,6 +10,7 @@ find_package(ImGui REQUIRED)
 
 add_executable(CellntaDesktop
   ./src/Context.cpp
+  ./src/Keybind.cpp
   ./src/Log.cpp
   ./src/Source.cpp
   ./src/UndoRedo.cpp

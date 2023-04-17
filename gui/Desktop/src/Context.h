@@ -14,6 +14,7 @@
 #include "ActionBase.h"
 #include "WindowBase.h"
 #include "UndoRedo.h"
+#include "Keybind.h"
 
 namespace Cellnta {
 
@@ -56,6 +57,9 @@ class Context {
   const UndoRedo& GetUndoRedo() const { return m_undoRedo; }
   UndoRedo& GetUndoRedo() { return m_undoRedo; }
 
+  const KeybindMap& GetKeybindings() const { return m_keybinds; }
+  KeybindMap& GetKeybindings() { return m_keybinds; }
+
   void SetOnFirstStartup(
       const std::function<void(const Context&)>& onFirstStartup) {
     m_OnFirstStartup = onFirstStartup;
@@ -76,6 +80,8 @@ class Context {
   static void* SettingsHandler_ReadOpen(ImGuiContext*, ImGuiSettingsHandler*,
                                         const char* name);
 
+  void ProccessKeybindings();
+
   WindowsDataType m_windowsData;
   Cellnta::Renderer m_renderer;
   std::unique_ptr<Cellnta::World> m_world;
@@ -85,6 +91,7 @@ class Context {
   std::shared_ptr<Cellnta::RenderData> m_renderData;
 
   UndoRedo m_undoRedo;
+  KeybindMap m_keybinds;
 
   std::string m_currentWindow;
 

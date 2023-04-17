@@ -36,6 +36,8 @@ Context::Context() {
     DESKTOP_LOG_ERROR("Unable to create hypercube");
   m_renderer.SetData(m_renderData);
 
+  m_keybinds.SetupDefault();
+
   ImGuiContext* imguiCtx = ImGui::GetCurrentContext();
   ImGuiSettingsHandler contextHandler;
   contextHandler.TypeName = "CellNta";
@@ -62,6 +64,8 @@ void Context::SetDimension(int dim) {
 
 void Context::Update() {
   CELLNTA_PROFILE;
+
+  ProccessKeybindings();
 
   Cellnta::RenderData* data = m_renderer.GetData();
   if (data == nullptr)
@@ -207,5 +211,34 @@ void Context::WriteWindowProperties(ImGuiSettingsHandler* /*unused*/,
     buf->appendf("(%s)\n", window->GetProperties().Name);
     window->WriteProperties(buf);
     buf->appendf("\n");
+  }
+}
+
+void Context::ProccessKeybindings() {
+  CELLNTA_PROFILE;
+
+  const auto& io = ImGui::GetIO();
+  if (io.WantTextInput)
+    return;
+
+  Keymap map;
+  map.mod |= (io.KeyCtrl) ? ImGuiMod_Ctrl : 0;
+  map.mod |= (io.KeyShift) ? ImGuiMod_Shift : 0;
+  map.mod |= (io.KeyAlt) ? ImGuiMod_Alt : 0;
+  map.mod |= (io.KeySuper) ? ImGuiMod_Super : 0;
+
+  for (int key = ImGuiKey_None; key < ImGuiKey_COUNT; ++key) {
+    if (!ImGui::IsKeyPressed((ImGuiKey)key))
+      continue;
+
+    map.key = (ImGuiKey)key;
+    auto res = m_keybinds.Find(map);
+    if (res == nullptr)
+      continue;
+
+    if (!res)
+      DESKTOP_LOG_WARN("Key bind has a ill formed function, skip it");
+    else
+      res(*this);
   }
 }
