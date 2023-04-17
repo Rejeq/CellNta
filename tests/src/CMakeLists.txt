@@ -3,6 +3,7 @@ add_executable(CellntaBaseTests
   ./AdjustableTest.cpp
   ./AreaTest.cpp
   ./IteratorTest.cpp
+  ./SnapshotTest.cpp
 )
 
 target_link_libraries(CellntaBaseTests PRIVATE
