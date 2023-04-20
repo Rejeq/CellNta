@@ -1,10 +1,10 @@
-#include "Cellnta/Renderer/Drawer/Scene.h"
+#include "Cellnta/Renderer/Drawer/GL/Scene.h"
 
 #include <type_traits>
 
 using namespace Cellnta;
 
-SceneDrawer::SceneDrawer() {
+SceneDrawerGL::SceneDrawerGL() {
   CELLNTA_PROFILE;
 
   glGenVertexArrays(1, &m_vao);
@@ -26,7 +26,7 @@ SceneDrawer::SceneDrawer() {
   glEnableVertexAttribArray(1);
 }
 
-SceneDrawer::~SceneDrawer() {
+SceneDrawerGL::~SceneDrawerGL() {
   CELLNTA_PROFILE;
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -36,7 +36,7 @@ SceneDrawer::~SceneDrawer() {
   glDeleteVertexArrays(1, &m_vao);
 }
 
-bool SceneDrawer::CreateShaders(const std::string& gridPath,
+bool SceneDrawerGL::CreateShaders(const std::string& gridPath,
                                 const std::string& cellPath) {
   CELLNTA_PROFILE;
 
@@ -72,14 +72,14 @@ bool SceneDrawer::CreateShaders(const std::string& gridPath,
   return false;
 }
 
-void SceneDrawer::DrawGrid() {
+void SceneDrawerGL::DrawGrid() {
   CELLNTA_PROFILE;
 
   m_gridShader.Use();
   glDrawArrays(GL_TRIANGLES, 0, 12);
 }
 
-void SceneDrawer::Draw() {
+void SceneDrawerGL::Draw() {
   CELLNTA_PROFILE;
 
   if (m_cellsDrawer.GetSize() == 0)
@@ -95,7 +95,7 @@ void SceneDrawer::Draw() {
                           GL_UNSIGNED_SHORT, nullptr, m_cellsDrawer.GetSize());
 }
 
-void SceneDrawer::UpdateDistance(float distance) {
+void SceneDrawerGL::UpdateDistance(float distance) {
   CELLNTA_PROFILE;
 
   constexpr float FarPlane = 6.25f;
@@ -105,7 +105,7 @@ void SceneDrawer::UpdateDistance(float distance) {
   m_gridShader.Set("u_far", (float)distance * FarPlane);
 }
 
-void SceneDrawer::UpdateCamera(const Eigen::Matrix4f& projView) {
+void SceneDrawerGL::UpdateCamera(const Eigen::Matrix4f& projView) {
   CELLNTA_PROFILE;
 
   m_cellShader.Use();

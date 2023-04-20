@@ -16,6 +16,11 @@ using namespace Ui;
 static std::unique_ptr<Context> s_ctx;
 
 Context::Context() {
+  if (m_renderer.Init(DrawerBackend::GL)) {
+    DESKTOP_LOG_CRITICAL("Unable to initialize renderer");
+    return;
+  }
+
   m_camera3d = std::make_shared<Cellnta::Camera3d>();
   if (m_camera3d == nullptr)
     DESKTOP_LOG_ERROR("Unable to create 3d camera");

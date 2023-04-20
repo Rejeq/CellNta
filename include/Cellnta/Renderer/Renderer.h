@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "Cellnta/Renderer/Drawer/Scene.h"
+#include "Cellnta/Renderer/DrawerBackend.h"
 
 namespace Cellnta {
 
@@ -17,6 +17,8 @@ using CameraNdList = std::vector<CameraNd>;
 
 class Renderer {
  public:
+  bool Init(DrawerBackend backend);
+
   bool CreateShaders(const std::string& gridPath, const std::string& cellPath);
 
   void Update();
@@ -67,7 +69,7 @@ class Renderer {
   std::shared_ptr<HypercubeStorage> m_cube;
   std::shared_ptr<RenderData> m_data;
 
-  SceneDrawer m_sceneDrawer;
+  std::unique_ptr<SceneDrawer> m_sceneDrawer;
 
   bool m_wantDraw = false;
   int m_d = 0;

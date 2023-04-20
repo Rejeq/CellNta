@@ -1,19 +1,19 @@
-#include "Cellnta/Renderer/Drawer/NCell.h"
+#include "Cellnta/Renderer/Drawer/GL/NCell.h"
 
 using namespace Cellnta;
 
-NCellDrawer::NCellDrawer() {
+NCellDrawerGL::NCellDrawerGL() {
   glGenBuffers(1, &m_buffer);
 }
 
-NCellDrawer::~NCellDrawer() {
+NCellDrawerGL::~NCellDrawerGL() {
   glDeleteBuffers(1, &m_buffer);
 }
 
-void NCellDrawer::Update(const NCellStorage& cells) {
+void NCellDrawerGL::Update(const NCellStorage& cells) {
   CELLNTA_PROFILE;
 
-  CELLNTA_LOG_TRACE("Updating NCellDrawer");
+  CELLNTA_LOG_TRACE("Updating NCellDrawerGL");
 
   const NCellStorage::VecList& rawCells = cells.GetVisibleRaw();
   if (rawCells.empty())

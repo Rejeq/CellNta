@@ -10,11 +10,20 @@
 
 using namespace Cellnta;
 
+bool Renderer::Init(DrawerBackend backend) {
+  m_sceneDrawer = CreateSceneDrawerInstance(backend);
+  if (m_sceneDrawer == nullptr) {
+    CELLNTA_LOG_ERROR("Unable to create scene drawer instance in Renderer");
+    return true;
+  }
+  return false;
+}
+
 bool Renderer::CreateShaders(const std::string& gridPath,
                              const std::string& cellPath) {
   CELLNTA_PROFILE;
 
-  return m_sceneDrawer.CreateShaders(gridPath, cellPath);
+  return m_sceneDrawer->CreateShaders(gridPath, cellPath);
 }
 
 void Renderer::Update() {
@@ -30,14 +39,14 @@ void Renderer::Update() {
     }
 
     if (m_cube->NeedUpdateIndices()) {
-      m_sceneDrawer.GetCube().UpdateIndices(*m_cube);
+      m_sceneDrawer->GetCube().UpdateIndices(*m_cube);
       m_wantDraw = true;
       m_cube->IndicesHandled();
     }
 
     ColorStorage& color = m_cube->GetColor();
     if (color.NeedUpdate()) {
-      m_sceneDrawer.GetCube().GetColor().Update(color);
+      m_sceneDrawer->GetCube().GetColor().Update(color);
       m_wantDraw = true;
       color.Handled();
     }
@@ -56,14 +65,14 @@ void Renderer::Update() {
 void Renderer::DrawGrid() {
   CELLNTA_PROFILE;
 
-  m_sceneDrawer.DrawGrid();
+  m_sceneDrawer->DrawGrid();
 }
 
 void Renderer::Draw() {
   CELLNTA_PROFILE;
 
   m_wantDraw = false;
-  m_sceneDrawer.Draw();
+  m_sceneDrawer->Draw();
 }
 
 void Renderer::Rotate() {
@@ -117,7 +126,7 @@ void Renderer::SetRenderDistance(uint32_t distance) {
     return;
 
   m_data->SetDistance(distance);
-  m_sceneDrawer.UpdateDistance(distance);
+  m_sceneDrawer->UpdateDistance(distance);
 }
 
 void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
@@ -154,9 +163,9 @@ void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
   }
 
   if (projectCube)
-    m_sceneDrawer.GetCube().UpdatePoints(*m_cube);
+    m_sceneDrawer->GetCube().UpdatePoints(*m_cube);
   if (projectCells)
-    m_sceneDrawer.GetCell().Update(cells);
+    m_sceneDrawer->GetCell().Update(cells);
   m_wantDraw = true;
 }
 
@@ -181,7 +190,7 @@ void Renderer::UpdateCameraUniform() {
   const Eigen::Matrix4f& proj = m_camera3d->GetProjection();
   const Eigen::Matrix4f& view = m_camera3d->GetView();
   const Eigen::Matrix4f projView = proj * view;
-  m_sceneDrawer.UpdateCamera(projView);
+  m_sceneDrawer->UpdateCamera(projView);
   m_wantDraw = true;
 }
 

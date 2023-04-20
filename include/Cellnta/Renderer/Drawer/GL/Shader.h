@@ -6,7 +6,7 @@
 #include <Eigen/Core>
 
 #include "Cellnta/Config.h"
-#include "Cellnta/Renderer/GlBackend.h"
+#include "Cellnta/Renderer/Drawer/GL/GL.h"
 
 namespace Cellnta {
 

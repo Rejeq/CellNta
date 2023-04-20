@@ -1,41 +1,30 @@
 #pragma once
 
-#include "Cellnta/Renderer/GlBackend.h"
+#include <Eigen/Core>
+
 #include "Cellnta/Renderer/Drawer/Hypercube.h"
 #include "Cellnta/Renderer/Drawer/NCell.h"
-#include "Cellnta/Renderer/Shader.h"
 
 namespace Cellnta {
 
 class SceneDrawer {
  public:
-  SceneDrawer();
-  ~SceneDrawer();
+  virtual ~SceneDrawer() = default;
 
-  bool CreateShaders(const std::string& gridPath, const std::string& cellPath);
+  virtual bool CreateShaders(const std::string& gridPath,
+                             const std::string& cellPath) = 0;
 
-  void DrawGrid();
-  void Draw();
+  virtual void DrawGrid() = 0;
+  virtual void Draw() = 0;
 
-  GLuint GetVao() const { return m_vao; }
+  virtual void UpdateDistance(float distance) = 0;
+  virtual void UpdateCamera(const Eigen::Matrix4f& projView) = 0;
 
-  void UpdateDistance(float distance);
-  void UpdateCamera(const Eigen::Matrix4f& projView);
+  virtual HypercubeDrawer& GetCube() = 0;
+  virtual const HypercubeDrawer& GetCube() const = 0;
 
-  HypercubeDrawer& GetCube() { return m_cubeDrawer; }
-  const HypercubeDrawer& GetCube() const { return m_cubeDrawer; }
-
-  NCellDrawer& GetCell() { return m_cellsDrawer; }
-  const NCellDrawer& GetCell() const { return m_cellsDrawer; }
-
- private:
-  Shader m_cellShader;
-  Shader m_gridShader;
-
-  HypercubeDrawer m_cubeDrawer;
-  NCellDrawer m_cellsDrawer;
-
-  GLuint m_vao = 0;
+  virtual NCellDrawer& GetCell() = 0;
+  virtual const NCellDrawer& GetCell() const = 0;
 };
 
 }  // namespace Cellnta

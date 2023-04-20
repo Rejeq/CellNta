@@ -46,6 +46,7 @@ target_include_directories(CellntaDesktop PUBLIC
 target_link_libraries(CellntaDesktop PUBLIC
   Cellnta::World
   Cellnta::Renderer
+  Cellnta::Drawer::GL
   ImGui::ImGui
   SDL2::SDL2
   ${CMAKE_DL_LIBS}

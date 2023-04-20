@@ -6,7 +6,7 @@
 #define IMGUI_IMPL_OPENGL_ES3
 #endif
 
-#include <Cellnta/Renderer/GlBackend.h>
+#include <Cellnta/Renderer/Drawer/GL/GL.h>
 #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 
 #define IMGUI_DISABLE_OBSOLETE_FUNCTIONS

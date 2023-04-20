@@ -1,18 +1,18 @@
-#include "Cellnta/Renderer/Drawer/Hypercube.h"
+#include "Cellnta/Renderer/Drawer/GL/Hypercube.h"
 
 using namespace Cellnta;
 
-HypercubeDrawer::HypercubeDrawer() {
+HypercubeDrawerGL::HypercubeDrawerGL() {
   glGenBuffers(1, &m_points);
   glGenBuffers(1, &m_indices);
 }
 
-HypercubeDrawer::~HypercubeDrawer() {
+HypercubeDrawerGL::~HypercubeDrawerGL() {
   glDeleteBuffers(1, &m_points);
   glDeleteBuffers(1, &m_indices);
 }
 
-void HypercubeDrawer::UpdatePoints(const HypercubeStorage& cube) {
+void HypercubeDrawerGL::UpdatePoints(const HypercubeStorage& cube) {
   CELLNTA_PROFILE;
 
   CELLNTA_LOG_TRACE("Updating points buffer");
@@ -51,7 +51,7 @@ void HypercubeDrawer::UpdatePoints(const HypercubeStorage& cube) {
   EndArrayBufferSource();
 }
 
-void HypercubeDrawer::UpdateIndices(HypercubeStorage& cube) {
+void HypercubeDrawerGL::UpdateIndices(HypercubeStorage& cube) {
   CELLNTA_PROFILE;
 
   ChangeMode(cube.GetMode());
@@ -65,7 +65,7 @@ void HypercubeDrawer::UpdateIndices(HypercubeStorage& cube) {
                GL_DYNAMIC_DRAW);
 }
 
-void HypercubeDrawer::UpdateColor(HypercubeStorage& cube) {
+void HypercubeDrawerGL::UpdateColor(HypercubeStorage& cube) {
   auto& color = cube.GetColor();
   switch (cube.GetMode()) {
     case CubeMode::POINTS: color.Generate(cube.GetVerticesCount(), 1); break;
@@ -75,7 +75,7 @@ void HypercubeDrawer::UpdateColor(HypercubeStorage& cube) {
   }
 }
 
-bool HypercubeDrawer::ChangeMode(CubeMode mode) {
+bool HypercubeDrawerGL::ChangeMode(CubeMode mode) {
   GLenum res = 0;
 
   switch (mode) {

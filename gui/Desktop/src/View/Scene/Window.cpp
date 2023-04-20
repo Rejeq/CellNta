@@ -2,7 +2,7 @@
 
 #include <SDL.h>
 
-#include <Cellnta/Renderer/GlBackend.h>
+#include <Cellnta/Renderer/Drawer/GL/GL.h>
 #include <Cellnta/Renderer/Camera3d.h>
 
 #include "Context.h"

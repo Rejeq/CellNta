@@ -1,28 +1,28 @@
-find_package(OpenGL REQUIRED)
-find_package(GLEW)
+option(CELLNTA_DRAWER_GL "Enable OpenGL renderer backend" ON)
 
 add_library(CellntaRenderer STATIC
   ./Camera3d.cpp
   ./CameraController.cpp
   ./CameraNd.cpp
   ./ColorStorage.cpp
-  ./GlBackend.cpp
+  ./DrawerBackend.cpp
   ./HypercubeStorage.cpp
   ./NCellStorage.cpp
   ./RenderData.cpp
   ./Renderer.cpp
-  ./Shader.cpp
   ./Transform.cpp
-
-  ./Drawer/Color.cpp
-  ./Drawer/Hypercube.cpp
-  ./Drawer/NCell.cpp
-  ./Drawer/Scene.cpp
 )
 add_library(Cellnta::Renderer ALIAS CellntaRenderer)
 
 target_link_libraries(CellntaRenderer PUBLIC
   Cellnta::Base
-  OpenGL::GL
-  GLEW::GLEW
 )
+
+set(DrawerBackDef "")
+
+if (${CELLNTA_DRAWER_GL})
+  list(APPEND DrawerBackDef CELLNTA_DRAWER_GL=1)
+  add_subdirectory(./Drawer/GL/)
+endif()
+
+target_compile_definitions(CellntaRenderer PUBLIC ${DrawerBackDef})

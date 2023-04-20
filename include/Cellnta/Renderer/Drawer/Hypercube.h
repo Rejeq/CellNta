@@ -1,42 +1,20 @@
 #pragma once
 
-#include "Cellnta/Renderer/GlBackend.h"
-#include "Cellnta/Renderer/HypercubeStorage.h"
 #include "Cellnta/Renderer/Drawer/Color.h"
+#include "Cellnta/Renderer/HypercubeStorage.h"
 
 namespace Cellnta {
 
 class HypercubeDrawer {
  public:
-  HypercubeDrawer();
-  ~HypercubeDrawer();
+  virtual ~HypercubeDrawer() = default;
 
-  void UpdatePoints(const HypercubeStorage& cube);
-  void UpdateIndices(HypercubeStorage& cube);
-  void UpdateColor(HypercubeStorage& cube);
+  virtual void UpdatePoints(const HypercubeStorage& cube) = 0;
+  virtual void UpdateIndices(HypercubeStorage& cube) = 0;
+  virtual void UpdateColor(HypercubeStorage& cube) = 0;
 
-  GLenum GetMode() const { return m_mode; }
-
-  GLuint GetPointsBuffer() const { return m_points; }
-
-  GLuint GetIndicesBuffer() const { return m_indices; }
-  GLuint GetIndicesSize() const { return m_indicesSize; }
-
-  const ColorDrawer& GetColor() const { return m_color; }
-  ColorDrawer& GetColor() { return m_color; }
-
- private:
-  bool ChangeMode(CubeMode mode);
-
-  GLenum m_mode = 0;
-
-  GLuint m_points = 0;
-  int m_pointsCapacity = 0;
-
-  GLuint m_indices = 0;
-  GLuint m_indicesSize = 0;
-  ColorDrawer m_color;
+  virtual const ColorDrawer& GetColor() const = 0;
+  virtual ColorDrawer& GetColor() = 0;
 };
 
 }  // namespace Cellnta
-
