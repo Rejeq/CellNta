@@ -24,7 +24,14 @@ bool Adjustable::SetCell(const std::vector<Cell>& cells) {
 bool Adjustable::SetCell(const IteratorRef& cellsIter) {
   CELLNTA_PROFILE;
 
-  while (const Cell* cell = cellsIter->Next()) {
+  // TODO: Replace IteartorRef witch Iterator everywhere
+  return SetCell(*cellsIter);
+}
+
+bool Adjustable::SetCell(Iterator& cellsIter) {
+  CELLNTA_PROFILE;
+
+  while (const Cell* cell = cellsIter.Next()) {
     if (SetCell(*cell))
       return true;
   }
