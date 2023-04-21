@@ -9,6 +9,7 @@ add_executable(CellntaBaseTests
 target_link_libraries(CellntaBaseTests PRIVATE
   Cellnta::Base
   GTest::gtest_main
+  GTest::gmock_main
 )
 
 gtest_discover_tests(CellntaBaseTests)
