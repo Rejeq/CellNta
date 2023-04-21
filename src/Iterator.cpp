@@ -4,7 +4,10 @@ using namespace Cellnta;
 
 const Cell* Iterator::Nth(int n) {
   const Cell* cell = nullptr;
-  for (int i = 0; i < n; ++i)
+  for (int i = 0; i < n; ++i) {
     cell = Next();
+    if (cell == nullptr)
+      break;
+  }
   return cell;
 }
