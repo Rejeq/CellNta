@@ -21,7 +21,7 @@ class Snapshot : public Adjustable, public Iterable {
  private:
   using CellList = std::vector<Cell>;
 
-  class Iterator;
+  class WholeIterator;
   class AreaIterator;
 
   CellList m_data;

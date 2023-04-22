@@ -33,7 +33,7 @@ class WorldImplRandom : public World {
   Cell::State OnGetCell(const Cell::Pos&) const override;
 
  private:
-  class Iterator;
+  class WholeIterator;
   class AreaIterator;
 
   std::vector<Cell::Pos> m_data;

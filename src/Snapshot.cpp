@@ -4,9 +4,9 @@
 
 using namespace Cellnta;
 
-class Snapshot::Iterator : public Cellnta::Iterator {
+class Snapshot::WholeIterator : public Cellnta::Iterator {
  public:
-  Iterator(const Snapshot* snap) : m_snap(snap) {
+  WholeIterator(const Snapshot* snap) : m_snap(snap) {
     if (snap == nullptr)
       CELLNTA_LOG_ERROR("Passing a not initialized Snapshot in Iterator");
     Reset();
@@ -107,7 +107,7 @@ Cell::State Snapshot::OnGetCell(const Cell::Pos& pos) const {
 }
 
 std::unique_ptr<Cellnta::Iterator> Snapshot::CreateIterator() const {
-  return std::make_unique<Snapshot::Iterator>(this);
+  return std::make_unique<Snapshot::WholeIterator>(this);
 }
 
 std::unique_ptr<Cellnta::Iterator> Snapshot::CreateIterator(

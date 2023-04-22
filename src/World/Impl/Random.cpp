@@ -20,9 +20,9 @@ struct RandomRange {
 
 }  // namespace
 
-class WorldImplRandom::Iterator : public Cellnta::Iterator {
+class WorldImplRandom::WholeIterator : public Cellnta::Iterator {
  public:
-  Iterator(const WorldImplRandom* world)
+  WholeIterator(const WorldImplRandom* world)
       : m_world(const_cast<WorldImplRandom*>(world)) {
     if (world == nullptr)
       CELLNTA_LOG_ERROR(
@@ -133,7 +133,7 @@ Cell::State WorldImplRandom::OnGetCell(const Cell::Pos& pos) const {
 }
 
 std::unique_ptr<Cellnta::Iterator> WorldImplRandom::CreateIterator() const {
-  return std::make_unique<WorldImplRandom::Iterator>(this);
+  return std::make_unique<WorldImplRandom::WholeIterator>(this);
 }
 
 std::unique_ptr<Cellnta::Iterator> WorldImplRandom::CreateIterator(

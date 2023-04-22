@@ -36,7 +36,7 @@ class WorldImplSimple : public World {
   Cell::State OnGetCell(const Cell::Pos& pos) const override;
 
  private:
-  class Iterator;
+  class WholeIterator;
   class AreaIterator;
 
   void Step();
