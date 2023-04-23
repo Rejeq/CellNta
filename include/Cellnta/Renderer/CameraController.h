@@ -2,7 +2,7 @@
 
 namespace Cellnta {
 
-static float radians(float degrees) {
+inline float radians(float degrees) {
   return degrees * static_cast<float>(0.01745329251994329576923690768489);
 }
 

@@ -181,8 +181,9 @@ TEST(WorldImplSimple, Iterator) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
-  if (i == 0)
+  if (i == 0) {
     ASSERT_TRUE(false) << "Iterator no have any value";
+  }
 }
 
 TEST(WorldImplSimple, AreaIterator) {
@@ -206,8 +207,9 @@ TEST(WorldImplSimple, AreaIterator) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
-  if (i != 6)
+  if (i != 6) {
     ASSERT_TRUE(false) << "Iterator did not go through all the values";
+  }
 
   // Testing out of range area
   iter = world.CreateIterator(Area(-1234, 1234));
@@ -218,8 +220,9 @@ TEST(WorldImplSimple, AreaIterator) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
-  if (i != 9)
+  if (i != 9) {
     ASSERT_TRUE(false) << "Iterator did not go through all the values";
+  }
 
   // Testing invalid area
   iter = world.CreateIterator(Area(4321, -128));

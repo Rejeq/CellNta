@@ -44,7 +44,7 @@ void RightAlign::SavePosition() {
 void RightAlign::PushPosition() {
   CELLNTA_PROFILE;
 
-  if (m_currentIdx + 1 >= m_pos.size())
+  if (m_currentIdx + 1 >= (int) m_pos.size())
     m_pos.resize(m_currentIdx + 1, -1);
 
   if (m_pos[m_currentIdx] != -1)

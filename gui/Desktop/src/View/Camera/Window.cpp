@@ -87,7 +87,7 @@ void CameraWindow::DrawCamera3d(Cellnta::Camera3d& cam3d) {
 void CameraWindow::DrawCameraNdList(Cellnta::CameraNdList& list) {
   CELLNTA_PROFILE;
 
-  for (int i = 0; i < list.size(); ++i) {
+  for (size_t i = 0; i < list.size(); ++i) {
     Cellnta::CameraNd& cam = list[i];
     std::string camName = fmt::format("{} Camera", cam.GetDimensions());
 

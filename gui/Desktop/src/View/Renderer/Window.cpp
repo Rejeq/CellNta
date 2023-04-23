@@ -129,7 +129,6 @@ void RendererWindow::DrawLoadedCells() {
 
     const auto& rawCells = cells.GetRaw();
     const auto& rawVisibleCells = cells.GetVisibleRaw();
-    ImGuiTable* table = ImGui::GetCurrentTable();
     ImGui::TableHeadersRow();
 
     const ImU32 cellBg =

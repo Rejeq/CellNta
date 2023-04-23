@@ -55,7 +55,7 @@ class SetCell : public Action::UndoBase {
 
  private:
   Cellnta::Cell m_cell;
-  Cellnta::Cell::State m_prevState;
+  // Cellnta::Cell::State m_prevState;
 };
 
 }  // namespace Renderer
