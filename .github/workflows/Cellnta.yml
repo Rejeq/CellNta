@@ -1,0 +1,56 @@
+name: Cellnta
+
+on:
+  push:
+  pull_request:
+
+env:
+  build_dir: ./build
+
+jobs:
+  build_and_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            compiler: g++
+            build_type: Release
+
+          - os: ubuntu-latest
+            compiler: clang++
+            build_type: Release
+
+    name: CellNta (${{ matrix.os }}, ${{ matrix.compiler }}, ${{ matrix.build_type }})
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout CellNta
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup cmake
+        uses: lukka/get-cmake@latest
+
+      - name: Restore third_party libraries
+        id: cache-deps
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.build_dir }}/_deps
+          key: cache-build-deps-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}
+
+      - name: Configure cmake
+        run: |
+          cmake -B ${{ env.build_dir }} -S ${{ github.workspace }} \
+                -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+                -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} \
+                -DCELLNTA_TESTS=ON \
+                -DCELLNTA_GUI=OFF \
+                -DCELLNTA_DRAWER_GL=OFF
+
+      - name: Build & Test
+        run: |
+          cd ${{ env.build_dir }}
+          cmake --build .
+          ctest --output-on-failure
