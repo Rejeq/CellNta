@@ -4,68 +4,51 @@
 
 using namespace Cellnta;
 
-class Snapshot::WholeIterator : public Cellnta::Iterator {
- public:
-  WholeIterator(const Snapshot* snap) : m_snap(snap) {
-    if (snap == nullptr)
-      CELLNTA_LOG_ERROR("Passing a not initialized Snapshot in Iterator");
-    Reset();
-  }
+Snapshot::WholeIter::WholeIter(const Snapshot* snap) : m_snap(snap) {
+  if (snap == nullptr)
+    CELLNTA_LOG_ERROR("Passing a not initialized Snapshot in Iterator");
+  Reset();
+}
 
-  void Reset() override {
-    m_curr.pos = Cell::Pos::Zero(0);
-    m_iter = m_snap->m_data.begin();
-  }
+void Snapshot::WholeIter::Reset() {
+  m_curr.pos = Cell::Pos::Zero(0);
+  m_iter = m_snap->m_data.begin();
+}
 
-  const Cell* Next() override {
+const Cell* Snapshot::WholeIter::Next() {
+  if (m_iter == m_snap->m_data.end())
+    return nullptr;
+
+  m_curr = *m_iter;
+  ++m_iter;
+  return &m_curr;
+}
+
+Snapshot::AreaIter::AreaIter(const Snapshot* snap, const Area& area)
+    : m_snap(snap), m_area(area) {
+  if (snap == nullptr)
+    CELLNTA_LOG_ERROR("Passing a not initialized Snapshot in Iterator");
+  Reset();
+}
+
+void Snapshot::AreaIter::Reset() {
+  m_curr.pos = Cell::Pos::Zero(0);
+  m_iter = m_snap->m_data.begin();
+}
+
+const Cell* Snapshot::AreaIter::Next() {
+  while (true) {
     if (m_iter == m_snap->m_data.end())
       return nullptr;
-
-    m_curr = *m_iter;
+    if (m_area.PosValid(m_iter->pos))
+      break;
     ++m_iter;
-    return &m_curr;
   }
 
- private:
-  const Snapshot* m_snap;
-  Cell m_curr;
-  Snapshot::CellList::const_iterator m_iter;
-};
-
-class Snapshot::AreaIterator : public Cellnta::Iterator {
- public:
-  AreaIterator(const Snapshot* snap, const Area& area)
-      : m_snap(snap), m_area(area) {
-    if (snap == nullptr)
-      CELLNTA_LOG_ERROR("Passing a not initialized Snapshot in Iterator");
-    Reset();
-  }
-
-  void Reset() override {
-    m_curr.pos = Cell::Pos::Zero(0);
-    m_iter = m_snap->m_data.begin();
-  }
-
-  const Cell* Next() override {
-    while (true) {
-      if (m_iter == m_snap->m_data.end())
-        return nullptr;
-      if (m_area.PosValid(m_iter->pos))
-        break;
-      ++m_iter;
-    }
-
-    m_curr = *m_iter;
-    ++m_iter;
-    return &m_curr;
-  }
-
- private:
-  const Snapshot* m_snap;
-  Cell m_curr;
-  Area m_area;
-  Snapshot::CellList::const_iterator m_iter;
-};
+  m_curr = *m_iter;
+  ++m_iter;
+  return &m_curr;
+}
 
 void Snapshot::SetDimension(int dim) {
   if (dim == m_dim)
@@ -106,11 +89,10 @@ Cell::State Snapshot::OnGetCell(const Cell::Pos& pos) const {
   return 0;
 }
 
-std::unique_ptr<Cellnta::Iterator> Snapshot::CreateIterator() const {
-  return std::make_unique<Snapshot::WholeIterator>(this);
+Snapshot::WholeIter Snapshot::MakeWholeIter() const {
+  return Snapshot::WholeIter(this);
 }
 
-std::unique_ptr<Cellnta::Iterator> Snapshot::CreateIterator(
-    const Area& area) const {
-  return std::make_unique<Snapshot::AreaIterator>(this, area);
+Snapshot::AreaIter Snapshot::MakeAreaIter(const Area& area) const {
+  return Snapshot::AreaIter(this, area);
 }

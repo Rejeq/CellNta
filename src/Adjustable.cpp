@@ -21,14 +21,7 @@ bool Adjustable::SetCell(const std::vector<Cell>& cells) {
   return false;
 }
 
-bool Adjustable::SetCell(const IteratorRef& cellsIter) {
-  CELLNTA_PROFILE;
-
-  // TODO: Replace IteartorRef witch Iterator everywhere
-  return SetCell(*cellsIter);
-}
-
-bool Adjustable::SetCell(Iterator& cellsIter) {
+bool Adjustable::SetCell(IterBase::CellForward& cellsIter) {
   CELLNTA_PROFILE;
 
   while (const Cell* cell = cellsIter.Next()) {
@@ -36,6 +29,12 @@ bool Adjustable::SetCell(Iterator& cellsIter) {
       return true;
   }
   return false;
+}
+
+bool Adjustable::SetCell(IterBase::CellForward&& cellsIter) {
+  CELLNTA_PROFILE;
+
+  return SetCell(cellsIter);
 }
 
 Cell::State Adjustable::GetCell(const Cell::Pos& pos) const {

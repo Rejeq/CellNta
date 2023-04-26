@@ -6,7 +6,7 @@
 
 using namespace Cellnta;
 
-class MockIterator : public Iterator {
+class MockIterator : public IterBase::CellForward {
  public:
   MOCK_METHOD((void), Reset, (), ());
   MOCK_METHOD((const Cell*), Next, (), ());

@@ -5,10 +5,11 @@
 #include <Cellnta/Area.h>
 
 namespace Cellnta {
+namespace IterBase {
 
-class Iterator {
+class CellForward {
  public:
-  virtual ~Iterator() = default;
+  virtual ~CellForward() = default;
 
   virtual void Reset() = 0;
   virtual const Cell* Next() = 0;
@@ -16,14 +17,5 @@ class Iterator {
   const Cell* Nth(int n);
 };
 
-using IteratorRef = std::unique_ptr<Iterator>;
-
-class Iterable {
- public:
-  virtual ~Iterable() = default;
-
-  virtual IteratorRef CreateIterator() const = 0;
-  virtual IteratorRef CreateIterator(const Area& area) const = 0;
-};
-
+}  // namespac: IterBase
 }  // namespace Cellnta

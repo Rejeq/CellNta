@@ -21,9 +21,9 @@ static void IteratorSetPosition(const size_t* stride, size_t idx,
   }
 }
 
-class WorldImplSimple::WholeIterator : public Cellnta::Iterator {
+class WorldImplSimple::WholeIter : public IterBase::CellForward {
  public:
-  WholeIterator(const WorldImplSimple& world) : m_world(world) { Reset(); }
+  WholeIter(const WorldImplSimple& world) : m_world(world) { Reset(); }
 
   void Reset() override {
     m_curr.pos = Cell::Pos::Zero(m_world.GetDimension());
@@ -60,9 +60,9 @@ class WorldImplSimple::WholeIterator : public Cellnta::Iterator {
   size_t m_idx = 0;
 };
 
-class WorldImplSimple::AreaIterator : public Cellnta::Iterator {
+class WorldImplSimple::AreaIter : public IterBase::CellForward {
  public:
-  AreaIterator(const WorldImplSimple& world, const Area& area)
+  AreaIter(const WorldImplSimple& world, const Area& area)
       : m_world(world), m_area(area) {
     Reset();
   }
@@ -233,13 +233,12 @@ Cell::State WorldImplSimple::OnGetCell(const Cell::Pos& pos) const {
   return world[idx];
 }
 
-std::unique_ptr<Cellnta::Iterator> WorldImplSimple::CreateIterator() const {
-  return std::make_unique<WholeIterator>(*this);
+WorldIter WorldImplSimple::MakeWholeIter() const {
+  return WorldIter::MakeImpl(WorldImplSimple::WholeIter(*this));
 }
 
-std::unique_ptr<Cellnta::Iterator> WorldImplSimple::CreateIterator(
-    const Area& area) const {
-  return std::make_unique<AreaIterator>(*this, area);
+WorldIter WorldImplSimple::MakeAreaIter(const Area& area) const {
+  return WorldIter::MakeImpl(WorldImplSimple::AreaIter(*this, area));
 }
 
 void WorldImplSimple::SetSize(const std::vector<size_t>& size) {

@@ -26,8 +26,8 @@ void RenderData::Update(const World& world) {
     }
   }
 
-  IteratorRef iter = world.CreateIterator(GetVisibleArea());
-  while (const Cell* cell = iter->Next()) {
+  auto iter = world.MakeAreaIter(GetVisibleArea());
+  while (const Cell* cell = iter.Next()) {
     SetCell(*cell);
   }
 }

@@ -112,10 +112,10 @@ TEST(WorldImplSimple, BlinkerGeneration) {
     }
 
     const std::vector<Cell>& currStep = *expectedSteps[i];
-    auto iter = world.CreateIterator();
+    auto iter = world.MakeWholeIter();
     size_t processedCount = 0;
 
-    while (const Cell* cell = iter->Next()) {
+    while (const Cell* cell = iter.Next()) {
       processedCount += 1;
       auto res = std::find(currStep.begin(), currStep.end(), *cell);
 
@@ -173,11 +173,11 @@ TEST(WorldImplSimple, Iterator) {
   WorldImplSimple world;
   InitWorld(world, {10, 10, 10}, expectedCells);
 
-  auto iter = world.CreateIterator();
+  auto iter = world.MakeWholeIter();
   const Cell* cell = nullptr;
   int i = 0;
 
-  while ((cell = iter->Next()) != nullptr) {
+  while ((cell = iter.Next()) != nullptr) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
@@ -199,11 +199,11 @@ TEST(WorldImplSimple, AreaIterator) {
   WorldImplSimple world;
   InitWorld(world, {10, 10, 10}, expectedCells);
 
-  auto iter = world.CreateIterator(Area(4, 7));
+  auto iter = world.MakeAreaIter(Area(4, 7));
   const Cell* cell = nullptr;
   int i = 3;
 
-  while ((cell = iter->Next()) != nullptr) {
+  while ((cell = iter.Next()) != nullptr) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
@@ -212,11 +212,11 @@ TEST(WorldImplSimple, AreaIterator) {
   }
 
   // Testing out of range area
-  iter = world.CreateIterator(Area(-1234, 1234));
+  iter = world.MakeAreaIter(Area(-1234, 1234));
   cell = nullptr;
   i = 0;
 
-  while ((cell = iter->Next()) != nullptr) {
+  while ((cell = iter.Next()) != nullptr) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
@@ -225,6 +225,6 @@ TEST(WorldImplSimple, AreaIterator) {
   }
 
   // Testing invalid area
-  iter = world.CreateIterator(Area(4321, -128));
-  ASSERT_FALSE(iter->Next()) << "Iterator contain value, but area is invalid";
+  iter = world.MakeAreaIter(Area(4321, -128));
+  ASSERT_FALSE(iter.Next()) << "Iterator contain value, but area is invalid";
 }

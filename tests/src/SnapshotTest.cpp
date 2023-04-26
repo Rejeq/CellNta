@@ -40,10 +40,10 @@ TEST(Snapshot, Iterator) {
   snap.SetDimension(3);
   snap.SetCell(expectedCells);
 
-  auto iter = snap.CreateIterator();
+  auto iter = snap.MakeWholeIter();
   int i = 0;
 
-  while (const Cell* cell = iter->Next()) {
+  while (const Cell* cell = iter.Next()) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
@@ -63,26 +63,26 @@ TEST(Snapshot, AreaIterator) {
   snap.SetDimension(3);
   snap.SetCell(expectedCells);
 
-  auto iter = snap.CreateIterator(Area(3, 8));
+  auto iter = snap.MakeAreaIter(Area(3, 8));
   int i = 2;
 
-  while (const Cell* cell = iter->Next()) {
+  while (const Cell* cell = iter.Next()) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
   if (i != 7)
     ASSERT_TRUE(false) << "Iterator did not go through all the values";
 
-  iter = snap.CreateIterator(Area(-1234, 1234));
+  iter = snap.MakeAreaIter(Area(-1234, 1234));
   i = 0;
 
-  while (const Cell* cell = iter->Next()) {
+  while (const Cell* cell = iter.Next()) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
   if (i != 10)
     ASSERT_TRUE(false) << "Iterator did not go through all the values";
 
-  iter = snap.CreateIterator(Area(4321, -128));
-  ASSERT_FALSE(iter->Next()) << "Iterator contain value, but area is invalid";
+  iter = snap.MakeAreaIter(Area(4321, -128));
+  ASSERT_FALSE(iter.Next()) << "Iterator contain value, but area is invalid";
 }

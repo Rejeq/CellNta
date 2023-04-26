@@ -6,23 +6,49 @@
 
 namespace Cellnta {
 
-class Snapshot : public Adjustable, public Iterable {
+class Snapshot : public Adjustable {
  public:
+  using CellList = std::vector<Cell>;
+
   void SetDimension(int dim);
   int GetDimension() const { return m_dim; }
 
-  std::unique_ptr<Iterator> CreateIterator() const override;
-  std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;
+  class WholeIter : public IterBase::CellForward {
+   public:
+    WholeIter(const Snapshot* snap);
+    void Reset() override;
+
+    const Cell* Next() override;
+
+   private:
+    const Snapshot* m_snap;
+    Cell m_curr;
+    CellList::const_iterator m_iter;
+  };
+
+  WholeIter MakeWholeIter() const;
+
+  class AreaIter : public IterBase::CellForward {
+   public:
+    AreaIter(const Snapshot* snap, const Area& area);
+    void Reset() override;
+
+    const Cell* Next() override;
+
+   private:
+    const Snapshot* m_snap;
+    Cell m_curr;
+    Area m_area;
+    CellList::const_iterator m_iter;
+  };
+
+  AreaIter MakeAreaIter(const Area& area) const;
 
  protected:
   bool OnSetCell(const Cell& cell) override;
   Cell::State OnGetCell(const Cell::Pos& pos) const override;
 
  private:
-  using CellList = std::vector<Cell>;
-
-  class WholeIterator;
-  class AreaIterator;
 
   CellList m_data;
   int m_dim = 0;

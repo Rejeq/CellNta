@@ -4,7 +4,7 @@
 
 using namespace Cellnta;
 
-class FakeIterator : public Iterator {
+class FakeIterator : public IterBase::CellForward {
  public:
   FakeIterator() { Reset(); }
 

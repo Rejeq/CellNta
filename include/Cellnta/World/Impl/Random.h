@@ -17,8 +17,8 @@ class WorldImplRandom : public World {
   void SetDimension(int dim) override;
   size_t GetPopulation() const override { return m_data.size(); }
 
-  std::unique_ptr<Iterator> CreateIterator() const override;
-  std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;
+  WorldIter MakeWholeIter() const override;
+  WorldIter MakeAreaIter(const Area& area) const override;
 
   void SetSeed(int seed);
   int GetSeed() { return m_seed; }
@@ -33,8 +33,8 @@ class WorldImplRandom : public World {
   Cell::State OnGetCell(const Cell::Pos&) const override;
 
  private:
-  class WholeIterator;
-  class AreaIterator;
+  class WholeIter;
+  class AreaIter;
 
   std::vector<Cell::Pos> m_data;
   int m_rangeMin = -64;

@@ -12,8 +12,8 @@ class Adjustable {
   bool SetCell(const Cell& cell);
   bool SetCell(const Cell::Pos& pos, const Cell::State& state);
   bool SetCell(const std::vector<Cell>& cells);
-  bool SetCell(const IteratorRef& cellsIter);
-  bool SetCell(Iterator& cellsIter);
+  bool SetCell(IterBase::CellForward& cellsIter);
+  bool SetCell(IterBase::CellForward&& cellsIter);
 
   Cell::State GetCell(const Cell::Pos& pos) const;
 

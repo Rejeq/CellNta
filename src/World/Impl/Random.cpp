@@ -20,9 +20,9 @@ struct RandomRange {
 
 }  // namespace
 
-class WorldImplRandom::WholeIterator : public Cellnta::Iterator {
+class WorldImplRandom::WholeIter : public IterBase::CellForward {
  public:
-  WholeIterator(const WorldImplRandom* world)
+  WholeIter(const WorldImplRandom* world)
       : m_world(const_cast<WorldImplRandom*>(world)) {
     if (world == nullptr)
       CELLNTA_LOG_ERROR(
@@ -30,9 +30,7 @@ class WorldImplRandom::WholeIterator : public Cellnta::Iterator {
     Reset();
   }
 
-  void Reset() override {
-    m_iter = m_world->m_data.begin();
-  }
+  void Reset() override { m_iter = m_world->m_data.begin(); }
 
   const Cell* Next() override {
     if (m_iter == m_world->m_data.end())
@@ -51,9 +49,9 @@ class WorldImplRandom::WholeIterator : public Cellnta::Iterator {
   Cell m_curr;
 };
 
-class WorldImplRandom::AreaIterator : public Cellnta::Iterator {
+class WorldImplRandom::AreaIter : public IterBase::CellForward {
  public:
-  AreaIterator(const WorldImplRandom* world, const Area& area)
+  AreaIter(const WorldImplRandom* world, const Area& area)
       : m_world(const_cast<WorldImplRandom*>(world)), m_area(area) {
     if (world == nullptr)
       CELLNTA_LOG_ERROR(
@@ -61,9 +59,7 @@ class WorldImplRandom::AreaIterator : public Cellnta::Iterator {
     Reset();
   }
 
-  void Reset() override {
-    m_iter = m_world->m_data.begin();
-  }
+  void Reset() override { m_iter = m_world->m_data.begin(); }
 
   Cell* Next() override {
     while (true) {
@@ -132,13 +128,12 @@ Cell::State WorldImplRandom::OnGetCell(const Cell::Pos& pos) const {
   return (Cell::State)0;
 }
 
-std::unique_ptr<Cellnta::Iterator> WorldImplRandom::CreateIterator() const {
-  return std::make_unique<WorldImplRandom::WholeIterator>(this);
+WorldIter WorldImplRandom::MakeWholeIter() const {
+  return WorldIter::MakeImpl(WorldImplRandom::WholeIter(this));
 }
 
-std::unique_ptr<Cellnta::Iterator> WorldImplRandom::CreateIterator(
-    const Area& area) const {
-  return std::make_unique<WorldImplRandom::AreaIterator>(this, area);
+WorldIter WorldImplRandom::MakeAreaIter(const Area& area) const {
+  return WorldIter::MakeImpl(WorldImplRandom::AreaIter(this, area));
 }
 
 void WorldImplRandom::SetSeed(int seed) {

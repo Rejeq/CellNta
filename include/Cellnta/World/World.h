@@ -2,7 +2,7 @@
 
 #include "Cellnta/Adjustable.h"
 #include "Cellnta/Area.h"
-#include "Cellnta/Iterator.h"
+#include "Cellnta/World/WorldIter.h"
 
 namespace Cellnta {
 
@@ -12,7 +12,7 @@ enum class WorldType {
   COUNT,
 };
 
-class World : public Adjustable, public Iterable {
+class World : public Adjustable {
  public:
   World(WorldType type) : m_type(type) {}
   virtual ~World() = default;
@@ -20,6 +20,9 @@ class World : public Adjustable, public Iterable {
   virtual void Update() = 0;
   virtual void SetDimension(int dim) = 0;
   virtual size_t GetPopulation() const = 0;
+
+  virtual WorldIter MakeWholeIter() const = 0;
+  virtual WorldIter MakeAreaIter(const Area& area) const = 0;
 
   int GetDimension() const { return p_dim; }
 

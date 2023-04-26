@@ -16,8 +16,8 @@ class WorldImplSimple : public World {
   void SetDimension(int dim) override;
   size_t GetPopulation() const override { return m_population; }
 
-  std::unique_ptr<Iterator> CreateIterator() const override;
-  std::unique_ptr<Iterator> CreateIterator(const Area& area) const override;
+  WorldIter MakeWholeIter() const override;
+  WorldIter MakeAreaIter(const Area& area) const override;
 
   void SetSize(const std::vector<size_t>& size);
   void SetWorldRepeated(bool state) { m_worldRepeated = state; }
@@ -36,8 +36,8 @@ class WorldImplSimple : public World {
   Cell::State OnGetCell(const Cell::Pos& pos) const override;
 
  private:
-  class WholeIterator;
-  class AreaIterator;
+  class WholeIter;
+  class AreaIter;
 
   void Step();
   size_t FindNeighbors(const Cell::State* world, size_t idx) const;

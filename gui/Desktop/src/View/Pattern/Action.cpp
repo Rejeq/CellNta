@@ -43,7 +43,7 @@ static bool AddSnapshot(Context* ctx, const Cellnta::Snapshot& snapshot) {
                           "World and snapshot dimension mismatch"))
     return true;
 
-  world->SetCell(snapshot.CreateIterator());
+  world->SetCell(snapshot.MakeWholeIter());
   ctx->PushAction(Action::Make(Action::Renderer::Update()));
   return false;
 }
@@ -55,12 +55,12 @@ void Pattern::Base::Undo() {
 }
 
 void Pattern::Base::MakeUndoAble(const Cellnta::Snapshot& snap) {
-  std::unique_ptr<Cellnta::Iterator> it = snap.CreateIterator();
+  auto it = snap.MakeWholeIter();
   Cellnta::World& world = p_ctx->GetWorld();
   const Cellnta::Cell* cell = nullptr;
 
   m_prevSnap.SetDimension(snap.GetDimension());
-  while ((cell = it->Next()) != nullptr) {
+  while ((cell = it.Next()) != nullptr) {
     Cellnta::Cell::State worldState = world.GetCell(cell->pos);
     m_prevSnap.SetCell(cell->pos, worldState);
   }
