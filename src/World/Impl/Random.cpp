@@ -22,18 +22,15 @@ struct RandomRange {
 
 class WorldImplRandom::WholeIter : public IterBase::CellForward {
  public:
-  WholeIter(const WorldImplRandom* world)
-      : m_world(const_cast<WorldImplRandom*>(world)) {
-    if (world == nullptr)
-      CELLNTA_LOG_ERROR(
-          "Passing a not initialized WorldImplRandom in Iterator");
+  WholeIter(const WorldImplRandom& world)
+      : m_world(world) {
     Reset();
   }
 
-  void Reset() override { m_iter = m_world->m_data.begin(); }
+  void Reset() override { m_iter = m_world.m_data.begin(); }
 
   const Cell* Next() override {
-    if (m_iter == m_world->m_data.end())
+    if (m_iter == m_world.m_data.end())
       return nullptr;
 
     m_curr.pos = *m_iter;
@@ -44,26 +41,23 @@ class WorldImplRandom::WholeIter : public IterBase::CellForward {
   }
 
  private:
-  WorldImplRandom* m_world;
+  const WorldImplRandom& m_world;
   std::vector<Cell::Pos>::const_iterator m_iter;
   Cell m_curr;
 };
 
 class WorldImplRandom::AreaIter : public IterBase::CellForward {
  public:
-  AreaIter(const WorldImplRandom* world, const Area& area)
-      : m_world(const_cast<WorldImplRandom*>(world)), m_area(area) {
-    if (world == nullptr)
-      CELLNTA_LOG_ERROR(
-          "Passing a not initialized WorldImplRandom in AreaIterator");
+  AreaIter(const WorldImplRandom& world, const Area& area)
+      : m_world(world), m_area(area) {
     Reset();
   }
 
-  void Reset() override { m_iter = m_world->m_data.begin(); }
+  void Reset() override { m_iter = m_world.m_data.begin(); }
 
   Cell* Next() override {
     while (true) {
-      if (m_iter == m_world->m_data.end())
+      if (m_iter == m_world.m_data.end())
         return nullptr;
       if (m_area.PosValid(*m_iter))
         break;
@@ -78,8 +72,8 @@ class WorldImplRandom::AreaIter : public IterBase::CellForward {
   }
 
  private:
-  WorldImplRandom* m_world;
-  std::vector<Cell::Pos>::iterator m_iter;
+  const WorldImplRandom& m_world;
+  std::vector<Cell::Pos>::const_iterator m_iter;
   Area m_area;
   Cell m_curr;
 };
@@ -129,11 +123,11 @@ Cell::State WorldImplRandom::OnGetCell(const Cell::Pos& pos) const {
 }
 
 WorldIter WorldImplRandom::MakeWholeIter() const {
-  return WorldIter::MakeImpl(WorldImplRandom::WholeIter(this));
+  return WorldIter::MakeImpl(WorldImplRandom::WholeIter(*this));
 }
 
 WorldIter WorldImplRandom::MakeAreaIter(const Area& area) const {
-  return WorldIter::MakeImpl(WorldImplRandom::AreaIter(this, area));
+  return WorldIter::MakeImpl(WorldImplRandom::AreaIter(*this, area));
 }
 
 void WorldImplRandom::SetSeed(int seed) {

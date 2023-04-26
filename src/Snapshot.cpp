@@ -4,9 +4,7 @@
 
 using namespace Cellnta;
 
-Snapshot::WholeIter::WholeIter(const Snapshot* snap) : m_snap(snap) {
-  if (snap == nullptr)
-    CELLNTA_LOG_ERROR("Passing a not initialized Snapshot in Iterator");
+Snapshot::WholeIter::WholeIter(const Snapshot& snap) : m_snap(&snap) {
   Reset();
 }
 
@@ -24,10 +22,8 @@ const Cell* Snapshot::WholeIter::Next() {
   return &m_curr;
 }
 
-Snapshot::AreaIter::AreaIter(const Snapshot* snap, const Area& area)
-    : m_snap(snap), m_area(area) {
-  if (snap == nullptr)
-    CELLNTA_LOG_ERROR("Passing a not initialized Snapshot in Iterator");
+Snapshot::AreaIter::AreaIter(const Snapshot& snap, const Area& area)
+    : m_snap(&snap), m_area(area) {
   Reset();
 }
 
@@ -90,9 +86,9 @@ Cell::State Snapshot::OnGetCell(const Cell::Pos& pos) const {
 }
 
 Snapshot::WholeIter Snapshot::MakeWholeIter() const {
-  return Snapshot::WholeIter(this);
+  return Snapshot::WholeIter(*this);
 }
 
 Snapshot::AreaIter Snapshot::MakeAreaIter(const Area& area) const {
-  return Snapshot::AreaIter(this, area);
+  return Snapshot::AreaIter(*this, area);
 }

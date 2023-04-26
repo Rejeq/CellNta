@@ -15,7 +15,7 @@ class Snapshot : public Adjustable {
 
   class WholeIter : public IterBase::CellForward {
    public:
-    WholeIter(const Snapshot* snap);
+    WholeIter(const Snapshot& snap);
     void Reset() override;
 
     const Cell* Next() override;
@@ -30,7 +30,7 @@ class Snapshot : public Adjustable {
 
   class AreaIter : public IterBase::CellForward {
    public:
-    AreaIter(const Snapshot* snap, const Area& area);
+    AreaIter(const Snapshot& snap, const Area& area);
     void Reset() override;
 
     const Cell* Next() override;
