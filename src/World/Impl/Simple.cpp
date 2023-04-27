@@ -211,7 +211,6 @@ void WorldImplSimple::SetDimension(int dim) {
   m_surviveMask[5] = true;
 
   SetSize(std::vector<size_t>(p_dim, 30));
-  GenerateNeigbors();
 }
 
 bool WorldImplSimple::OnSetCell(const Cell& cell) {
@@ -256,6 +255,7 @@ void WorldImplSimple::SetSize(const std::vector<size_t>& size) {
   for (auto& i : m_size)
     m_totalArea *= i;
   CreateWorld();
+  GenerateNeigbors();
 }
 
 void WorldImplSimple::Step() {
