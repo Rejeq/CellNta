@@ -5,6 +5,7 @@ add_executable(CellntaWorldTests
 
 target_link_libraries(CellntaWorldTests PRIVATE
   Cellnta::World
+  Cellnta::Test::Utils
   GTest::gtest_main
 )
 

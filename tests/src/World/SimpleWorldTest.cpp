@@ -2,6 +2,8 @@
 
 #include <Cellnta/World/Impl/Simple.h>
 
+#include "Utils.h"
+
 using namespace Cellnta;
 
 static void InitWorld(WorldImplSimple& world, const std::vector<size_t>& size,
@@ -134,97 +136,109 @@ TEST(WorldImplSimple, BlinkerGeneration) {
 }
 
 TEST(WorldImplSimple, SetCell) {
-  const std::vector<Cell> expectedCells = {
-      // clang-format off
-      Cell(Eigen::Vector3i(-12, -12, -12), -12),
-      Cell(Eigen::Vector3i(0, 0, 0), 0), Cell(Eigen::Vector3i(1, 1, 1), 1),
-      Cell(Eigen::Vector3i(2, 2, 2), 2), Cell(Eigen::Vector3i(3, 3, 3), 3),
-      Cell(Eigen::Vector3i(4, 4, 4), 4), Cell(Eigen::Vector3i(5, 5, 5), 5),
-      Cell(Eigen::Vector3i(6, 6, 6), 6), Cell(Eigen::Vector3i(7, 7, 7), 7),
-      Cell(Eigen::Vector3i(8, 8, 8), 8), Cell(Eigen::Vector3i(9, 9, 9), 9),
-      Cell(Eigen::Vector3i(10, 10, 10), 10), Cell(Eigen::Vector3i(150, 150, 150), 150),
-      // clang-format on
-  };
   WorldImplSimple world;
-  InitWorld(world, {10, 10, 10}, expectedCells);
+  InitWorld(world, {10, 10, 10}, {});
 
-  auto iter = expectedCells.begin();
+  Cell cell = Cell(Eigen::Vector3i(1, 1, 1), 1);
+  world.SetCell(cell);
+  ASSERT_EQ(world.GetCell(cell.pos), cell.state);
 
-  ASSERT_FALSE(world.GetCell(iter->pos));
-  ++iter;
-  for (; iter != expectedCells.end() - 2; iter++) {
-    ASSERT_EQ(world.GetCell(iter->pos), iter->state);
-  }
-  ASSERT_FALSE(world.GetCell(iter->pos));
-  ++iter;
-  ASSERT_FALSE(world.GetCell(iter->pos));
+  cell = Cell(Eigen::Vector3i(9, 9, 9), 9);
+  world.SetCell(cell);
+  ASSERT_EQ(world.GetCell(cell.pos), cell.state);
+}
+
+TEST(WorldImplSimple, SetCellTwice) {
+  WorldImplSimple world;
+  InitWorld(world, {10, 10, 10}, {});
+
+  Cell cell = Cell(Eigen::Vector3i(1, 1, 1), 1);
+  world.SetCell(cell);
+  ASSERT_EQ(world.GetCell(cell.pos), cell.state);
+
+  cell = Cell(Eigen::Vector3i(1, 1, 1), 2);
+  world.SetCell(cell);
+  ASSERT_EQ(world.GetCell(cell.pos), cell.state);
+}
+
+TEST(WorldImplSimple, SetInvalidCell) {
+  WorldImplSimple world;
+  InitWorld(world, {10, 10, 10}, {});
+
+  Cell cell = Cell(Eigen::Vector3i(-1, -1, -1), 1);
+  world.SetCell(cell);
+  ASSERT_FALSE(world.GetCell(cell.pos));
+
+  cell = Cell(Eigen::Vector3i(11, 11, 11), 11);
+  world.SetCell(cell);
+  ASSERT_FALSE(world.GetCell(cell.pos));
+}
+
+static void CheckAndDeleteCell(const Cell& cell, int min, int max,
+                               std::vector<Cell>& expCells) {
+  ASSERT_TRUE(cell.state >= min && cell.state < max)
+      << "Cell is not in range: expcted [" << min << ", " << max << "] "
+      << "but actual: " << cell.state;
+
+  auto res = std::find(expCells.begin(), expCells.end(), cell);
+  ASSERT_TRUE(res != expCells.end());
+  expCells.erase(res);
 }
 
 TEST(WorldImplSimple, Iterator) {
-  const std::vector<Cell> expectedCells = {
-      Cell(Eigen::Vector3i(1, 1, 1), 1), Cell(Eigen::Vector3i(2, 2, 2), 2),
-      Cell(Eigen::Vector3i(3, 3, 3), 3), Cell(Eigen::Vector3i(4, 4, 4), 4),
-      Cell(Eigen::Vector3i(5, 5, 5), 5), Cell(Eigen::Vector3i(6, 6, 6), 6),
-      Cell(Eigen::Vector3i(7, 7, 7), 7), Cell(Eigen::Vector3i(8, 8, 8), 8),
-      Cell(Eigen::Vector3i(9, 9, 9), 9), Cell(Eigen::Vector3i(10, 10, 10), 10),
-      // Keep in mind that cell with state=10 is not iterable because it has
-      // invalid position
-  };
   WorldImplSimple world;
-  InitWorld(world, {10, 10, 10}, expectedCells);
+  const Area area = Area(1, 10);
+  auto expCells = GenerateCellList(area);
 
+  InitWorld(world, {10, 10, 10}, expCells);
   auto iter = world.MakeWholeIter();
-  const Cell* cell = nullptr;
-  int i = 0;
 
-  while ((cell = iter.Next()) != nullptr) {
-    ASSERT_EQ(*cell, expectedCells[i]);
-    ++i;
+  while (const Cell* cell = iter.Next()) {
+    CheckAndDeleteCell(*cell, area.min[0], area.max[0], expCells);
   }
-  if (i == 0) {
-    ASSERT_TRUE(false) << "Iterator no have any value";
-  }
+
+  ASSERT_TRUE(expCells.empty()) << "Iterator did not go through all the values";
 }
 
-TEST(WorldImplSimple, AreaIterator) {
-  const std::vector<Cell> expectedCells = {
-      Cell(Eigen::Vector3i(1, 1, 1), 1), Cell(Eigen::Vector3i(2, 2, 2), 2),
-      Cell(Eigen::Vector3i(3, 3, 3), 3), Cell(Eigen::Vector3i(4, 4, 4), 4),
-      Cell(Eigen::Vector3i(5, 5, 5), 5), Cell(Eigen::Vector3i(6, 6, 6), 6),
-      Cell(Eigen::Vector3i(7, 7, 7), 7), Cell(Eigen::Vector3i(8, 8, 8), 8),
-      Cell(Eigen::Vector3i(9, 9, 9), 9), Cell(Eigen::Vector3i(10, 10, 10), 10),
-      // Keep in mind that cell with state=10 is not iterable because it has
-      // invalid position
-  };
+TEST(WorldImplSimple, ValidAreaIter) {
   WorldImplSimple world;
-  InitWorld(world, {10, 10, 10}, expectedCells);
+  const Area area = Area(4, 7);
+  const auto cells = GenerateCellList(Area(1, 10));
+  auto expCells = GenerateCellList(area);
 
-  auto iter = world.MakeAreaIter(Area(4, 7));
-  const Cell* cell = nullptr;
-  int i = 3;
+  InitWorld(world, {10, 10, 10}, cells);
+  auto iter = world.MakeAreaIter(area);
 
-  while ((cell = iter.Next()) != nullptr) {
-    ASSERT_EQ(*cell, expectedCells[i]);
-    ++i;
-  }
-  if (i != 6) {
-    ASSERT_TRUE(false) << "Iterator did not go through all the values";
+  while (const Cell* cell = iter.Next()) {
+    CheckAndDeleteCell(*cell, area.min[0], area.max[0], expCells);
   }
 
-  // Testing out of range area
-  iter = world.MakeAreaIter(Area(-1234, 1234));
-  cell = nullptr;
-  i = 0;
+  ASSERT_TRUE(expCells.empty()) << "Iterator did not go through all the values";
+}
 
-  while ((cell = iter.Next()) != nullptr) {
-    ASSERT_EQ(*cell, expectedCells[i]);
-    ++i;
-  }
-  if (i != 9) {
-    ASSERT_TRUE(false) << "Iterator did not go through all the values";
+TEST(WorldImplSimple, OutOfRangeAreaIter) {
+  WorldImplSimple world;
+  const Area area = Area(-1234, 1234);
+  const auto cells = GenerateCellList(Area(1, 10));
+  auto expCells = cells;
+
+  InitWorld(world, {10, 10, 10}, cells);
+  auto iter = world.MakeAreaIter(area);
+
+  while (const Cell* cell = iter.Next()) {
+    CheckAndDeleteCell(*cell, area.min[0], area.max[0], expCells);
   }
 
-  // Testing invalid area
-  iter = world.MakeAreaIter(Area(4321, -128));
+  ASSERT_TRUE(expCells.empty()) << "Iterator did not go through all the values";
+}
+
+TEST(WorldImplSimple, InvalidAreaIterator) {
+  WorldImplSimple world;
+  const Area area = Area(4321, -128);
+  const auto cells = GenerateCellList(Area(1, 10));
+
+  InitWorld(world, {10, 10, 10}, cells);
+  auto iter = world.MakeAreaIter(area);
+
   ASSERT_FALSE(iter.Next()) << "Iterator contain value, but area is invalid";
 }
