@@ -242,3 +242,14 @@ TEST(WorldImplSimple, InvalidAreaIterator) {
 
   ASSERT_FALSE(iter.Next()) << "Iterator contain value, but area is invalid";
 }
+
+TEST(WorldImplSimple, NegativeAreaIter) {
+  WorldImplSimple world;
+  const Area area = Area(-256, 0);
+  const auto cells = GenerateCellList(Area(1, 10));
+
+  InitWorld(world, {10, 10, 10}, cells);
+  auto iter = world.MakeAreaIter(area);
+
+  ASSERT_FALSE(iter.Next()) << "Iterator contain value, but area is invalid";
+}
