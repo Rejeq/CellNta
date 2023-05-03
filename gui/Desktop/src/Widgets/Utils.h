@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-#include <Cellnta/Area.h>
+#include <Cellnta/Cell.h>
 
 namespace Ui {
 namespace Widget {

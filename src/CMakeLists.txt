@@ -4,6 +4,7 @@ find_package(Eigen)
 add_library(CellntaBase STATIC
   ./Adjustable.cpp
   ./Area.cpp
+  ./Cell.cpp
   ./Iterator.cpp
   ./Log.cpp
   ./LogBase.cpp

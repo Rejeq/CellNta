@@ -2,6 +2,7 @@ add_executable(CellntaBaseTests
   ./Main.cpp
   ./AdjustableTest.cpp
   ./AreaTest.cpp
+  ./CellTest.cpp
   ./IteratorTest.cpp
   ./SnapshotTest.cpp
 )

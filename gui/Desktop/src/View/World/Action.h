@@ -2,7 +2,7 @@
 
 #include <random>
 
-#include <Cellnta/Area.h>
+#include <Cellnta/Cell.h>
 #include <Cellnta/World/WorldList.h>
 
 #include <ActionBase.h>

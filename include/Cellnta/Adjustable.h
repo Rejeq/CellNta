@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cellnta/Area.h"
+#include "Cellnta/Cell.h"
 #include "Cellnta/Iterator.h"
 
 namespace Cellnta {

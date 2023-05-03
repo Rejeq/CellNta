@@ -4,14 +4,6 @@
 
 using namespace Cellnta;
 
-bool Cell::operator==(const Cell& r) const {
-  return (pos == r.pos) && (state == r.state);
-}
-
-bool Cell::operator!=(const Cell& r) const {
-  return !(*this == r);
-}
-
 Area::Area() {
   this->min = Eigen::Vector3i::Zero();
   this->max = Eigen::Vector3i::Zero();

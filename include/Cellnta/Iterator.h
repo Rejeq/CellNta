@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <Cellnta/Area.h>
+#include <Cellnta/Cell.h>
 
 namespace Cellnta {
 namespace IterBase {

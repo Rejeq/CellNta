@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Cellnta/Area.h>
+#include <Cellnta/Cell.h>
 
 #include "WindowBase.h"
 
