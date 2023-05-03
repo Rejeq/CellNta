@@ -111,7 +111,7 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
       return nullptr;
 
     while (true) {
-      IncrementPosition(m_world.m_size.data(), m_area, m_idx, m_curr.pos);
+      IncrementPosition();
       assert(m_area.PosValid(m_curr.pos) &&
              "m_curr.pos in AreaIterator must be always valid");
 
@@ -128,20 +128,23 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
   }
 
  private:
-  static void IncrementPosition(const size_t* stride, const Area& area,
-                                size_t& idx, Cell::Pos& pos) {
+  void IncrementPosition() {
     CELLNTA_PROFILE;
 
+    const size_t* stride = m_world.m_size.data();
+    const Area& area = m_area;
+    Cell::Pos& pos = m_curr.pos;
+    size_t& idx = m_idx;
+
+    size_t rowIdx = 1;
     for (int i = pos.size() - 1; i >= 0; --i) {
       const int min = std::max(area.min[i], 0);
       const int max = std::min(area.max[i], (Cell::Pos::Scalar)stride[i]);
-      const int rowIdx = std::pow(stride[i], pos.size() - 1 - i);
 
       assert(max >= min && "Max must >= min. Otherwise negative idx occured");
 
       if (pos[i] < min) {
         pos[i] = min;
-        // Should modify idx in this case?
         idx += rowIdx * (min - pos[i]);
         break;
       }
@@ -153,6 +156,8 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
 
       pos[i] = min;
       idx -= rowIdx * (max - min);
+
+      rowIdx *= stride[i];
     }
   }
 
