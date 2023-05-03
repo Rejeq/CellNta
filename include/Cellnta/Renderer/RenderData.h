@@ -48,6 +48,8 @@ class RenderData {
   void DesireAreaProcessed() { m_desiredArea.clear(); }
 
  private:
+  void ForceSetCell(const Cell& cell);
+
   void AddVisibleArea(const Eigen::Vector3i& newPos);
   void EraseUnvisibleArea(const Eigen::Vector3i& newPos);
 

@@ -16,6 +16,8 @@ RenderData::RenderData(int dim) : m_d(dim) {
 }
 
 void RenderData::Update(const World& world) {
+  CELLNTA_PROFILE;
+
   CELLNTA_LOG_TRACE("Updating RenderData");
 
   NCellStorage::VecList& rawCells = m_cells.GetRaw();
@@ -28,7 +30,7 @@ void RenderData::Update(const World& world) {
 
   auto iter = world.MakeAreaIter(GetVisibleArea());
   while (const Cell* cell = iter.Next()) {
-    SetCell(*cell);
+    ForceSetCell(*cell);
   }
 }
 
@@ -47,9 +49,15 @@ void RenderData::SetCell(const Cell& cell) {
     return;
 
   if (GetVisibleArea().PosValid(cell.pos)) {
-    m_cells.Add(cell.pos.cast<NCellStorage::Point>());
-    CELLNTA_LOG_TRACE("Added cell: ({}): {}", cell.pos.transpose(), cell.state);
+    ForceSetCell(cell);
   }
+}
+
+void RenderData::ForceSetCell(const Cell& cell) {
+  CELLNTA_PROFILE;
+
+  m_cells.Add(cell.pos.cast<NCellStorage::Point>());
+  CELLNTA_LOG_TRACE("Added cell: ({}): {}", cell.pos.transpose(), cell.state);
 }
 
 void RenderData::Clear() {

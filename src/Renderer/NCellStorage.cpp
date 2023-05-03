@@ -16,24 +16,35 @@ void NCellStorage::Restore() {
 void NCellStorage::Add(const Vec& pos) {
   CELLNTA_PROFILE;
 
-  Vec tmp = Vec::Zero(m_d + 1);
-  memcpy(tmp.data(), pos.data(),
-         std::min(m_d, (int)pos.size()) * sizeof(Point));
+  Vec tmp = Vec(m_d + 1);
+
+  if (pos.size() >= m_d) {
+    memcpy(tmp.data(), pos.data(), m_d * sizeof(Point));
+  } else {
+    const size_t offset = pos.size();
+    const size_t rem = tmp.size() - offset - 1;
+    memcpy(tmp.data(), pos.data(), offset * sizeof(Point));
+    memset(tmp.data() + offset, 0, rem * sizeof(Point));
+  }
+
   tmp(m_d) = 1;
 
-  m_cells.push_back(tmp);
-
+  m_cells.push_back(std::move(tmp));
   m_needUpdate = true;
 }
 
 void NCellStorage::AddHomogeneous(const Vec& pos) {
   CELLNTA_PROFILE;
 
-  Vec tmp = Vec::Zero(m_d + 1);
-  memcpy(tmp.data(), pos.data(),
-         std::min(m_d + 1, (int)pos.size()) * sizeof(Point));
-  m_cells.push_back(pos);
+  if (pos.size() != m_d + 1) {
+    CELLNTA_LOG_WARN(
+        "Unable to set homogeneous pos:"
+        "expcected size: {} (dim + 1), but passed: {}",
+        m_d + 1, pos.size());
+    return;
+  }
 
+  m_cells.push_back(pos);
   m_needUpdate = true;
 }
 
