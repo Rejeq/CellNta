@@ -86,7 +86,7 @@ void WorldImplRandom::Update() {
 
   for (int i = 0; i < GetStep(); ++i) {
     Cell::Pos pos = Cell::Pos::NullaryExpr(
-        p_dim, RandomRange<Cell::Point>(m_rangeMin, m_rangeMax, m_gen));
+        p_dim, RandomRange<Cell::Pos::Scalar>(m_rangeMin, m_rangeMax, m_gen));
     m_data.push_back(pos);
   }
 }

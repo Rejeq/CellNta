@@ -32,12 +32,14 @@ bool Widget::ToggleButton(const char* label, bool& v) {
 
 static void PositionSelectorEx(size_t targetSize, Cellnta::Cell::Pos& pos,
                                bool shiftLastPoint) {
+  using Pos = Cellnta::Cell::Pos;
+
   const size_t realSize = pos.size();
 
   if (realSize != targetSize) {
-    Cellnta::Cell::Pos tmp = Cellnta::Cell::Pos::Zero(targetSize);
+    Pos tmp = Pos::Zero(targetSize);
     const int minSize = std::min(realSize, targetSize);
-    memcpy(tmp.data(), pos.data(), minSize * sizeof(Cellnta::Cell::Point));
+    memcpy(tmp.data(), pos.data(), minSize * sizeof(Pos::Scalar));
 
     if (shiftLastPoint) {
       if (realSize < targetSize && realSize != 0)

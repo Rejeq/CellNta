@@ -22,7 +22,7 @@ void RenderData::Update(const World& world) {
 
   NCellStorage::VecList& rawCells = m_cells.GetRaw();
   for (auto itPos = rawCells.begin(); itPos != rawCells.end(); ++itPos) {
-    if (world.GetCell(itPos->cast<Cell::Point>()) == 0) {
+    if (world.GetCell(itPos->cast<Cell::Pos::Scalar>()) == 0) {
       m_cells.Erase(itPos);
       --itPos;
     }
@@ -120,7 +120,7 @@ void RenderData::EraseUnvisibleArea(const Eigen::Vector3i& newPos) {
 
   auto PosValid = [&](auto& pos) -> bool {
     for (const Area& erase : eraseList)
-      if (erase.PosValid(pos.template cast<Cell::Point>()))
+      if (erase.PosValid(pos.template cast<Cell::Pos::Scalar>()))
         return true;
     return false;
   };

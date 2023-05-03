@@ -7,9 +7,8 @@
 namespace Cellnta {
 
 struct Cell {
-  using Point = int32_t;
   using State = uint8_t;
-  using Pos = Eigen::Vector<Point, Eigen::Dynamic>;
+  using Pos = Eigen::Vector<int32_t, Eigen::Dynamic>;
 
   Pos pos;
   State state = 0;
