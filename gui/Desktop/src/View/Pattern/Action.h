@@ -23,47 +23,47 @@ class Base : public Action::UndoBase {
 
 class SetMiddlePosition : public Action::Base {
  public:
-  SetMiddlePosition(Eigen::VectorXi& pos) : m_pos(pos) {}
+  SetMiddlePosition(Cellnta::Cell::Pos& pos) : m_pos(pos) {}
   void Execute() override;
 
  private:
-  Eigen::VectorXi& m_pos;
+  Cellnta::Cell::Pos& m_pos;
 };
 
 class CreateBlinker : public Action::Pattern::Base {
  public:
-  CreateBlinker(const Eigen::VectorXi& pos) : m_pos(pos) {}
+  CreateBlinker(const Cellnta::Cell::Pos& pos) : m_pos(pos) {}
   void Execute() override;
 
  private:
-  Eigen::VectorXi m_pos;
+  Cellnta::Cell::Pos m_pos;
 };
 
 class CreateStair : public Action::Pattern::Base {
  public:
-  CreateStair(const Eigen::VectorXi& pos) : m_pos(pos) {}
+  CreateStair(const Cellnta::Cell::Pos& pos) : m_pos(pos) {}
   void Execute() override;
 
  private:
-  Eigen::VectorXi m_pos;
+  Cellnta::Cell::Pos m_pos;
 };
 
 class Create1dLine : public Action::Pattern::Base {
  public:
-  Create1dLine(const Eigen::VectorXi& pos) : m_pos(pos) {}
+  Create1dLine(const Cellnta::Cell::Pos& pos) : m_pos(pos) {}
   void Execute() override;
 
  private:
-  Eigen::VectorXi m_pos;
+  Cellnta::Cell::Pos m_pos;
 };
 
 class Create2dGlider : public Action::Pattern::Base {
  public:
-  Create2dGlider(const Eigen::VectorXi& pos) : m_pos(pos) {}
+  Create2dGlider(const Cellnta::Cell::Pos& pos) : m_pos(pos) {}
   void Execute() override;
 
  private:
-  Eigen::VectorXi m_pos;
+  Cellnta::Cell::Pos m_pos;
 };
 
 }  // namespace Pattern
