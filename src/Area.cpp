@@ -1,5 +1,6 @@
 #include "Cellnta/Area.h"
 
+#include "Cellnta/Axis.h"
 #include "Cellnta/Config.h"
 
 using namespace Cellnta;
@@ -22,14 +23,19 @@ Area::Area(const int min, const int max) {
 bool Area::PosValid(const Eigen::VectorXi& pos) const {
   CELLNTA_PROFILE;
 
-  for (int i = 0; i < 3 /* min.size() */; ++i) {
+  for (int i = 0; i < GetSize(); ++i) {
     int point = (i < pos.size()) ? pos(i) : 0;
 
-    if ((point < min(i)) || (point >= max(i)))
+    if (!Axis::WithinBound(min[i], max[i], point))
       return false;
   }
 
   return true;
+}
+
+int Area::GetSize() const {
+  assert(min.size() == max.size() && "Min and max sizes must be equal");
+  return min.size();
 }
 
 std::vector<Area> Area::InverseClip(const Area& clipper, const Area& subject) {

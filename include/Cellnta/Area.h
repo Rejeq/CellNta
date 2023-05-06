@@ -18,7 +18,7 @@ struct Area {
 
   bool Valid() const;
   bool PosValid(const Cell::Pos& pos) const;
-  int GetSize() const { return min.size(); }
+  int GetSize() const;
 
   static Area Intersection(const Area& first, const Area& second);
   static std::vector<Area> InverseClip(const Area& clipper,

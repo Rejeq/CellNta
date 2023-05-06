@@ -1,5 +1,7 @@
 #include "Utils.h"
 
+#include <Cellnta/Axis.h>
+
 #include <cassert>
 
 std::vector<Cellnta::Cell> GenerateCellList(const Cellnta::Area& area) {
@@ -11,7 +13,7 @@ std::vector<Cellnta::Cell> GenerateCellList(const Cellnta::Area& area) {
 
   std::vector<Cellnta::Cell> res;
 
-  for (int i = area.min[0]; i < area.max[0]; ++i) {
+  for (int i = area.min[0]; Cellnta::Axis::WithinUpperBound(area.min[0], i); ++i) {
     Cellnta::Cell cell;
     cell.pos = Eigen::Vector3i::Constant(i);
     cell.state = i;

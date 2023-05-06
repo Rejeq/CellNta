@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <Cellnta/Axis.h>
 #include <Cellnta/World/Impl/Simple.h>
 
 #include "Utils.h"
@@ -176,7 +177,7 @@ TEST(WorldImplSimple, SetInvalidCell) {
 
 static void CheckAndDeleteCell(const Cell& cell, int min, int max,
                                std::vector<Cell>& expCells) {
-  ASSERT_TRUE(cell.state >= min && cell.state < max)
+  ASSERT_TRUE(Axis::WithinBound(min, max, cell.state))
       << "Cell is not in range: expcted [" << min << ", " << max << "] "
       << "but actual: " << cell.state;
 

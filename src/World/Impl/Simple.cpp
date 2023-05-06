@@ -5,6 +5,8 @@
 
 #include <Eigen/Core>
 
+#include "Cellnta/Area.h"
+#include "Cellnta/Axis.h"
 #include "Cellnta/Config.h"
 #include "Cellnta/Log.h"
 
@@ -143,7 +145,7 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
 
       assert(max >= min && "Max must >= min. Otherwise negative idx occured");
 
-      if (pos[i] < min) {
+      if (!Axis::WithinLowerBound(min, pos[i])) {
         pos[i] = min;
         idx += rowIdx * (min - pos[i]);
         break;
@@ -151,7 +153,7 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
 
       pos[i] += 1;
       idx += rowIdx;
-      if (pos[i] < max)
+      if (Axis::WithinUpperBound(max, pos[i]))
         break;
 
       pos[i] = min;
@@ -317,6 +319,7 @@ size_t WorldImplSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
   for (auto i = 0; i < pos.size(); ++i)
     if (pos[i] < 0 || pos[i] >= (int)m_size[i])
       return GetTotalArea();
+
   return CalculateIdxFromPosRaw(pos);
 }
 
