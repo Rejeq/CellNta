@@ -22,3 +22,18 @@ struct Cell {
 
 }
 
+namespace std {
+
+template <>
+struct hash<Cellnta::Cell::Pos> {
+  using Pos = Cellnta::Cell::Pos;
+  size_t operator()(const Pos& data) const {
+    int seed = 0;
+    for (int i = 0; i < data.size(); ++i)
+      seed ^= std::hash<typename Pos::Scalar>()(data(i)) + 0x9e3779b9 +
+              (seed << 6) + (seed >> 2);
+    return seed;
+  }
+};
+
+}  // namespace std
