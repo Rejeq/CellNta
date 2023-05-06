@@ -76,16 +76,17 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
       return;
     }
 
-    for (auto point : m_area.max) {
+    for (auto point : m_area.Max()) {
       if (point <= 0) {
         m_firstIter = -1;
-        CELLNTA_LOG_ERROR("Unable to create AreaIterator: area.max has negative coordinates");
+        CELLNTA_LOG_ERROR(
+            "Unable to create AreaIterator: area.max has negative coordinates");
         return;
       }
     }
 
     m_curr.pos = Cell::Pos::Zero(m_world.GetDimension());
-    m_idx = m_world.CalculateIdxFromPos(m_area.min);
+    m_idx = m_world.CalculateIdxFromPos(m_area.Min());
     // Since InrementPosition resets m_idx to intial state when it
     // reaches the end of
     m_idxEnd = m_idx;
@@ -140,8 +141,8 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
 
     size_t rowIdx = 1;
     for (int i = pos.size() - 1; i >= 0; --i) {
-      const int min = std::max(area.min[i], 0);
-      const int max = std::min(area.max[i], (Cell::Pos::Scalar)stride[i]);
+      const int min = std::max(area.MinAxis(i), 0);
+      const int max = std::min(area.MaxAxis(i), (Cell::Pos::Scalar)stride[i]);
 
       assert(max >= min && "Max must >= min. Otherwise negative idx occured");
 

@@ -104,8 +104,8 @@ void RenderData::AddVisibleArea(const Eigen::Vector3i& newPos) {
 
   for (size_t i = 0; i < m_desiredArea.size(); ++i)
     CELLNTA_LOG_TRACE("Desired area {} min: ({}) max: ({})", i,
-                      m_desiredArea[i].min.transpose(),
-                      m_desiredArea[i].max.transpose());
+                      m_desiredArea[i].Min().transpose(),
+                      m_desiredArea[i].Max().transpose());
 }
 
 void RenderData::EraseUnvisibleArea(const Eigen::Vector3i& newPos) {
@@ -130,8 +130,8 @@ void RenderData::EraseUnvisibleArea(const Eigen::Vector3i& newPos) {
 
   for (size_t i = 0; i < eraseList.size(); ++i)
     CELLNTA_LOG_TRACE("Erase list {} min: ({}) max: ({})", i,
-                      eraseList[i].min.transpose(),
-                      eraseList[i].max.transpose());
+                      eraseList[i].Min().transpose(),
+                      eraseList[i].Max().transpose());
 }
 
 void RenderData::SetCollatingX(int x) {

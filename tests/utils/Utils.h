@@ -10,7 +10,7 @@ inline bool IsPosHasEqualValues(const Eigen::Vector3i& pos) {
 }
 
 inline bool IsAreaHasEqualValues(const Cellnta::Area& area) {
-  return IsPosHasEqualValues(area.min) && IsPosHasEqualValues(area.max);
+  return IsPosHasEqualValues(area.Min()) && IsPosHasEqualValues(area.Max());
 }
 
 std::vector<Cellnta::Cell> GenerateCellList(const Cellnta::Area& area);

@@ -195,7 +195,7 @@ TEST(WorldImplSimple, Iterator) {
   auto iter = world.MakeWholeIter();
 
   while (const Cell* cell = iter.Next()) {
-    CheckAndDeleteCell(*cell, area.min[0], area.max[0], expCells);
+    CheckAndDeleteCell(*cell, area.MinAxis(0), area.MaxAxis(0), expCells);
   }
 
   ASSERT_TRUE(expCells.empty()) << "Iterator did not go through all the values";
@@ -211,7 +211,7 @@ TEST(WorldImplSimple, ValidAreaIter) {
   auto iter = world.MakeAreaIter(area);
 
   while (const Cell* cell = iter.Next()) {
-    CheckAndDeleteCell(*cell, area.min[0], area.max[0], expCells);
+    CheckAndDeleteCell(*cell, area.MinAxis(0), area.MaxAxis(0), expCells);
   }
 
   ASSERT_TRUE(expCells.empty()) << "Iterator did not go through all the values";
@@ -227,7 +227,7 @@ TEST(WorldImplSimple, OutOfRangeAreaIter) {
   auto iter = world.MakeAreaIter(area);
 
   while (const Cell* cell = iter.Next()) {
-    CheckAndDeleteCell(*cell, area.min[0], area.max[0], expCells);
+    CheckAndDeleteCell(*cell, area.MinAxis(0), area.MaxAxis(0), expCells);
   }
 
   ASSERT_TRUE(expCells.empty()) << "Iterator did not go through all the values";

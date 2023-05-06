@@ -6,20 +6,20 @@ using namespace Cellnta;
 
 TEST(Area, Initialization) {
   Area area;
-  EXPECT_TRUE(area.min.isZero());
-  EXPECT_TRUE(area.max.isZero());
+  EXPECT_TRUE(area.Min().isZero());
+  EXPECT_TRUE(area.Max().isZero());
 
   area = Area(Eigen::Vector3i::Zero(), Eigen::Vector3i::Zero());
-  EXPECT_TRUE(area.min.isZero());
-  EXPECT_TRUE(area.max.isZero());
+  EXPECT_TRUE(area.Min().isZero());
+  EXPECT_TRUE(area.Max().isZero());
 
   area = Area(0, 0);
-  EXPECT_TRUE(area.min.isZero());
-  EXPECT_TRUE(area.max.isZero());
+  EXPECT_TRUE(area.Min().isZero());
+  EXPECT_TRUE(area.Max().isZero());
 
   area = Area(15, 20);
-  EXPECT_EQ(area.min, Eigen::Vector3i::Constant(15));
-  EXPECT_EQ(area.max, Eigen::Vector3i::Constant(20));
+  EXPECT_EQ(area.Min(), Eigen::Vector3i::Constant(15));
+  EXPECT_EQ(area.Max(), Eigen::Vector3i::Constant(20));
 }
 
 TEST(Area, Valid) {
@@ -104,22 +104,22 @@ TEST(AreaTest, InverseClip) {
   ASSERT_EQ(result.size(), 6);
 
   Area front = Area({9, 1, 1}, {10, 10, 10});
-  EXPECT_EQ(result[0], front) << result[0].min << ", " << result[0].max;
+  EXPECT_EQ(result[0], front) << result[0].Min() << ", " << result[0].Max();
 
   // FIXME: Must be Area({0, 0, 0}, {1, 10, 10})
   Area behind = Area({0, 0, 0}, {1, 9, 9});
-  EXPECT_EQ(result[1], behind) << result[1].min << ", " << result[1].max;
+  EXPECT_EQ(result[1], behind) << result[1].Min() << ", " << result[1].Max();
 
   Area right = Area({1, 1, 9}, {10, 10, 10});
-  EXPECT_EQ(result[2], right) << result[2].min << ", " << result[2].max;
+  EXPECT_EQ(result[2], right) << result[2].Min() << ", " << result[2].Max();
 
   Area left = Area({0, 0, 0}, {9, 1, 9});
-  EXPECT_EQ(result[3], left) << result[3].min << ", " << result[3].max;
+  EXPECT_EQ(result[3], left) << result[3].Min() << ", " << result[3].Max();
 
   Area top = Area({1, 9, 1}, {10, 10, 10});
-  EXPECT_EQ(result[4], top)<< result[4].min << ", " << result[4].max;
+  EXPECT_EQ(result[4], top)<< result[4].Min() << ", " << result[4].Max();
 
   Area bottom = Area({0, 0, 0}, {9, 9, 1});
-  EXPECT_EQ(result[5], bottom)<< result[5].min << ", " << result[5].max;
+  EXPECT_EQ(result[5], bottom)<< result[5].Min() << ", " << result[5].Max();
 }
 
