@@ -6,19 +6,27 @@
 
 namespace Cellnta {
 
-struct Cell {
+template<typename Scalar = int32_t>
+struct CellEx {
   using State = uint8_t;
-  using Pos = Eigen::Vector<int32_t, Eigen::Dynamic>;
+  using Pos = Eigen::Vector<Scalar, Eigen::Dynamic>;
 
   Pos pos;
   State state = 0;
 
-  Cell() = default;
-  Cell(const Pos& pos, State state) : pos(pos), state(state) {}
+  CellEx() = default;
+  CellEx(const Pos& pos, State state) : pos(pos), state(state) {}
 
-  bool operator==(const Cell& r) const;
-  bool operator!=(const Cell& r) const;
+  bool operator==(const CellEx& r) const {
+    return (pos == r.pos) && (state == r.state);
+  }
+
+  bool operator!=(const CellEx& r) const {
+    return !(*this == r);
+  }
 };
+
+typedef CellEx<> Cell;
 
 }
 
