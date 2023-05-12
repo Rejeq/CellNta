@@ -7,15 +7,26 @@
 namespace Cellnta {
 namespace IterBase {
 
-class CellForward {
+template <typename Cell = Cellnta::Cell>
+class CellForwardEx {
  public:
-  virtual ~CellForward() = default;
+  virtual ~CellForwardEx() = default;
 
   virtual void Reset() = 0;
   virtual const Cell* Next() = 0;
 
-  const Cell* Nth(int n);
+  const Cell* Nth(int n) {
+    const Cell* cell = nullptr;
+    for (int i = 0; i < n; ++i) {
+      cell = Next();
+      if (cell == nullptr)
+        break;
+    }
+    return cell;
+  }
 };
 
-}  // namespac: IterBase
+typedef CellForwardEx<> CellForward;
+
+}  // namespace IterBase
 }  // namespace Cellnta
