@@ -1,5 +1,7 @@
 #include "Cellnta/Renderer/RenderData.h"
 
+#include <chrono>
+
 #include "Cellnta/Config.h"
 #include "Cellnta/Log.h"
 #include "Cellnta/LogFormatEigen.h"
@@ -20,6 +22,8 @@ void RenderData::Update(const World& world) {
 
   CELLNTA_LOG_TRACE("Updating RenderData");
 
+  auto start = std::chrono::steady_clock::now();
+
   NCellStorage::VecList& rawCells = m_cells.GetRaw();
   Area area = GetVisibleArea();
 
@@ -29,6 +33,10 @@ void RenderData::Update(const World& world) {
   while (const Cell* cell = iter.Next()) {
     ForceSetCell(*cell);
   }
+
+  auto end = std::chrono::steady_clock::now();
+  auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  CELLNTA_LOG_INFO("RenderData update time: {}", dur);
 }
 
 void RenderData::SetDimension(int dim) {
