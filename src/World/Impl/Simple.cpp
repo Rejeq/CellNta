@@ -76,12 +76,30 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
       return;
     }
 
-    for (auto point : m_area.Max()) {
-      if (point <= 0) {
+    // TODO: Here a lot of checks, maybe decrease count?
+    for (int i = 0; i < m_area.GetSize(); ++i) {
+      auto& minPoint = m_area.Min()[i];
+      auto& maxPoint = m_area.Max()[i];
+
+      if (minPoint < 0)
+        minPoint = 0;
+
+      if (maxPoint <= 0) {
         m_firstIter = -1;
         CELLNTA_LOG_ERROR(
             "Unable to create AreaIterator: area.max has negative coordinates");
         return;
+      }
+
+      if (minPoint >= (int) m_world.m_size[i]) {
+        m_firstIter = -1;
+        CELLNTA_LOG_ERROR(
+            "Unable to create AreaIterator: area.min has to large coordinates");
+        return;
+      }
+
+      if (maxPoint > (int) m_world.m_size[i]) {
+        maxPoint = m_world.m_size[i];
       }
     }
 
@@ -92,14 +110,18 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
     m_idxEnd = m_idx;
     m_firstIter = true;
 
-    if (m_idx < m_world.GetTotalArea()) {
-      IteratorSetPosition(m_world.m_size.data(), m_idx - 1, m_curr.pos);
+    if (m_idx >= m_world.GetTotalArea()) {
+      CELLNTA_LOG_ERROR("Unable to reset area iterator: Something get wrong");
+      m_firstIter = -1;
       return;
     }
 
-    m_idx = m_idxEnd = 0;
-    // Its needed because IteratorNextPosition will be called before m_idx + 1
-    m_curr.pos[m_curr.pos.size() - 1] = -1;
+    if (m_idx == 0) {
+      // Its needed because IteratorNextPosition will be called before m_idx + 1
+      m_curr.pos[m_curr.pos.size() - 1] = -1;
+    } else {
+      IteratorSetPosition(m_world.m_size.data(), m_idx - 1, m_curr.pos);
+    }
   }
 
   const Cell* Next() override {
