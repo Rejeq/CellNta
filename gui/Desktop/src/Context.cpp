@@ -157,7 +157,7 @@ bool Context::SetWorld(const Cellnta::WorldType type) {
     return false;
   }
 
-  data->GetCells().clear();
+  data->GetCells().Clear();
   return false;
 }
 

@@ -110,14 +110,23 @@ void Cellnta::NProject(NCellStorage& cells, int cameraDim,
   CELLNTA_PROFILE;
 
   const int divPos = ((perspective) ? 2 : 1);
-  NCellStorage::VecList rawCells = cells.GetRaw();
+  // TODO: Add feature that behaviour can be disabled in gui
+  // FIXME: Use reference
+  NCellStorage::VecList visibleRaw = cells.GetVisibleRaw();
 
-  for (size_t i = 0; i < rawCells.size(); ++i) {
-    Eigen::Map<Eigen::VectorXf> pos(rawCells.at(i).data(), cameraDim + 1);
+  auto iter = cells.GetRaw().MakeWholeIter();
+
+  NCellStorage::Vec pos = NCellStorage::Vec::Zero(cameraDim + 1);
+  while (const auto* cell = iter.Next()) {
+    pos = cell->pos;
 
     pos = viewProj * pos;
     const float& div = pos(pos.rows() - divPos);
     pos /= (div == 0.0f) ? FLT_EPSILON : div;
+
+    // Overriding existing data its not bug here
+    // because visibleRaw is already copy
+    visibleRaw.Move(cell->pos, pos);
   }
 }
 
@@ -139,8 +148,7 @@ void Cellnta::NProject(HypercubeStorage& cube, int cameraDim,
   }
 }
 
-Eigen::MatrixXf Cellnta::NRotate(int N, int axis1, int axis2,
-                                 float angle) {
+Eigen::MatrixXf Cellnta::NRotate(int N, int axis1, int axis2, float angle) {
   assert(axis1 != axis2);
   assert(axis1 < N);
   assert(axis2 < N);

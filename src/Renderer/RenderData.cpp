@@ -21,12 +21,9 @@ void RenderData::Update(const World& world) {
   CELLNTA_LOG_TRACE("Updating RenderData");
 
   NCellStorage::VecList& rawCells = m_cells.GetRaw();
-  for (auto itPos = rawCells.begin(); itPos != rawCells.end(); ++itPos) {
-    if (world.GetCell(itPos->cast<Cell::Pos::Scalar>()) == 0) {
-      m_cells.Erase(itPos);
-      --itPos;
-    }
-  }
+  Area area = GetVisibleArea();
+
+  rawCells.EraseArea(area);
 
   auto iter = world.MakeAreaIter(GetVisibleArea());
   while (const Cell* cell = iter.Next()) {
@@ -61,7 +58,7 @@ void RenderData::ForceSetCell(const Cell& cell) {
 }
 
 void RenderData::Clear() {
-  m_cells.clear();
+  m_cells.Clear();
 }
 
 void RenderData::SetDistance(int distance) {
@@ -71,7 +68,7 @@ void RenderData::SetDistance(int distance) {
     return;
 
   m_distance = distance;
-  m_cells.clear();
+  m_cells.Clear();
   EraseUnvisibleArea(m_pos);
 
   UpdateVisibleArea();
@@ -118,20 +115,13 @@ void RenderData::EraseUnvisibleArea(const Eigen::Vector3i& newPos) {
   NCellStorage::VecList& rawCells = m_cells.GetRaw();
   Eigen::Vector3i pos;
 
-  auto PosValid = [&](auto& pos) -> bool {
-    for (const Area& erase : eraseList)
-      if (erase.PosValid(pos.template cast<Cell::Pos::Scalar>()))
-        return true;
-    return false;
-  };
+  for (const auto& area : eraseList) {
+    rawCells.EraseArea(area);
 
-  auto rem = std::remove_if(rawCells.begin(), rawCells.end(), PosValid);
-  rawCells.erase(rem, rawCells.end());
-
-  for (size_t i = 0; i < eraseList.size(); ++i)
-    CELLNTA_LOG_TRACE("Erase list {} min: ({}) max: ({})", i,
-                      eraseList[i].Min().transpose(),
-                      eraseList[i].Max().transpose());
+    CELLNTA_LOG_TRACE("Erase unvisible area from: ({}) to: ({})",
+                      area.Min().transpose(),
+                      area.Max().transpose());
+  }
 }
 
 void RenderData::SetCollatingX(int x) {

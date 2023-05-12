@@ -69,7 +69,7 @@ void RendererWindow::Draw() {
 
     ImGui::Spacing();
 
-    const size_t cellsSize = data->GetCells().size();
+    const size_t cellsSize = data->GetCells().Size();
 
     ImGuiTreeNodeFlags nodeFlags =
         ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick |
@@ -111,7 +111,7 @@ void RendererWindow::DrawLoadedCells() {
     return;
 
   const Cellnta::NCellStorage& cells = data->GetCells();
-  if (cells.size() == 0)
+  if (cells.Size() == 0)
     return;
 
   constexpr ImGuiTableFlags TableFlags =
@@ -127,8 +127,8 @@ void RendererWindow::DrawLoadedCells() {
     ImGui::TableSetupColumn("Visible", ImGuiTableColumnFlags_NoResize);
     ImGui::TableSetupScrollFreeze(1, 1);
 
-    const auto& rawCells = cells.GetRaw();
-    const auto& rawVisibleCells = cells.GetVisibleRaw();
+    auto rawCells = cells.GetRaw().MakeWholeIter();
+    auto rawVisibleCells = cells.GetVisibleRaw().MakeWholeIter();
     ImGui::TableHeadersRow();
 
     const ImU32 cellBg =
@@ -139,7 +139,7 @@ void RendererWindow::DrawLoadedCells() {
 
     ImGuiListClipper clipper;
 
-    clipper.Begin(cells.size());
+    clipper.Begin(cells.Size());
     while (clipper.Step()) {
       for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
         ImGui::PushID(i);
@@ -153,8 +153,8 @@ void RendererWindow::DrawLoadedCells() {
         else
           ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cellBgAlt);
 
-        const auto& cell = rawCells.at(i);
-        Widget::TextMatrix(cell.transpose());
+        const auto* cell = rawCells.Next();
+        Widget::TextMatrix(cell->pos.transpose());
 
         ImGui::TableNextColumn();
         if (i % 2 == 0)
@@ -162,8 +162,8 @@ void RendererWindow::DrawLoadedCells() {
         else
           ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, cellBg);
 
-        const auto& visibleCell = rawVisibleCells.at(i);
-        Widget::TextMatrix(visibleCell.transpose());
+        const auto* visibleCell = rawVisibleCells.Next();
+        Widget::TextMatrix(visibleCell->pos.transpose());
 
         ImGui::PopID();
       }

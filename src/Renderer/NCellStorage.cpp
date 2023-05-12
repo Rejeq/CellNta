@@ -29,7 +29,7 @@ void NCellStorage::Add(const Vec& pos) {
 
   tmp(m_d) = 1;
 
-  m_cells.push_back(std::move(tmp));
+  m_cells.Set(tmp, 1);
   m_needUpdate = true;
 }
 
@@ -44,46 +44,46 @@ void NCellStorage::AddHomogeneous(const Vec& pos) {
     return;
   }
 
-  m_cells.push_back(pos);
-  m_needUpdate = true;
-}
-
-void NCellStorage::Erase(const VecList::iterator& pos) {
-  CELLNTA_PROFILE;
-
-  m_cells.erase(pos);
+  m_cells.Set(pos, 1);
   m_needUpdate = true;
 }
 
 void NCellStorage::Erase(const Vec& pos) {
   CELLNTA_PROFILE;
 
-  // In future i want to make m_cells as a hash map
-  // So its temporary
-  auto it = m_cells.begin();
-  while (it != m_cells.end()) {
-    if (it->block(0, 0, 1, m_d) == pos) {
-      m_cells.erase(it);
-      break;
-    }
-    ++it;
-  }
+  // TODO: Better make iterator that always return homogenous vector
+  // Its better because:
+  // - No need store extra axis in every position
+  // - No need to make similar methods Erase() and EraseHomogeneous()
+  // - No need reallocations
+  // - Zero overhead
 
+  Vec tmp = Vec(m_d + 1);
+
+  if (pos.size() >= m_d) {
+    memcpy(tmp.data(), pos.data(), m_d * sizeof(Point));
+  } else {
+    const size_t offset = pos.size();
+    const size_t rem = tmp.size() - offset - 1;
+    memcpy(tmp.data(), pos.data(), offset * sizeof(Point));
+    memset(tmp.data() + offset, 0, rem * sizeof(Point));
+  }
+  tmp(m_d) = 1;
+
+  m_cells.Erase(tmp);
   m_needUpdate = true;
+}
+
+void NCellStorage::EraseArea(const Area& area) {
+  CELLNTA_PROFILE;
+
+  m_cells.EraseArea(area);
 }
 
 void NCellStorage::EraseHomogeneous(const Vec& pos) {
   CELLNTA_PROFILE;
 
-  auto it = m_cells.begin();
-  while (it != m_cells.end()) {
-    if (*it == pos) {
-      m_cells.erase(it);
-      break;
-    }
-    ++it;
-  }
-
+  m_cells.Erase(pos);
   m_needUpdate = true;
 }
 
@@ -91,29 +91,18 @@ void NCellStorage::SetDimension(const int dim) {
   CELLNTA_PROFILE;
 
   m_d = dim;
-  clear();
+  Clear();
 }
 
-void NCellStorage::clear() {
+void NCellStorage::Clear() {
   CELLNTA_PROFILE;
 
-  m_visibleCells.clear();
-  m_cells.clear();
+  m_visibleCells.Clear();
+  m_cells.Clear();
 
   m_needUpdate = true;
 };
 
-void NCellStorage::reserve(int capacity) {
-  CELLNTA_PROFILE;
-
-  m_visibleCells.reserve(capacity);
-  m_cells.reserve(capacity);
-};
-
-size_t NCellStorage::capacity() const {
-  return m_cells.capacity();
-}
-
-size_t NCellStorage::size() const {
-  return m_cells.size();
+int NCellStorage::Size() const {
+  return m_cells.Size();
 }
