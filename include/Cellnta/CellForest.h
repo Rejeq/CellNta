@@ -9,24 +9,29 @@
 #include "Cellnta/Cell.h"
 #include "Cellnta/Iterator.h"
 
+// TODO: Don't forget rewrite without templates, when NCellStorage will be
+// splitted.
+
 namespace Cellnta {
 
-// Inputs:
-// Vec(15, 16, 20, 30): 1
-// Vec(15, 20): 2
-// Vec(15, 20, 30): 3
-// Vec(1, 1, 1, 1): 4
-// Vec(1, 2, 5): 5
-// Vec(1, 3): 6
-//
-// Result:
-//  15            1
-//  /\          / | \
-// 16 20: 2    1  2  3: 6
-// |   |       |  |
-// 20 30: 3    1  5: 5
-// |           |
-// 30: 1       1: 4
+/*
+Inputs:
+Vec(15, 16, 20, 30): 1
+Vec(15, 20): 2
+Vec(15, 20, 30): 3
+Vec(1, 1, 1, 1): 4
+Vec(1, 2, 5): 5
+Vec(1, 3): 6
+
+Result:
+ 15            1
+ /\          / | \
+16 20: 2    1  2  3: 6
+|   |       |  |
+20 30: 3    1  5: 5
+|           |
+30: 1       1: 4
+**/
 template <typename Cell = Cellnta::Cell>
 class CellForest {
   struct Node;
@@ -316,12 +321,7 @@ class CellForest {
         : it(std::move(it)), end(std::move(end)) {}
   };
 
-  template <typename T>
-  struct DetermineIterRange {
-    static_assert(!sizeof(T), "DetermineIterRange must be implemented");
-  };
-
-  template <typename Derived>
+  template <typename Derived, typename TDetermineRange>
   struct IterCommon {
     IterCommon(const CellForest& tree) : m_tree(&tree) {}
 
@@ -363,8 +363,7 @@ class CellForest {
 
    private:
     void PushToStack(const Map& map) {
-      IterRange<> range =
-          DetermineIterRange<Derived>()(GetDerived(), map, m_stack.size());
+      IterRange<> range = TDetermineRange()(GetDerived(), map, m_stack.size());
 
       m_stack.push(std::move(range));
     }
@@ -376,27 +375,25 @@ class CellForest {
     const CellForest* m_tree = nullptr;
   };
 
-  template <>
-  struct DetermineIterRange<WholeIter> {
+  struct DetermineWholeIterRange {
     IterRange<> operator()(const WholeIter&, const Map& node, int) {
       return IterRange<>(node.begin(), node.end());
     }
   };
 
   class WholeIter : public IterBase::CellForwardEx<Cell>,
-                    protected IterCommon<WholeIter> {
-    using IterCommon = IterCommon<WholeIter>;
+                    protected IterCommon<WholeIter, DetermineWholeIterRange> {
+    using ItCommon = IterCommon<WholeIter, DetermineWholeIterRange>;
 
    public:
-    WholeIter(const CellForest& tree) : IterCommon(tree) { Reset(); }
+    WholeIter(const CellForest& tree) : ItCommon(tree) { Reset(); }
 
-    void Reset() override { IterCommon::Reset(); }
+    void Reset() override { ItCommon::Reset(); }
 
-    const Cell* Next() override { return IterCommon::Next(); }
+    const Cell* Next() override { return ItCommon::Next(); }
   };
 
-  template <>
-  struct DetermineIterRange<AreaIter> {
+  struct DetermineAreaIterRange {
     IterRange<> operator()(const AreaIter& iter, const Map& node, int i) {
       auto min = node.lower_bound(Axis::NotLess(iter.GetArea().MinAxis(i)));
       auto max = node.upper_bound(Axis::GreaterThan(iter.GetArea().MaxAxis(i)));
@@ -405,12 +402,12 @@ class CellForest {
   };
 
   class AreaIter : public IterBase::CellForwardEx<Cell>,
-                   protected IterCommon<AreaIter> {
-    using IterCommon = IterCommon<AreaIter>;
+                   protected IterCommon<AreaIter, DetermineAreaIterRange> {
+    using ItCommon = IterCommon<AreaIter, DetermineAreaIterRange>;
 
    public:
     AreaIter(const CellForest& tree, const Area& area)
-        : IterCommon(tree), m_area(area) {
+        : ItCommon(tree), m_area(area) {
       Reset();
     }
 
@@ -421,10 +418,10 @@ class CellForest {
         return;
       }
 
-      IterCommon::Reset();
+      ItCommon::Reset();
     }
 
-    const Cell* Next() override { return IterCommon::Next(); }
+    const Cell* Next() override { return ItCommon::Next(); }
 
     const Area& GetArea() const { return m_area; }
 
