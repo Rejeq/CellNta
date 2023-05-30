@@ -47,7 +47,7 @@ void RendererWindow::Draw() {
     static const std::array<ComboData<Cellnta::CubeMode>, 3> CubeModeData = {
         ComboData(Cellnta::CubeMode::POINTS, "Points"),
         ComboData(Cellnta::CubeMode::WIREFRAME, "Wireframe"),
-        ComboData(Cellnta::CubeMode::POLYGON, "Polygon (gives errors from 6d)"),
+        ComboData(Cellnta::CubeMode::POLYGON, "Polygon"),
     };
 
     Cellnta::CubeMode res = Cellnta::CubeMode::NONE;

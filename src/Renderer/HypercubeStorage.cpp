@@ -545,7 +545,7 @@ void HypercubeStorage::GenerateIndicesPolygon() {
     for (size_t currJump = 0; currJump < totalJumps; ++currJump) {
       size_t currPlane = 0;
       size_t midPoint = 1;
-      while (currPlane < currDim - 1) {
+      while (currPlane < (size_t) (currDim - 1)) {
         assert(midPoint != edgeStart &&
                "Middle point cannot be start of common edge");
 
