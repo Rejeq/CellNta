@@ -64,6 +64,7 @@ class HypercubeStorage {
   // 3d: 3  - xy,xz,yz
   // 4d: 6  - xy,xz,yz,xw,yw,zw
   // 5d: 10 - xy,xz,yz,xw,yw,zw,xe,ye,ze,we
+  // 6d: 15 - xy,xz,yz,xw,yw,zw,xe,ye,ze,we,qx,qy,qz,qw,qe
   int GetPlanesCount(int dim) const;
 
   int GetRemaindingFacesCount(int dim) const;
