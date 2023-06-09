@@ -77,7 +77,8 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
     }
 
     // TODO: Here a lot of checks, maybe decrease count?
-    for (int i = 0; i < m_area.GetSize(); ++i) {
+    int totalDims = std::min(m_area.GetSize(), (int) m_world.m_size.size());
+    for (int i = 0; i < totalDims; ++i) {
       auto& minPoint = m_area.Min()[i];
       auto& maxPoint = m_area.Max()[i];
 
