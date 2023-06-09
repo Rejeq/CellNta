@@ -6,7 +6,6 @@ if (NOT IMGUI_DIR AND CELLNTA_FETCHING)
   include(FetchContent)
   FetchContent_Declare(ImGui
     URL ${IMGUI_URL}
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
   )
   FetchContent_MakeAvailable(ImGui)
   set(IMGUI_DIR ${imgui_SOURCE_DIR})

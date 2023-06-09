@@ -9,7 +9,6 @@ if (NOT GTEST_FOUND AND CELLNTA_FETCHING)
   include(FetchContent)
   FetchContent_Declare(gtest
     URL ${GTEST_URL}
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
   )
 
 FetchContent_MakeAvailable(gtest)

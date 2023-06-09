@@ -14,7 +14,6 @@ if (NOT GLEW_FOUND AND CELLNTA_FETCHING)
   include(FetchContent)
   FetchContent_Declare(glew
     URL ${GLEW_URL}
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
   )
 
   FetchContent_GetProperties(glew)

@@ -7,7 +7,6 @@ if (NOT spdlog_FOUND AND CELLNTA_FETCHING)
   include(FetchContent)
   FetchContent_Declare(spdlog
     URL ${SPDLOG_URL}
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
   )
   FetchContent_MakeAvailable(spdlog)
 

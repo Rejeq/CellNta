@@ -5,7 +5,6 @@ if (NOT TRACY_DIR AND CELLNTA_FETCHING)
   include(FetchContent)
   FetchContent_Declare(tracy
     URL ${TRACY_URL}
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
   )
   FetchContent_MakeAvailable(tracy)
   set(TRACY_DIR ${tracy_SOURCE_DIR})

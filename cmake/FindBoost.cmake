@@ -5,7 +5,6 @@ function(LoadBoostDependices target)
 
     FetchContent_Declare(boost_${dep}
       URL ${BOOST_DEP_URL}
-      DOWNLOAD_EXTRACT_TIMESTAMP ON
     )
     FetchContent_GetProperties(${dep})
     if(NOT boost_${dep}_POPULATED)

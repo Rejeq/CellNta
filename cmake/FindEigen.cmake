@@ -9,7 +9,6 @@ if (NOT Eigen3_FOUND AND CELLNTA_FETCHING)
   include(FetchContent)
   FetchContent_Declare(eigen3
     URL ${EIGEN_URL}
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
   )
 
   if(CELLNTA_THIRD_PARTY_Eigen3_BUILD)

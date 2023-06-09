@@ -7,7 +7,6 @@ if (NOT SDL2_FOUND AND CELLNTA_FETCHING)
   include(FetchContent)
   FetchContent_Declare(SDL2
     URL ${SDL2_URL}
-    DOWNLOAD_EXTRACT_TIMESTAMP ON
   )
 
   set(SDL_TEST              OFF CACHE BOOL "")
