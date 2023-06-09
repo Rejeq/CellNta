@@ -99,6 +99,9 @@ class CellForest {
     std::stack<std::pair<Map*, IterRange<MapIter>>> stack;
 
     const auto PushToStack = [&area, &stack](Map& cont, int idx) {
+      if (cont.empty())
+        return;
+
       auto minRoot = cont.lower_bound(Axis::NotLess(area.MinAxis(idx)));
       if (minRoot == cont.end()) {
         if (Axis::NotLess(area.MinAxis(idx)) < cont.begin()->first)
