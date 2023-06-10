@@ -21,8 +21,6 @@ class RenderData {
 
   void Update(const World& world);
 
-  void SetDimension(int dim);
-
   void SetCell(const Cell& cell);
   void Clear();
 
@@ -43,6 +41,9 @@ class RenderData {
 
   void SetPosition(Eigen::Vector3i pos);
 
+  void SetDimension(int dim);
+  int GetDimension() const { return m_d; }
+
   const std::vector<Area>& GetDesireArea() const { return m_desiredArea; }
   bool DesireArea() const { return !m_desiredArea.empty(); }
   void DesireAreaProcessed() { m_desiredArea.clear(); }
@@ -59,7 +60,8 @@ class RenderData {
   const Area& GetVisibleArea() const { return m_visibleArea; }
 
   NCellStorage m_cells;
-  Eigen::Vector3i m_pos = Eigen::Vector3i(0, 0, 0); // Always mod of PositionDivider
+  // Always mod of PositionDivider
+  Eigen::Vector3i m_pos = Eigen::Vector3i(0, 0, 0);
   Area m_visibleArea = Area(0, 0);
 
   int m_distance = 0;
@@ -71,7 +73,8 @@ class RenderData {
   int m_collY = 1;
   int m_collZ = 2;
 
-  constexpr static int PositionDivider = 16; // Visible area will be updated after the given length
+  constexpr static int PositionDivider =
+      16;  // Visible area will be updated after the given length
 };
 
 }  // namespace Cellnta
