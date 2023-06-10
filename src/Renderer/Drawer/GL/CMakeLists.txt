@@ -5,6 +5,7 @@ add_library(CellntaDrawerGL STATIC
   ./Color.cpp
   ./GL.cpp
   ./Hypercube.cpp
+  ./Instance.cpp
   ./NCell.cpp
   ./Scene.cpp
   ./Shader.cpp

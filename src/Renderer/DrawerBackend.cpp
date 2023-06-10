@@ -1,13 +1,18 @@
 #include "Cellnta/Renderer/DrawerBackend.h"
 
+#if CELLNTA_DRAWER_GL
+
+#include "Cellnta/Renderer/Drawer/GL/Instance.h"
+
+#endif
+
 using namespace Cellnta;
 
-std::unique_ptr<SceneDrawer> Cellnta::CreateSceneDrawerInstance(DrawerBackend backend) {
+DrawerPtr<SceneDrawer> Cellnta::CreateSceneDrawerInstance(
+    DrawerBackend backend) {
   switch (backend) {
 #if CELLNTA_DRAWER_GL
-    case DrawerBackend::GL:
-      return std::make_unique<SceneDrawerGL>();
-      break;
+    case DrawerBackend::GL: return InstanceDrawerGL::CreateScene(); break;
 #endif
     default: break;
   }
