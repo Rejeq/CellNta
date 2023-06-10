@@ -1,7 +1,7 @@
 #include "Keybind.h"
 
 #include "Context.h"
-#include "View/Menubar/Action.h"
+#include "Menubar/AppearanceAction.h"
 
 using namespace Ui;
 

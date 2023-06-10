@@ -15,18 +15,34 @@ add_executable(CellntaDesktop
   ./src/Source.cpp
   ./src/UndoRedo.cpp
 
-  ./src/View/Camera/Action.cpp
-  ./src/View/Camera/Window.cpp
-  ./src/View/Menubar/Action.cpp
-  ./src/View/Menubar/Window.cpp
-  ./src/View/Pattern/Action.cpp
-  ./src/View/Pattern/Window.cpp
-  ./src/View/Renderer/Action.cpp
-  ./src/View/Renderer/Window.cpp
-  ./src/View/Scene/Action.cpp
-  ./src/View/Scene/Window.cpp
-  ./src/View/World/Action.cpp
-  ./src/View/World/Window.cpp
+  ./src/Camera/3dAction.cpp
+  ./src/Camera/3dView.cpp
+  ./src/Camera/ControllerView.cpp
+  ./src/Camera/NdAction.cpp
+  ./src/Camera/NdView.cpp
+  ./src/Camera/Window.cpp
+
+  ./src/Menubar/AppearanceAction.cpp
+  ./src/Menubar/Window.cpp
+
+  ./src/Pattern/Action.cpp
+  ./src/Pattern/Window.cpp
+
+  ./src/Renderer/HypercubeAction.cpp
+  ./src/Renderer/HypercubeView.cpp
+  ./src/Renderer/RenderDataAction.cpp
+  ./src/Renderer/RenderDataView.cpp
+  ./src/Renderer/Window.cpp
+
+  ./src/Scene/FocusAction.cpp
+  ./src/Scene/Window.cpp
+
+  ./src/World/Action.cpp
+  ./src/World/RandomAction.cpp
+  ./src/World/RandomView.cpp
+  ./src/World/SimpleAction.cpp
+  ./src/World/SimpleView.cpp
+  ./src/World/Window.cpp
 
   ./src/Widgets/RightAlign.cpp
   ./src/Widgets/Utils.cpp

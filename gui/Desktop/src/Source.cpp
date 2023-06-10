@@ -12,12 +12,13 @@
 
 #include "Context.h"
 #include "Log.h"
-#include "View/Camera/Window.h"
-#include "View/Menubar/Window.h"
-#include "View/Pattern/Window.h"
-#include "View/Renderer/Window.h"
-#include "View/Scene/Window.h"
-#include "View/World/Window.h"
+
+#include "Camera/Window.h"
+#include "Menubar/Window.h"
+#include "Pattern/Window.h"
+#include "Renderer/Window.h"
+#include "Scene/Window.h"
+#include "World/Window.h"
 
 #ifndef RESOURCE_DIR
 #error "Not provided resource directory"
