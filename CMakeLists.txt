@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
+if (POLICY CMP0135)
+  cmake_policy(SET CMP0135 NEW)
+endif()
+
 project(Cellnta)
 
 option(CELLNTA_PROFILING "Enable profiling" OFF)
