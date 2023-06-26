@@ -86,17 +86,28 @@ void SceneWindow::SetFocused(bool focused) {
 void SceneWindow::OnEnterFocus() {
   CELLNTA_PROFILE;
 
-  m_focused = true;
+  SDL_GetMouseState(&m_oldMousePosX, &m_oldMousePosY);
+
   SDL_SetRelativeMouseMode(SDL_TRUE);
-  // io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+  ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+  m_focused = true;
 }
 
 void SceneWindow::OnLeaveFocus() {
   CELLNTA_PROFILE;
 
-  m_focused = false;
   SDL_SetRelativeMouseMode(SDL_FALSE);
-  // io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+  ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+  m_focused = false;
+
+  SDL_Window* focusWin = SDL_GetMouseFocus();
+  if (focusWin == nullptr) {
+    DESKTOP_LOG_ERROR("Unable to set mouse position that was before the"
+                      "SceneWindow was focused");
+    return;
+  }
+
+  SDL_WarpMouseInWindow(focusWin, m_oldMousePosX, m_oldMousePosY);
 }
 
 void SceneWindow::HandleInput() {
@@ -117,9 +128,9 @@ void SceneWindow::HandleInput() {
     HandleCameraInput();
 
   ImVec2 size = ImGui::GetContentRegionAvail();
-
   if (size != m_framebufferSize) {
     Cellnta::Camera3d* cam = ren.GetCamera3d();
+
     if (cam != nullptr)
       cam->Resize(Eigen::Vector2f(size.x, size.y));
     ResizeFramebuffer(size.x, size.y);
@@ -141,6 +152,7 @@ void SceneWindow::HandleCameraInput() {
     return false;
   };
 
+  Context* ctx = GetContext();
   Cellnta::Camera3d* cam = GetContext()->GetRenderer().GetCamera3d();
   ImGuiIO& io = ImGui::GetIO();
   float& delta = io.DeltaTime;
@@ -148,9 +160,12 @@ void SceneWindow::HandleCameraInput() {
   if (cam == nullptr)
     return;
 
-  //CELLNTA_LOG_DEBUG("Mouse Delta ({}, {})", io.MouseDelta.x, io.MouseDelta.y);
-  if (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)
-    cam->Rotate(io.MouseDelta.x, io.MouseDelta.y, delta);
+  float deltaX = ctx->GetMouseDeltaX();
+  float deltaY = ctx->GetMouseDeltaY();
+  if (deltaX != 0 || deltaY != 0) {
+    cam->Rotate(deltaX, deltaY, delta);
+  }
+
   if (io.MouseWheel != 0)
     cam->Move(Direction::FORWARD, io.MouseWheel / 4.0f);
 

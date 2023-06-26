@@ -103,10 +103,13 @@ void Context::Draw() {
 
   // TODO: Delete this
   ImGui::ShowDemoWindow();
+
   for (auto& window : m_windowsData)
     if (window->GetProperties().Opened)
       window->Draw();
 
+  m_mouseDeltaX = 0;
+  m_mouseDeltaY = 0;
   ImGui::PopID();
 }
 

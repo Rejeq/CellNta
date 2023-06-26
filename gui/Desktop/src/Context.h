@@ -34,8 +34,6 @@ class Context {
   void AddWindow(std::unique_ptr<Window>&& window);
   void SetDimension(int dim);
 
-  void NextGeneration();
-
   void PushAction(Action::BasePtr&& action);
 
   void Update();
@@ -59,6 +57,14 @@ class Context {
 
   const KeybindMap& GetKeybindings() const { return m_keybinds; }
   KeybindMap& GetKeybindings() { return m_keybinds; }
+
+  void SetMouseDelta(float xDelta, float yDelta) {
+    m_mouseDeltaX = xDelta;
+    m_mouseDeltaY = yDelta;
+  }
+
+  float GetMouseDeltaX() const { return m_mouseDeltaX; }
+  float GetMouseDeltaY() const { return m_mouseDeltaY; }
 
   void SetOnFirstStartup(
       const std::function<void(const Context&)>& onFirstStartup) {
@@ -97,8 +103,11 @@ class Context {
 
   std::function<void(const Context&)> m_OnFirstStartup;
 
-  bool m_firstStartup = true;
   ImGuiID m_dockspaceId = 0;
+
+  float m_mouseDeltaX = 0;
+  float m_mouseDeltaY = 0;
+  bool m_firstStartup = true;
 };
 
 }  // namespace Ui

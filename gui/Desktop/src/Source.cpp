@@ -320,6 +320,9 @@ int main(int /*unused*/, char** /*unused*/) {
             default: break;
           }
           break;
+        case SDL_MOUSEMOTION:
+          ctx.SetMouseDelta((float)event.motion.xrel, (float)event.motion.yrel);
+          break;
         default: break;
       }
     }

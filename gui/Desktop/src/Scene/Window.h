@@ -34,6 +34,8 @@ class SceneWindow : public Window {
   void ResizeFramebuffer(int width, int height);
 
   ImVec2 m_framebufferSize = ImVec2(0, 0);
+  int m_oldMousePosX = 0;
+  int m_oldMousePosY = 0;
   uint32_t m_framebuffer = 0;
   uint32_t m_renBuffer = 0;
   uint32_t m_texture = 0;
