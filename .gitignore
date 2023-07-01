@@ -1,5 +1,21 @@
-**/build
-**/.vs
-**/.vscode
-**/.cache
-*.ini
+# Temp files created by most text editors.
+*~
+# Vim swap files
+.*.sw?
+.sw?
+# VS and VS Code config folders
+/.vs
+/.vscode
+
+# Merge files created by git.
+*.orig
+# Reject files created by patch.
+*.rej
+
+# Language server cache
+/.cache
+
+# ImGui config files
+/*.ini
+
+/build
