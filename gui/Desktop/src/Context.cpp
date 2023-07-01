@@ -72,6 +72,8 @@ void Context::Update() {
 
   ProccessKeybindings();
 
+  m_renderer.Update();
+
   Cellnta::RenderData* data = m_renderer.GetData();
   if (data == nullptr)
     return;
@@ -84,8 +86,6 @@ void Context::Update() {
       data->Update(*m_world);
     data->DesireAreaProcessed();
   }
-
-  m_renderer.Update();
 }
 
 void Context::Draw() {
