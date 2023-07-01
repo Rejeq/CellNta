@@ -16,8 +16,8 @@ class World;
 
 class RenderData {
  public:
-  RenderData();
-  RenderData(int dim);
+  RenderData() = default;
+  RenderData(int dim): m_d(dim) {}
 
   void Update(const World& world);
 
@@ -26,14 +26,6 @@ class RenderData {
 
   const NCellStorage& GetCells() const { return m_cells; }
   NCellStorage& GetCells() { return m_cells; }
-
-  int GetCollatingX() const { return m_collX; }
-  int GetCollatingY() const { return m_collY; }
-  int GetCollatingZ() const { return m_collZ; }
-
-  void SetCollatingX(int x);
-  void SetCollatingY(int y);
-  void SetCollatingZ(int z);
 
   void SetDistance(int distance);
   uint32_t GetDistance() const { return m_distance; }
@@ -68,10 +60,6 @@ class RenderData {
   int m_d = 0;
 
   std::vector<Area> m_desiredArea;
-
-  int m_collX = 0;
-  int m_collY = 1;
-  int m_collZ = 2;
 
   constexpr static int PositionDivider =
       16;  // Visible area will be updated after the given length

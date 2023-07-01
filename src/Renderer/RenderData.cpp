@@ -9,14 +9,6 @@
 
 using namespace Cellnta;
 
-RenderData::RenderData() {
-  m_desiredArea.reserve(4);
-}
-
-RenderData::RenderData(int dim) : m_d(dim) {
-  m_desiredArea.reserve(4);
-}
-
 void RenderData::Update(const World& world) {
   CELLNTA_PROFILE;
 
@@ -130,19 +122,4 @@ void RenderData::EraseUnvisibleArea(const Eigen::Vector3i& newPos) {
                       area.Min().transpose(),
                       area.Max().transpose());
   }
-}
-
-void RenderData::SetCollatingX(int x) {
-  m_collX = x;
-  m_desiredArea.push_back(GetVisibleArea());
-}
-
-void RenderData::SetCollatingY(int y) {
-  m_collY = y;
-  m_desiredArea.push_back(GetVisibleArea());
-}
-
-void RenderData::SetCollatingZ(int z) {
-  m_collZ = z;
-  m_desiredArea.push_back(GetVisibleArea());
 }
