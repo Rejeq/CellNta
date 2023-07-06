@@ -42,17 +42,24 @@ inline BasePtr Make(ActionType&& action) {
   return std::make_unique<ActionType>(std::move(action));
 }
 
+// FMT_CONSTEVAL used because fmt::format_string can be not a consteval
+#ifdef FMT_HAS_CONSTEVAL
+#define DK_CONSTEVAL FMT_CONSTEVAL
+#else
+#define DK_CONSTEVAL inline
+#endif
+
 template <typename... Args>
-constexpr bool CheckLogErr(bool expr, fmt::format_string<Args...> fmt,
-                           Args&&... args) {
+DK_CONSTEVAL bool CheckLogErr(bool expr, fmt::format_string<Args...> fmt,
+                              Args&&... args) {
   if (expr)
     DESKTOP_LOG_ERROR(fmt, std::forward<Args>(args)...);
   return expr;
 }
 
 template <typename... Args>
-constexpr bool CheckLogWarn(bool expr, fmt::format_string<Args...> fmt,
-                            Args&&... args) {
+DK_CONSTEVAL bool CheckLogWarn(bool expr, fmt::format_string<Args...> fmt,
+                               Args&&... args) {
   if (expr)
     DESKTOP_LOG_WARN(fmt, std::forward<Args>(args)...);
   return expr;
@@ -61,13 +68,15 @@ constexpr bool CheckLogWarn(bool expr, fmt::format_string<Args...> fmt,
 #define DESKTOP_ACTION_DERR_MSG "Unable to execute action "
 #define DESKTOP_ACTION_DERR_MSG_FMT DESKTOP_ACTION_DERR_MSG "{}"
 
-constexpr bool CheckLogDErr(bool expr, const std::string_view& actionName) {
+DK_CONSTEVAL bool CheckLogDErr(bool expr, const std::string_view& actionName) {
   return CheckLogErr(expr, DESKTOP_ACTION_DERR_MSG_FMT, actionName);
 }
 
-constexpr bool CheckLogDWarn(bool expr, const std::string_view& actionName) {
+DK_CONSTEVAL bool CheckLogDWarn(bool expr, const std::string_view& actionName) {
   return CheckLogWarn(expr, DESKTOP_ACTION_DERR_MSG_FMT, actionName);
 }
+
+#undef DK_CONSTEVAL
 
 }  // namespace Action
 }  // namespace Ui
