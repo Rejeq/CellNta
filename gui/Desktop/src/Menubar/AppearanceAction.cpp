@@ -22,14 +22,14 @@ void ToggleFullscreen::Execute() {
 }
 
 void ZoomIn::Execute() {
-  CELLNTA_LOG_ERROR("ZoomIn action not implemented");
+  DESKTOP_LOG_ERROR("ZoomIn action not implemented");
 }
 
 void ZoomOut::Execute() {
-  CELLNTA_LOG_ERROR("ZoomOut action not implemented");
+  DESKTOP_LOG_ERROR("ZoomOut action not implemented");
 }
 
 void ResetZoom::Execute() {
-  CELLNTA_LOG_ERROR("ResetZoom action not implemented");
+  DESKTOP_LOG_ERROR("ResetZoom action not implemented");
 }
 
