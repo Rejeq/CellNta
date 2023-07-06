@@ -47,8 +47,9 @@ TEST(Snapshot, Iterator) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
-  if (i == 0)
+  if (i == 0) {
     ASSERT_TRUE(false) << "Iterator no have any value";
+  }
 }
 
 TEST(Snapshot, AreaIterator) {
@@ -70,8 +71,9 @@ TEST(Snapshot, AreaIterator) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
-  if (i != 7)
+  if (i != 7) {
     ASSERT_TRUE(false) << "Iterator did not go through all the values";
+  }
 
   iter = snap.MakeAreaIter(Area(-1234, 1234));
   i = 0;
@@ -80,8 +82,9 @@ TEST(Snapshot, AreaIterator) {
     ASSERT_EQ(*cell, expectedCells[i]);
     ++i;
   }
-  if (i != 10)
+  if (i != 10) {
     ASSERT_TRUE(false) << "Iterator did not go through all the values";
+  }
 
   iter = snap.MakeAreaIter(Area(4321, -128));
   ASSERT_FALSE(iter.Next()) << "Iterator contain value, but area is invalid";

@@ -8,7 +8,8 @@ using namespace Ui;
 void KeybindMap::Add(const Keymap& map, Func func) {
   auto res = m_data.insert_or_assign(map, func);
   if (res.second == false)
-    DESKTOP_LOG_WARN("Keybind ({}, {}) has been redefined", map.key, map.mod);
+    DESKTOP_LOG_WARN("Keybind ({}, {}) has been redefined", (int)map.key,
+                     (int)map.mod);
 }
 
 KeybindMap::Func KeybindMap::Erase(const Keymap& map) {
