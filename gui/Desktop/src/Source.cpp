@@ -100,17 +100,21 @@ void Shutdown(SDL_Window* win, SDL_GLContext glCtx) {
 }
 
 bool InitLogging() {
-  if (Log::InitDefault())
+  if (Log::CreateDefault() == nullptr)
     return true;
-  Log::GetLogger()->set_level(spdlog::level::trace);
+  Log::Get().SetLevel(Cellnta::LogBase::Level::Trace);
 
-  if (LogGL::InitDefault())
+  if (LogGL::CreateDefault() == nullptr) {
     DESKTOP_LOG_ERROR("Unable to initilize OpenGL logger");
-  LogGL::GetLogger()->set_level(spdlog::level::trace);
+    return true;
+  }
+  LogGL::Get().SetLevel(Cellnta::LogBase::Level::Trace);
 
-  if (Cellnta::Log::InitDefault())
+  if (Cellnta::Log::CreateDefault() == nullptr) {
     DESKTOP_LOG_ERROR("Unable to initilize Cellnta logger");
-  Cellnta::Log::GetLogger()->set_level(spdlog::level::trace);
+    return true;
+  }
+  Cellnta::Log::Get().SetLevel(Cellnta::LogBase::Level::Trace);
 
   return false;
 }

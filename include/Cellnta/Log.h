@@ -2,19 +2,16 @@
 
 #include "Cellnta/LogBase.h"
 
-namespace Cellnta {
+namespace Cellnta::Log {
 
-class Log {
- public:
-  static bool InitDefault();
-  static bool AddSinks(const std::vector<spdlog::sink_ptr>& sinks);
-  static spdlog::logger* GetLogger();
-};
+LogBase& Get();
+LogBase* GetPtr();
+LogBase* Create();
+LogBase* CreateDefault();
 
-}  // namespace Cellnta
+}  // namespace Cellnta::Log
 
-#define _CT_LOGGER ::Cellnta::Log::GetLogger()
-
+#define _CT_LOGGER ::Cellnta::Log::Get()
 #define CELLNTA_LOG_CRITICAL(...) _CELLNTA_LOGBASE_C(_CT_LOGGER, __VA_ARGS__)
 #define CELLNTA_LOG_ERROR(...) _CELLNTA_LOGBASE_E(_CT_LOGGER, __VA_ARGS__)
 #define CELLNTA_LOG_WARN(...) _CELLNTA_LOGBASE_W(_CT_LOGGER, __VA_ARGS__)

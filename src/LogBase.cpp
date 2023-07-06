@@ -8,35 +8,48 @@
 
 using namespace Cellnta;
 
-std::unique_ptr<spdlog::logger> LogBase::InitDefault(const char* name) {
-  std::unique_ptr<spdlog::logger> logger =
-      std::make_unique<spdlog::logger>(name);
-  std::vector<spdlog::sink_ptr> sinks;
+// TODO: Delete this when ability to change pattern is added
+const char* s_defaultPattern = "[%H:%M:%S.%e] [%n] [%^%l%$] %v";
 
-#if defined(__ANDROID__)
-  sinks.emplace_back(std::make_shared<spdlog::sinks::android_sink_mt>(name));
-#else
-  sinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-#endif
+bool LogBase::SetDefault() {
+  bool err = false;
 
-  if (AddSinks(logger.get(), sinks)) {
-    assert(false && "Unable to set default logger sinks");
-    return nullptr;
-  }
-  logger->set_pattern("[%H:%M:%S.%e] [%n] [%^%l%$] %v");
-
-  return logger;
+  err = SetDefaultSinks();
+  SetDefaultPattern();
+  SetDefaultLevel();
+  return err;
 }
 
-bool LogBase::AddSinks(spdlog::logger* logger,
-                       const std::vector<spdlog::sink_ptr>& sinks) {
-  if (logger == nullptr) {
-    assert(logger != nullptr && "Logger is not initialized");
-    return true;
-  }
+bool LogBase::SetDefaultSinks() {
+  bool err = false;
+#if defined(__ANDROID__)
+  err |= AddSink<spdlog::sinks::android_sink_mt>(name);
+#else
+  err |= AddSink<spdlog::sinks::stdout_color_sink_mt>();
+#endif
+  return err;
+}
 
-  auto& logSinks = logger->sinks();
-  logSinks.insert(logSinks.end(), sinks.begin(), sinks.end());
+void LogBase::SetDefaultPattern() {
+  p_logger.set_pattern(s_defaultPattern);
+}
 
-  return false;
+const char* LogBase::GetCurrentPattern() {
+  return s_defaultPattern;
+}
+
+void LogBase::SetLevel(LogBase::Level level) {
+  p_logger.set_level((spdlog::level::level_enum)level);
+}
+
+void LogBase::SetDefaultLevel() {
+  SetLevel(GetDefaultLevel());
+}
+
+LogBase::Level LogBase::GetDefaultLevel() {
+  return Level::Info;
+}
+
+spdlog::logger* LogBase::GetLogger() {
+  return &p_logger;
 }

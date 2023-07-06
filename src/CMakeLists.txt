@@ -40,9 +40,9 @@ if(CELLNTA_PROFILING)
   message(STATUS "Profiling enabled")
 endif()
 
-if (NOT CELLNTA_LOGGING)
-  target_compile_definitions(CellntaBase PUBLIC CELLNTA_LOGGING_DISABLED)
-  message(STATUS "Logging disabled")
+if (CELLNTA_LOGGING)
+  target_compile_definitions(CellntaBase PUBLIC CELLNTA_LOGGING_ENABLED)
+  message(STATUS "Logging enabled")
 endif()
 
 if(CELLNTA_TRACE_LOGGING)

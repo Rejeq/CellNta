@@ -1,33 +1,57 @@
 #include "Log.h"
 
-static std::unique_ptr<spdlog::logger> s_logger;
+static std::unique_ptr<Cellnta::LogBase> s_logger;
 
-bool Log::InitDefault() {
-  s_logger = Cellnta::LogBase::InitDefault("Desktop");
-  return (s_logger == nullptr);
+Cellnta::LogBase& Log::Get() {
+  assert(s_logger != nullptr && "Desktop logger is not created");
+  return *s_logger;
 }
 
-bool Log::AddSinks(const std::vector<spdlog::sink_ptr>& sinks) {
-  return Cellnta::LogBase::AddSinks(s_logger.get(), sinks);
-}
-
-spdlog::logger* Log::GetLogger() {
-  assert(s_logger != nullptr && "Desktop logger is not initialized");
+Cellnta::LogBase* Log::GetPtr() {
   return s_logger.get();
 }
 
-static std::unique_ptr<spdlog::logger> s_loggerGL;
+Cellnta::LogBase* Log::Create() {
+  assert(s_logger == nullptr && "Desktop logger is already created");
 
-bool LogGL::InitDefault() {
-  s_loggerGL = Cellnta::LogBase::InitDefault("GL");
-  return (s_loggerGL == nullptr);
+  s_logger = std::make_unique<Cellnta::LogBase>("Desktop");
+  return s_logger.get();
 }
 
-bool LogGL::AddSinks(const std::vector<spdlog::sink_ptr>& sinks) {
-  return Cellnta::LogBase::AddSinks(s_loggerGL.get(), sinks);
+Cellnta::LogBase* Log::CreateDefault() {
+  if (Create() == nullptr)
+    return nullptr;
+
+  if (s_logger->SetDefault())
+    return nullptr;
+
+  return s_logger.get();
 }
 
-spdlog::logger* LogGL::GetLogger() {
-  assert(s_loggerGL != nullptr && "GL logger is not initialized");
+static std::unique_ptr<Cellnta::LogBase> s_loggerGL;
+
+Cellnta::LogBase& LogGL::Get() {
+  assert(s_loggerGL != nullptr && "GL logger is not created");
+  return *s_loggerGL;
+}
+
+Cellnta::LogBase* LogGL::GetPtr() {
+  return s_loggerGL.get();
+}
+
+Cellnta::LogBase* LogGL::Create() {
+  assert(s_loggerGL == nullptr && "GL logger is already created");
+
+  s_loggerGL = std::make_unique<Cellnta::LogBase>("Desktop");
+  return s_loggerGL.get();
+}
+
+Cellnta::LogBase* LogGL::CreateDefault() {
+  if (Create() == nullptr)
+    return nullptr;
+
+  if (s_loggerGL->SetDefault())
+    return nullptr;
+
   return s_loggerGL.get();
 }
