@@ -1,5 +1,7 @@
 #include "Cellnta/Renderer/Drawer/GL/Hypercube.h"
 
+#include "Cellnta/Log.h"
+
 using namespace Cellnta;
 
 HypercubeDrawerGL::HypercubeDrawerGL() {

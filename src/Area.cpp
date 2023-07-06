@@ -2,6 +2,7 @@
 
 #include "Cellnta/Axis.h"
 #include "Cellnta/Config.h"
+#include "Cellnta/Log.h"
 
 using namespace Cellnta;
 

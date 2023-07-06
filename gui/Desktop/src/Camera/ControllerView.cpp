@@ -1,9 +1,14 @@
 #include "Camera/ControllerView.h"
 
+#include <imgui.h>
+
+#include <Cellnta/Config.h>
+
 using namespace Ui;
 using CamContView = CameraControllerView;
 
-CamContView::PressedType CamContView::Draw(const Cellnta::CameraController& cont, bool* value) {
+CamContView::PressedType CamContView::Draw(
+    const Cellnta::CameraController& cont, bool* value) {
   CELLNTA_PROFILE;
 
   constexpr const char* PerspectiveStr = "Current perspective";

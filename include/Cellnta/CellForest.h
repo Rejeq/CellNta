@@ -7,7 +7,9 @@
 #include "Cellnta/Area.h"
 #include "Cellnta/Axis.h"
 #include "Cellnta/Cell.h"
+#include "Cellnta/Config.h"
 #include "Cellnta/Iterator.h"
+#include "Cellnta/Log.h"
 
 // TODO: Don't forget rewrite without templates, when NCellStorage will be
 // splitted.

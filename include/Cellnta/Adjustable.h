@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "Cellnta/Cell.h"
 #include "Cellnta/Iterator.h"
 
