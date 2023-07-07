@@ -3,7 +3,7 @@ find_package(Eigen3 3.4.0 CONFIG)
 option(CELLNTA_THIRD_PARTY_Eigen3_BUILD "Enable Eigen building. When disabled just header only library will be added" OFF)
 
 if (NOT Eigen3_FOUND AND CELLNTA_FETCHING)
-  set(EIGEN_URL "https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz")
+  set(EIGEN_URL "https://github.com/eigen-mirror/eigen/archive/refs/tags/3.4.0.tar.gz")
   message(STATUS "Loading Eigen3 from ${EIGEN_URL}")
 
   include(FetchContent)
