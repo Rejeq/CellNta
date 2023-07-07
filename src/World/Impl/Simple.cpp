@@ -77,7 +77,7 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
     }
 
     // TODO: Here a lot of checks, maybe decrease count?
-    int totalDims = std::min(m_area.GetSize(), (int) m_world.m_size.size());
+    int totalDims = std::min(m_area.GetSize(), (int)m_world.m_size.size());
     for (int i = 0; i < totalDims; ++i) {
       auto& minPoint = m_area.Min()[i];
       auto& maxPoint = m_area.Max()[i];
@@ -92,14 +92,14 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
         return;
       }
 
-      if (minPoint >= (int) m_world.m_size[i]) {
+      if (minPoint >= (int)m_world.m_size[i]) {
         m_firstIter = -1;
         CELLNTA_LOG_ERROR(
             "Unable to create AreaIterator: area.min has to large coordinates");
         return;
       }
 
-      if (maxPoint > (int) m_world.m_size[i]) {
+      if (maxPoint > (int)m_world.m_size[i]) {
         maxPoint = m_world.m_size[i];
       }
     }
@@ -198,7 +198,7 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
 void WorldImplSimple::Update() {
   CELLNTA_PROFILE;
 
-  if (p_dim == 0 || m_worlds[0] == nullptr || m_worlds[1] == nullptr) {
+  if (!IsWorldValid()) {
     CELLNTA_LOG_WARN(
         "WorldImplSimple not properly initiliezed. The Update() has not "
         "happened");
@@ -212,10 +212,11 @@ void WorldImplSimple::Update() {
     Cell::State* buffWorld = GetBufferWorld();
     m_population = 0;
 
-    for (size_t cellPos = 0; cellPos < GetTotalArea(); ++cellPos) {
-      size_t neiMask = FindNeighbors(world, cellPos);
-      buffWorld[cellPos] = m_bornMask[neiMask] || m_surviveMask[neiMask];
-      m_population += m_bornMask[neiMask] || m_surviveMask[neiMask];
+    for (size_t currCell = 0; currCell < GetTotalArea(); ++currCell) {
+      size_t neiCount = FindNeighbors(world, currCell);
+
+      buffWorld[currCell] = m_bornMask[neiCount] || m_surviveMask[neiCount];
+      m_population += m_bornMask[neiCount] || m_surviveMask[neiCount];
     }
 
     Step();
@@ -236,10 +237,13 @@ void WorldImplSimple::SetDimension(int dim) {
   m_bornMask = boost::dynamic_bitset<>(std::pow(3, p_dim));
   m_surviveMask = boost::dynamic_bitset<>(std::pow(3, p_dim));
 
-  m_bornMask[4] = true;
-  m_bornMask[5] = true;
+  // TODO: Remove this init
+  if (p_dim > 2) {
+    m_bornMask[4] = true;
+    m_bornMask[5] = true;
 
-  m_surviveMask[5] = true;
+    m_surviveMask[5] = true;
+  }
 
   SetSize(std::vector<size_t>(p_dim, 30));
 }
@@ -253,8 +257,12 @@ bool WorldImplSimple::OnSetCell(const Cell& cell) {
   if (world == nullptr || idx >= GetTotalArea())
     return true;
 
-  if (world[idx] == 0)
+  const Cell::State state = world[idx];
+  if (state == 0 && cell.state != 0)
     m_population += 1;
+  else if (state != 0 && cell.state == 0)
+    m_population -= 1;
+
   world[idx] = cell.state;
   return false;
 }
@@ -262,7 +270,7 @@ bool WorldImplSimple::OnSetCell(const Cell& cell) {
 Cell::State WorldImplSimple::OnGetCell(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
-  Cell::State* world = GetWorld();
+  const Cell::State* world = GetWorld();
   size_t idx = CalculateIdxFromPos(pos);
 
   if (world == nullptr || idx >= GetTotalArea())
@@ -283,13 +291,13 @@ void WorldImplSimple::SetSize(const std::vector<size_t>& size) {
   m_size = size;
 
   m_totalArea = 1;
-  for (auto& i : m_size)
+  for (auto i : m_size)
     m_totalArea *= i;
   CreateWorld();
   GenerateNeigbors();
 }
 
-void WorldImplSimple::Step() {
+inline void WorldImplSimple::Step() {
   CELLNTA_PROFILE;
 
   m_oddGen = !m_oddGen;
@@ -299,36 +307,52 @@ size_t WorldImplSimple::FindNeighbors(const Cell::State* world,
                                       size_t idx) const {
   CELLNTA_PROFILE;
 
-  size_t out = 0;
+  size_t neiCount = 0;
   for (auto& i : m_neighbors) {
     size_t neiPos = FindIdxInRangedWorld(idx, i);
 
     if (neiPos < GetTotalArea())
-      out += (bool)world[neiPos];
+      neiCount += (bool)world[neiPos];
   }
-  return out;
+  return neiCount;
 }
 
 void WorldImplSimple::GenerateNeigbors() {
   CELLNTA_PROFILE;
 
-  Cell::Pos oneDimNei = Cell::Pos(3);
-  oneDimNei[0] = -1;
-  oneDimNei[1] = 0;
-  oneDimNei[2] = 1;
-  m_neighbors.clear();
+  // Calculates cartesian product of {-1, 0, 1}, ...(p_dim times) sets
+  // Without zero position
 
-  CartesianProduct(p_dim, oneDimNei, m_neighbors);
+  constexpr std::array<int, 3> baseSet = {-1, 0, 1};
+  const int totalSets = p_dim;
 
-  // Erase position where all coordinates == 0
-  int zeroPosIdx = m_neighbors.size() / 2;
-  m_neighbors.erase(m_neighbors.begin() + zeroPosIdx);
+  const int totalSize = std::pow(baseSet.size(), totalSets);
+  std::vector<int>& product = m_neighbors;
+  product = std::vector<int>();
+  product.reserve(totalSize);
+
+  Cell::Pos tmpTuple = Cell::Pos(totalSets);
+  for (int i = 0; i < totalSize; i++) {
+    // Skip position where all values == 0
+    if (i == totalSize / 2)
+      continue;
+
+    int limit = 1;  // Optimized std::pow()
+    for (int j = 0; j < totalSets; j++) {
+      const int idx = (i / limit) % baseSet.size();
+
+      tmpTuple[j] = baseSet[idx];
+      limit *= baseSet.size();
+    }
+
+    product.emplace_back(CalculateIdxFromPosRaw(tmpTuple));
+  }
 }
 
-size_t WorldImplSimple::FindIdxInRangedWorld(size_t cellIdx,
-                                             size_t neighborIdx) const {
+inline size_t WorldImplSimple::FindIdxInRangedWorld(size_t targetIdx,
+                                                    size_t neighborIdx) const {
   CELLNTA_PROFILE;
-  return cellIdx + neighborIdx;
+  return targetIdx + neighborIdx;
 }
 
 size_t WorldImplSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
@@ -373,7 +397,7 @@ void WorldImplSimple::CreateWorld() {
       continue;
     }
 
-    memset(world.get(), 0, GetTotalAreaInBytes());
+    memset(world.get(), 0, GetTotalArea() * sizeof(Cell::State));
   }
 }
 
@@ -383,40 +407,4 @@ void WorldImplSimple::DeleteWorld() {
   m_population = 0;
   for (auto& world : m_worlds)
     world.reset(nullptr);
-}
-
-void WorldImplSimple::CartesianProduct(int repeat, const Cell::Pos& oneDimNei,
-                                       std::vector<int>& out) {
-  CELLNTA_PROFILE;
-
-  // https://stackoverflow.com/a/5279601
-  using Vi = Cell::Pos;
-  std::vector<Cell::Pos> NDimNei(repeat, oneDimNei);
-  std::vector<Vi::const_iterator> vd;
-
-  out.reserve(std::pow(oneDimNei.size(), repeat));
-  vd.reserve(NDimNei.size());
-
-  for (const auto& it : NDimNei)
-    vd.push_back(it.begin());
-
-  while (true) {
-    Cell::Pos result = Cell::Pos::Zero(NDimNei.size());
-    for (int i = vd.size() - 1; i >= 0; --i)
-      result[result.size() - i - 1] = (*(vd[i]));
-    out.push_back(CalculateIdxFromPosRaw(result));
-
-    auto it = vd.begin();
-    int i = 0;
-    while (true) {
-      ++(*it);
-      if (*it != NDimNei[i].end())
-        break;
-      if (it + 1 == vd.end())
-        return;
-      *it = NDimNei[i].begin();
-      ++it;
-      ++i;
-    }
-  }
 }
