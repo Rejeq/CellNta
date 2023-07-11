@@ -8,5 +8,4 @@ if(CELLNTA_TRACE_LOGGING)
   message(WARNING "CELLNTA_TRACE_LOGGING are enabled. Timings may be affected")
 endif()
 
-
 add_subdirectory(src)
