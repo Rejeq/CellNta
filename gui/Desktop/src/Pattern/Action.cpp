@@ -12,13 +12,13 @@ using namespace Ui;
 using namespace Ui::Action;
 using namespace Ui::Action::Pattern;
 
-#define CHECK_DIMENSION(_actionName, _excpetedDim, _actualDim) \
+#define CHECK_DIMENSION(_actionName, _expectedDim, _actualDim) \
   {                                                            \
-    if (m_pos.size() != 3)                                     \
+    if (_expectedDim != _actualDim)                            \
       DESKTOP_LOG_WARN(                                        \
-          "{} action excpect {}d position, but actual - "      \
+          "{} action expect {}d position, but actual - "       \
           "{}. Other dimension will be ignored",               \
-          _actionName, _excpetedDim, _actualDim);              \
+          _actionName, _expectedDim, _actualDim);              \
   }                                                            \
   do {                                                         \
   } while (false)
