@@ -37,6 +37,11 @@ void PatternWindow::Draw() {
     if (ImGui::Button("2D Glider")) {
       ctx->PushAction(Action::Make(Action::Pattern::Create2dGlider(m_pos)));
     }
+
+    ImGui::SameLine();
+    if (ImGui::Button("Diod")) {
+      ctx->PushAction(Action::Make(Action::Pattern::Create2dDiod(m_pos)));
+    }
   }
 
   ImGui::End();

@@ -165,5 +165,33 @@ void Create2dGlider::Execute() {
     DESKTOP_LOG_ERROR(UNABLE_ADD_SNAPSHOT_MSG("Pattern::Create2dGlider"));
 }
 
+void Create2dDiod::Execute() {
+  CELLNTA_PROFILE;
+
+  CHECK_DIMENSION("Create2dDiod", 2, m_pos.size());
+
+  int x = m_pos.x();
+  int y = m_pos.y();
+
+  // ..33...
+  // 133.333
+  // ..33...
+  Cellnta::Snapshot diod = {
+      {Eigen::Vector2i(x - 3, y + 0), 1}, {Eigen::Vector2i(x - 2, y + 0), 3},
+      {Eigen::Vector2i(x - 1, y + 0), 3},
+
+      {Eigen::Vector2i(x + 1, y + 0), 3}, {Eigen::Vector2i(x + 2, y + 0), 3},
+      {Eigen::Vector2i(x + 3, y + 0), 3},
+
+      {Eigen::Vector2i(x - 1, y - 1), 3}, {Eigen::Vector2i(x - 1, y + 1), 3},
+
+      {Eigen::Vector2i(x + 0, y - 1), 3}, {Eigen::Vector2i(x + 0, y + 1), 3},
+  };
+
+  MakeUndoAble(diod);
+  if (AddSnapshot(*p_ctx, diod))
+    DESKTOP_LOG_ERROR(UNABLE_ADD_SNAPSHOT_MSG("Pattern::Create2dDiod"));
+}
+
 #undef UNABLE_ADD_SNAPSHOT_MSG
 #undef CHECK_DIMENSION

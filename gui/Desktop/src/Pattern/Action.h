@@ -66,6 +66,15 @@ class Create2dGlider : public Action::Pattern::Base {
   Cellnta::Cell::Pos m_pos;
 };
 
+class Create2dDiod : public Action::Pattern::Base {
+ public:
+  Create2dDiod(const Cellnta::Cell::Pos& pos) : m_pos(pos) {}
+  void Execute() override;
+
+ private:
+  Cellnta::Cell::Pos m_pos;
+};
+
 }  // namespace Pattern
 }  // namespace Action
 }  // namespace Ui
