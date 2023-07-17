@@ -17,8 +17,10 @@ option(CELLNTA_GUI "Enable building gui targets" ON)
 option(CELLNTA_BENCHS "Enable benchmarks" OFF)
 option(CELLNTA_OPENMP "Enable concurrency" ON)
 
+# This is required for cmake-gui, in cli its already specified as Debug
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, Release or Debug" FORCE)
+  message(STATUS "Build type was set to '${CMAKE_BUILD_TYPE}' because is was not specified")
 endif()
 
 set(CELLNTA_DIR ${CMAKE_CURRENT_LIST_DIR})
