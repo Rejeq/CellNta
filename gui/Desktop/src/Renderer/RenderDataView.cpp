@@ -103,4 +103,6 @@ void RenderDataView::DrawLoadedCells(const Cellnta::NCellStorage& cells) {
     }
     clipper.End();
   }
+
+  ImGui::EndTable();
 }
