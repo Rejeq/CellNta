@@ -83,7 +83,9 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
   bool enabled = m_timer.Enabled();
   if (ImGui::Checkbox("Auto", &enabled)) {
     if (enabled)
-      m_timer.Start(1.0f, [&]() { world->Update(); });
+      m_timer.Start(1.0f, [ctx]() {
+        ctx->PushAction(Action::Make(Action::World::NextGeneration()));
+      });
     else
       m_timer.Stop();
   }
