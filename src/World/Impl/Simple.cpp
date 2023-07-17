@@ -401,13 +401,8 @@ inline size_t WorldImplSimple::FindIdxInRangedWorld(size_t targetIdx,
 size_t WorldImplSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
-  if ((pos.size() - 2) > (int)m_size.size()) {
-    CELLNTA_LOG_ERROR(
-        "Unable to determine index from position: target pos > current dim");
-    return GetTotalArea();
-  }
-
-  for (auto i = 0; i < pos.size(); ++i)
+  size_t minDim = std::min((size_t)pos.size(), m_size.size());
+  for (size_t i = 0; i < minDim; ++i)
     if (pos[i] < 0 || pos[i] >= (int)m_size[i])
       return GetTotalArea();
 
@@ -417,12 +412,15 @@ size_t WorldImplSimple::CalculateIdxFromPos(const Cell::Pos& pos) const {
 size_t WorldImplSimple::CalculateIdxFromPosRaw(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
+  const int minDim = std::min((size_t)pos.size(), m_size.size());
+
   size_t idx = 0;
   size_t size = 1;
+  int i = minDim - 1;
 
-  idx = pos[pos.size() - 1];
-  for (int i = pos.size() - 2; i >= 0; --i) {
-    size *= m_size[m_size.size() - 1 - i];
+  idx = pos[i--];
+  for (; i >= 0; --i) {
+    size *= m_size[minDim - 1 - i];
     idx += size * pos[i];
   }
   return idx;
