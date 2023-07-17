@@ -10,6 +10,9 @@ class Snapshot : public Adjustable {
  public:
   using CellList = std::vector<Cell>;
 
+  Snapshot() = default;
+  Snapshot(std::initializer_list<Cell> cells);
+
   void SetDimension(int dim);
   int GetDimension() const { return m_dim; }
 
@@ -49,7 +52,6 @@ class Snapshot : public Adjustable {
   Cell::State OnGetCell(const Cell::Pos& pos) const override;
 
  private:
-
   CellList m_data;
   int m_dim = 0;
 };

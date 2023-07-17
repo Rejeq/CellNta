@@ -46,6 +46,23 @@ const Cell* Snapshot::AreaIter::Next() {
   return &m_curr;
 }
 
+Snapshot::Snapshot(std::initializer_list<Cell> cells) {
+  if (cells.size() == 0)
+    return;
+
+  int dim = cells.begin()->pos.size();
+  bool isValid = std::all_of(cells.begin(), cells.end(), [&](const Cell& cell) {
+    return cell.pos.size() == dim;
+  });
+
+  assert(isValid && "Initializer list must contain same dimensions");
+  if (!isValid)
+    return;
+
+  SetDimension(dim);
+  m_data = cells;
+}
+
 void Snapshot::SetDimension(int dim) {
   if (dim == m_dim)
     return;
