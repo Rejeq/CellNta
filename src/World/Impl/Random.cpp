@@ -6,26 +6,30 @@
 using namespace Cellnta;
 
 namespace {
-template <typename Scalar>
+template <typename OutScalar, typename Container>
 struct RandomRange {
-  RandomRange(const Scalar& low, const Scalar& high,
-              std::default_random_engine& gen)
-      : dis(low, high), gen(gen) {}
-  Scalar operator()() const { return dis(gen); }
+  RandomRange(std::default_random_engine& gen, const Container& min,
+              const Container& max)
+      : gen(gen), min(min), max(max) {}
+
+  OutScalar operator()() const {
+    auto res = min[i] + (gen() % (max[i] - min[i]));
+    i++;
+    return res;
+  }
 
  private:
-  mutable std::uniform_int_distribution<> dis;
   std::default_random_engine& gen;
+  const Container& min;
+  const Container& max;
+  mutable int i = 0;
 };
 
 }  // namespace
 
 class WorldImplRandom::WholeIter : public IterBase::CellForward {
  public:
-  WholeIter(const WorldImplRandom& world)
-      : m_world(world) {
-    Reset();
-  }
+  WholeIter(const WorldImplRandom& world) : m_world(world) { Reset(); }
 
   void Reset() override { m_iter = m_world.m_data.begin(); }
 
@@ -81,24 +85,58 @@ class WorldImplRandom::AreaIter : public IterBase::CellForward {
 void WorldImplRandom::Update() {
   CELLNTA_PROFILE;
 
-  if (p_dim == 0)
-    return;
-
   for (int i = 0; i < GetStep(); ++i) {
     Cell::Pos pos = Cell::Pos::NullaryExpr(
-        p_dim, RandomRange<Cell::Pos::Scalar>(m_rangeMin, m_rangeMax, m_gen));
+        m_rule.GetDimension(),
+        RandomRange<Cell::Pos::Scalar, AxisSizeList>(m_gen, m_min, m_max));
     m_data.push_back(pos);
   }
 }
 
-void WorldImplRandom::SetDimension(int dim) {
+bool WorldImplRandom::SetRule(const Rule& rule) {
   CELLNTA_PROFILE;
 
-  if (dim == p_dim)
-    return;
-  p_dim = dim;
+  const int oldDim = m_rule.GetDimension();
+  const int newDim = rule.GetDimension();
+  if (oldDim != newDim) {
+    m_min = AxisSizeList(newDim, 0);
+    m_max.resize(newDim, m_max.back());
+    m_data.clear();
+  }
 
-  m_data.clear();
+  m_rule = rule;
+  return false;
+}
+
+bool WorldImplRandom::SetAxisSizeFor(World::AxisId axis, World::AxisSize size) {
+  if (axis <= 0 || axis >= (World::AxisId)m_rule.GetDimension())
+    return true;
+  if (size <= 0)
+    return true;
+
+  m_max[axis] = size;
+  return false;
+}
+
+bool WorldImplRandom::SetAxisSizeList(const World::AxisSizeList& axisList) {
+  if (axisList.size() > (World::AxisId)m_rule.GetDimension())
+    return true;
+
+  if (std::any_of(axisList.begin(), axisList.end(),
+                  [](AxisSize size) { return size < 0; }))
+    return true;
+
+  m_max = axisList;
+  return false;
+}
+
+World::AxisSize WorldImplRandom::GetAxisSizeFor(AxisId axis) const {
+  assert(axis >= 0 && axis < (World::AxisId)m_rule.GetDimension());
+  return m_max[axis];
+}
+
+World::AxisSizeList WorldImplRandom::GetAxisSizeList() const {
+  return m_max;
 }
 
 bool WorldImplRandom::OnSetCell(const Cell& cell) {
@@ -111,7 +149,7 @@ bool WorldImplRandom::OnSetCell(const Cell& cell) {
 Cell::State WorldImplRandom::OnGetCell(const Cell::Pos& pos) const {
   CELLNTA_PROFILE;
 
-  if (pos.size() != p_dim)
+  if (pos.size() != m_rule.GetDimension())
     return (Cell::State)0;
 
   for (const auto& inPos : m_data) {
@@ -133,16 +171,4 @@ WorldIter WorldImplRandom::MakeAreaIter(const Area& area) const {
 void WorldImplRandom::SetSeed(int seed) {
   m_seed = seed;
   m_gen = std::default_random_engine(seed);
-}
-
-void WorldImplRandom::SetRangeMin(int min) {
-  if (min > m_rangeMax)
-    return;
-  m_rangeMin = min;
-}
-
-void WorldImplRandom::SetRangeMax(int max) {
-  if (max < m_rangeMin)
-    return;
-  m_rangeMax = max;
 }

@@ -26,15 +26,34 @@ class SetWorldType : public Action::UndoBase {
   Cellnta::WorldType m_prevType;
 };
 
-class SetDimension : public Action::UndoBase {
+class SetSize : public Action::UndoBase {
+  using World = Cellnta::World;
+
  public:
-  SetDimension(int dim) : m_dim(dim) {}
+  SetSize(World::AxisSizeList sizeList) : m_sizeList(std::move(sizeList)) {}
+
   void Execute() override;
   void Undo() override;
 
  private:
-  int m_dim;
-  int m_prevDim;
+  World::AxisSizeList m_sizeList;
+  World::AxisSizeList m_prevSizeList;
+};
+
+class SetAxisSize : public Action::UndoBase {
+  using World = Cellnta::World;
+
+ public:
+  SetAxisSize(World::AxisId axis, World::AxisSize size)
+      : m_axis(axis), m_size(size) {}
+
+  void Execute() override;
+  void Undo() override;
+
+ private:
+  World::AxisId m_axis;
+  World::AxisSize m_size;
+  World::AxisSize m_prevSize = -1;
 };
 
 class SetStep : public Action::UndoBase {
@@ -62,4 +81,4 @@ class SetCell : public Action::UndoBase {
   Action::BasePtr m_renAction;
 };
 
-}
+}  // namespace Ui::Action::World

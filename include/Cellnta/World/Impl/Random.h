@@ -14,8 +14,10 @@ class WorldImplRandom : public World {
   virtual ~WorldImplRandom() = default;
 
   void Update() override;
-  void SetDimension(int dim) override;
   size_t GetPopulation() const override { return m_data.size(); }
+
+  bool SetRule(const Rule& rule) override;
+  const Rule& GetRule() const override { return m_rule; }
 
   bool SetAxisSizeFor(AxisId axis, AxisSize size) override;
   bool SetAxisSizeList(const AxisSizeList& axisList) override;
@@ -35,6 +37,8 @@ class WorldImplRandom : public World {
  private:
   class WholeIter;
   class AreaIter;
+
+  Rule m_rule = Rule(2, 2, Rule::Neighborhood::Moore);
 
   std::vector<Cell::Pos> m_data;
   AxisSizeList m_min = {0, 0};

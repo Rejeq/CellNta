@@ -215,8 +215,12 @@ void WorldImplSimple::Update() {
     for (size_t currCell = 0; currCell < GetTotalArea(); ++currCell) {
       size_t neiCount = FindNeighbors(world, currCell);
 
-      buffWorld[currCell] = m_bornMask[neiCount] || m_surviveMask[neiCount];
-      m_population += m_bornMask[neiCount] || m_surviveMask[neiCount];
+      const Cell::State currState = world[currCell];
+      const Rule::Mask neiMask = FindNeighbors(world, currCell);
+
+      const Cell::State newState = m_rule.GetState(currState, neiMask);
+      buffWorld[currCell] = newState;
+      newPopulation += (bool)newState;
     }
 
     Step();
@@ -227,29 +231,34 @@ void WorldImplSimple::Update() {
   CELLNTA_LOG_INFO("Next generation time: {}", dur);
 }
 
-void WorldImplSimple::SetDimension(int dim) {
+bool WorldImplSimple::SetRule(const Rule& rule) {
   CELLNTA_PROFILE;
 
-  if (dim == p_dim)
-    return;
-  p_dim = dim;
+  int currDim = m_rule.GetDimension();
+  int newDim = rule.GetDimension();
 
-  m_bornMask = boost::dynamic_bitset<>(std::pow(3, p_dim));
-  m_surviveMask = boost::dynamic_bitset<>(std::pow(3, p_dim));
+  m_rule = rule;
 
-  // TODO: Remove this init
-  if (p_dim > 2) {
-    m_bornMask[4] = true;
-    m_bornMask[5] = true;
+  if (currDim != newDim && IsSizeValid()) {
+    AxisSizeList newSize;
+    newSize.reserve(newDim);
 
-    m_surviveMask[5] = true;
+    if (newDim < currDim) {
+      newSize.insert(newSize.end(), m_size.begin(), m_size.begin() + newDim);
+    }
+    else {
+      newSize.insert(newSize.end(), m_size.begin(), m_size.end());
+      newSize.insert(newSize.end(), newDim - currDim, m_size.back());
+    }
+
+    SetAxisSizeList(newSize);
   }
 
-  SetSize(std::vector<size_t>(p_dim, 30));
+  return 0;
 }
 
 bool WorldImplSimple::SetAxisSizeFor(World::AxisId axis, World::AxisSize size) {
-  if (axis < 0 || axis >= p_dim)
+  if (axis < 0 || axis >= (World::AxisId)m_rule.GetDimension())
     return 1;
   if (size <= 0)
     return true;
@@ -262,7 +271,7 @@ bool WorldImplSimple::SetAxisSizeFor(World::AxisId axis, World::AxisSize size) {
 }
 
 bool WorldImplSimple::SetAxisSizeList(const World::AxisSizeList& axisList) {
-  if (axisList.size() != p_dim)
+  if (axisList.size() != (size_t)m_rule.GetDimension())
     return 1;
 
   size_t newArea = 1;
@@ -318,34 +327,24 @@ WorldIter WorldImplSimple::MakeAreaIter(const Area& area) const {
   return WorldIter::MakeImpl(WorldImplSimple::AreaIter(*this, area));
 }
 
-void WorldImplSimple::SetSize(const std::vector<size_t>& size) {
-  m_size = size;
-
-  m_totalArea = 1;
-  for (auto i : m_size)
-    m_totalArea *= i;
-  CreateWorld();
-  GenerateNeigbors();
-}
-
 inline void WorldImplSimple::Step() {
   CELLNTA_PROFILE;
 
   m_oddGen = !m_oddGen;
 }
 
-size_t WorldImplSimple::FindNeighbors(const Cell::State* world,
-                                      size_t idx) const {
+Rule::Mask WorldImplSimple::FindNeighbors(const Cell::State* world,
+                                          size_t idx) const {
   CELLNTA_PROFILE;
 
-  size_t neiCount = 0;
+  Rule::Mask neiMask = 0;
   for (auto& i : m_neighbors) {
     size_t neiPos = FindIdxInRangedWorld(idx, i);
 
     if (neiPos < GetTotalArea())
-      neiCount += (bool)world[neiPos];
+      neiMask = m_rule.MakeMask(neiMask, world[neiPos]);
   }
-  return neiCount;
+  return neiMask;
 }
 
 void WorldImplSimple::GenerateNeigbors() {
@@ -355,7 +354,7 @@ void WorldImplSimple::GenerateNeigbors() {
   // Without zero position
 
   constexpr std::array<int, 3> baseSet = {-1, 0, 1};
-  const int totalSets = p_dim;
+  const int totalSets = m_rule.GetDimension();
 
   const int totalSize = std::pow(baseSet.size(), totalSets);
   std::vector<int>& product = m_neighbors;

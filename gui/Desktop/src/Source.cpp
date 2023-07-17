@@ -225,8 +225,32 @@ bool CreateContextLayout(Ui::Context& ctx) {
   Cellnta::Camera3d* cam3d = ren.GetCamera3d();
   Cellnta::HypercubeStorage* cube = ren.GetHypercube();
 
+  Cellnta::Rule rule(2, 2, Cellnta::Rule::Neighborhood::Moore);
+  rule.SetState(0, rule.MakeMaskFor(1).WhenQuantity(4), 1);
+  rule.SetState(0, rule.MakeMaskFor(1).WhenQuantity(5), 1);
+  rule.SetState(1, rule.MakeMaskFor(1).WhenQuantity(5), 1);
+
+  // Game Of Life
+  // Cellnta::Rule rule(2, 2, Cellnta::Rule::Neighborhood::Moore);
+  // rule.SetState(0, rule.MakeMaskFor(1).WhenQuantity(3), 1);
+  // rule.SetState(1, rule.MakeMaskFor(1).WhenQuantity(2), 1);
+  // rule.SetState(1, rule.MakeMaskFor(1).WhenQuantity(3), 1);
+
+  // Wireworld
+  // Cellnta::Rule rule(2, 4, Cellnta::Rule::Neighborhood::Moore);
+  // rule.SetFallbackState(0, 0); // 0 - empty
+  // rule.SetFallbackState(1, 2); // 1 - head
+  // rule.SetFallbackState(2, 3); // 2 - tail
+  // rule.SetFallbackState(3, 3); // 3 - conductor
+  // rule.SetState(3, rule.MakeMaskFor(1).WhenQuantity(1), 1);
+  // rule.SetState(3, rule.MakeMaskFor(1).WhenQuantity(2), 1);
+
+  const Cellnta::World::AxisSizeList axisSize(rule.GetDimension(), 30);
+
   ctx.SetWorld(Cellnta::WorldType::SIMPLE);
-  ctx.SetDimension(2);
+  ctx.GetWorld().SetRule(rule);
+  ctx.GetWorld().SetAxisSizeList(axisSize);
+  ctx.GetRenderer().SetDimension(rule.GetDimension());
 
   bool err = ren.CreateShaders(RESOURCE_DIR "Shaders/Grid.glsl",
                                RESOURCE_DIR "Shaders/Cell.glsl");

@@ -40,6 +40,7 @@ add_executable(CellntaDesktop
   ./src/World/Action.cpp
   ./src/World/RandomAction.cpp
   ./src/World/RandomView.cpp
+  ./src/World/RuleAction.cpp
   ./src/World/SimpleAction.cpp
   ./src/World/SimpleView.cpp
   ./src/World/Window.cpp

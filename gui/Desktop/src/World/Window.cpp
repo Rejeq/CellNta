@@ -9,6 +9,7 @@
 #include "Widgets/Utils.h"
 #include "World/Action.h"
 #include "World/RandomView.h"
+#include "World/RuleAction.h"
 #include "World/SimpleView.h"
 
 using namespace Ui;
@@ -63,7 +64,7 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
 
   size_t dim = world->GetDimension();
   if (ImGui::DragInt("Dimensions", (int*)&dim, 0.125f, 0, INT_MAX))
-    ctx->PushAction(Action::Make(Action::World::SetDimension(dim)));
+    ctx->PushAction(Action::Make(Action::Rule::SetDimension(dim)));
 
   ImGui::Spacing();
 

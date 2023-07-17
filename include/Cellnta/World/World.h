@@ -4,6 +4,7 @@
 
 #include "Cellnta/Adjustable.h"
 #include "Cellnta/Area.h"
+#include "Cellnta/World/Rule.h"
 #include "Cellnta/World/WorldIter.h"
 
 namespace Cellnta {
@@ -24,8 +25,10 @@ class World : public Adjustable {
   virtual ~World() = default;
 
   virtual void Update() = 0;
-  virtual void SetDimension(int dim) = 0;
   virtual size_t GetPopulation() const = 0;
+
+  virtual bool SetRule(const Rule& rule) = 0;
+  virtual const Rule& GetRule() const = 0;
 
   // TODO: If you wanna to add support for repeatable worlds, you can specify
   // that axis is repeatable by setting -1 in AxisSize
@@ -37,7 +40,7 @@ class World : public Adjustable {
   virtual WorldIter MakeWholeIter() const = 0;
   virtual WorldIter MakeAreaIter(const Area& area) const = 0;
 
-  int GetDimension() const { return p_dim; }
+  int GetDimension() const { return GetRule().GetDimension(); }
 
   void SetStep(int step) { m_step = step; }
   int GetStep() const { return m_step; }
@@ -46,7 +49,7 @@ class World : public Adjustable {
 
   void SetupFrom(const World& left) {
     m_step = left.m_step;
-    SetDimension(left.p_dim);
+    SetRule(left.GetRule());
     SetAxisSizeList(left.GetAxisSizeList());
   }
 

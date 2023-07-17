@@ -26,35 +26,59 @@ void SetWorldType::Undo() {
     DESKTOP_LOG_ERROR(DESKTOP_ACTION_DERR_MSG "World::SetWorldType");
 }
 
-void SetDimension::Execute() {
+void SetSize::Execute() {
   Cellnta::World& world = p_ctx->GetWorld();
-  m_prevDim = world.GetDimension();
-  world.SetDimension(m_dim);
+
+  m_prevSizeList = world.GetAxisSizeList();
+  world.SetAxisSizeList(m_sizeList);
 }
 
-void SetDimension::Undo() {
+void SetSize::Undo() {
   Cellnta::World& world = p_ctx->GetWorld();
-  world.SetDimension(m_prevDim);
+
+  if (m_prevSizeList.empty())
+    return;
+
+  world.SetAxisSizeList(m_prevSizeList);
+}
+
+void SetAxisSize::Execute() {
+  Cellnta::World& world = p_ctx->GetWorld();
+
+  m_prevSize = world.GetAxisSizeFor(m_axis);
+  world.SetAxisSizeFor(m_axis, m_size);
+}
+
+void SetAxisSize::Undo() {
+  Cellnta::World& world = p_ctx->GetWorld();
+
+  if (m_prevSize == -1)
+    return;
+
+  world.SetAxisSizeFor(m_axis, m_prevSize);
 }
 
 void SetStep::Execute() {
   Cellnta::World& world = p_ctx->GetWorld();
+
   m_prevStep = world.GetStep();
   world.SetStep(m_step);
 }
 
 void SetStep::Undo() {
   Cellnta::World& world = p_ctx->GetWorld();
+
   world.SetStep(m_prevStep);
 }
 
 void SetCell::Execute() {
   Cellnta::World& world = p_ctx->GetWorld();
+
   m_prevState = world.GetCell(m_cell.pos);
   world.SetCell(m_cell);
 
-  // m_renAction is executed this way because the undo command is executed twice
-  // through Context()->PushAction
+  // m_renAction is executed manually because othrwise when undo happens this
+  // action will be split to 2 different actions inside Context()->PushAction
   if (!m_renAction) {
     m_renAction = Action::Make(Action::Renderer::SetCell(m_cell));
     m_renAction->SetContext(p_ctx);

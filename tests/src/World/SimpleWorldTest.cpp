@@ -10,7 +10,8 @@ using namespace Cellnta;
 static void InitWorld(WorldImplSimple& world,
                       const World::AxisSizeList& axisSize,
                       const std::vector<Cell> expected) {
-  world.SetDimension(size.size());
+  world.SetRule(
+      Cellnta::Rule(axisSize.size(), 2, Cellnta::Rule::Neighborhood::Moore));
   world.SetAxisSizeList(axisSize);
 
   ASSERT_EQ(world.GetDimension(), axisSize.size());
@@ -98,16 +99,18 @@ TEST(WorldImplSimple, BlinkerGeneration) {
 
   // clang-format on
 
-  auto born = boost::dynamic_bitset<>(27);
-  born[4] = true;
-
-  auto survive = boost::dynamic_bitset<>(27);
-  survive[5] = true;
-
   WorldImplSimple world;
   InitWorld(world, {30, 30, 30}, step0);
-  world.SetBorn(born);
-  world.SetSurvive(survive);
+  Rule rule = world.GetRule();
+
+  rule.SetFallbackState(0, 0);
+  rule.SetFallbackState(1, 0);
+
+  rule.SetState(0, rule.MakeMaskFor(Cell::State(1)).WhenQuantity(4), 1);
+  rule.SetState(0, rule.MakeMaskFor(Cell::State(1)).WhenQuantity(5), 1);
+  rule.SetState(1, rule.MakeMaskFor(Cell::State(1)).WhenQuantity(5), 1);
+
+  world.SetRule(rule);
 
   for (int i = 0; i < expectedStepsSize; ++i) {
     if (expectedSteps[i] == nullptr) {

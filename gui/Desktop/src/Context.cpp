@@ -63,8 +63,10 @@ void Context::SetDimension(int dim) {
   CELLNTA_PROFILE;
 
   m_renderer.SetDimension(dim);
-  if (m_world != nullptr)
-    m_world->SetDimension(dim);
+  if (m_world != nullptr) {
+    Cellnta::Rule newRule = m_world->GetRule().ChangeDimension(dim);
+    m_world->SetRule(newRule);
+  }
 }
 
 void Context::Update() {
