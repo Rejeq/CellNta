@@ -2,7 +2,6 @@ if(NOT CELLNTA_OPENMP)
   return()
 endif()
 
-
 # MSVC compiler by default support only 2.5 version,
 # So if llvm features are supported (version >= 2019), trying to use it
 if(MSVC_TOOLSET_VERSION GREATER_EQUAL 142)
@@ -17,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH "${CELLNTA_DIR}/cmake")
 
 if(NOT OpenMP_FOUND)
   message(WARNING "Not found OpenMP support in your compiler, disabling")
-  set(CELLNTA_OPENMP OFF CACHE)
+  set(CELLNTA_OPENMP OFF)
 else()
   # Workaround for: https://gitlab.kitware.com/cmake/cmake/-/issues/21818
   if(NOT MSVC)
@@ -40,4 +39,3 @@ else()
 
   message(STATUS "OpenMP successfully enabled")
 endif()
-
