@@ -15,6 +15,7 @@ option(CELLNTA_FETCHING "Enable fetching third-party libraries" ON)
 option(CELLNTA_PCH "Enable building using a precompiled header to speed up compilation time" ON)
 option(CELLNTA_GUI "Enable building gui targets" ON)
 option(CELLNTA_BENCHS "Enable benchmarks" OFF)
+option(CELLNTA_OPENMP "Enable concurrency" ON)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")

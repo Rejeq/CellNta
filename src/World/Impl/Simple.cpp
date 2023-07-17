@@ -207,14 +207,25 @@ void WorldImplSimple::Update() {
 
   auto start = std::chrono::steady_clock::now();
 
+  size_t newPopulation = 0;
+
   for (int i = 0; i < GetStep(); ++i) {
     const Cell::State* world = GetWorld();
     Cell::State* buffWorld = GetBufferWorld();
-    m_population = 0;
 
+    newPopulation = 0;
+
+// MSVC OpenMP by default support only 2.5 version where are not allowed to use
+// unsigned counters
+#if !defined(_OPENMP) || _OPENMP >= 200805 || defined(CELLNTA_OPENMP_MSVC_LLVM)
+#pragma omp parallel for reduction(+ : newPopulation)
     for (size_t currCell = 0; currCell < GetTotalArea(); ++currCell) {
-      size_t neiCount = FindNeighbors(world, currCell);
-
+#else
+    int halfArea = (GetTotalArea() >> 1) + (GetTotalArea() % 2);
+#pragma omp parallel for reduction(+ : newPopulation)
+    for (int counter = -halfArea; counter < halfArea; ++counter) {
+      size_t currCell = counter + halfArea;
+#endif
       const Cell::State currState = world[currCell];
       const Rule::Mask neiMask = FindNeighbors(world, currCell);
 
@@ -225,6 +236,8 @@ void WorldImplSimple::Update() {
 
     Step();
   }
+
+  m_population = newPopulation;
 
   auto end = std::chrono::steady_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
