@@ -1,8 +1,8 @@
 #include "Pattern/Action.h"
 
 #include <Cellnta/Config.h>
-#include <Cellnta/World/World.h>
 #include <Cellnta/LogFormatEigen.h>
+#include <Cellnta/World/World.h>
 
 #include "Context.h"
 #include "Log.h"
@@ -26,34 +26,33 @@ using namespace Ui::Action::Pattern;
 #define UNABLE_ADD_SNAPSHOT_MSG(_actionName) \
   DESKTOP_ACTION_DERR_MSG _actionName ": Cannot add snapshot"
 
-static bool AddSnapshot(Context* ctx, const Cellnta::Snapshot& snapshot) {
+static bool AddSnapshot(Context& ctx, const Cellnta::Snapshot& snapshot) {
   CELLNTA_PROFILE;
 
-  if (Action::CheckLogErr(!ctx, "Unable to determie the context"))
-    return true;
+  Cellnta::World& world = ctx.GetWorld();
 
-  Cellnta::World* world = &ctx->GetWorld();
-  if (Action::CheckLogErr(!world,
-                          "Unable to add pattern to the world: World is "
-                          "nullptr"))
-    return true;
-
-  if (Action::CheckLogErr(world->GetDimension() != snapshot.GetDimension(),
+  if (Action::CheckLogErr(world.GetDimension() != snapshot.GetDimension(),
                           "World and snapshot dimension mismatch"))
     return true;
 
-  world->SetCell(snapshot.MakeWholeIter());
-  ctx->PushAction(Action::Make(Action::Renderer::Update()));
+  // TODO: Add method that truncate or adds dimension of current pattern to
+  // the specified dimension
+  // world.SetCell(snapshot.MakeResizedWholeIter(world.GetDimension()));
+
+  world.SetCell(snapshot.MakeWholeIter());
+  ctx.PushAction(Action::Make(Action::Renderer::Update()));
   return false;
 }
 
 void Pattern::Base::Undo() {
   // TODO: Maybe cause a bug if ctx will be not immediatly or unordered called
   // Action::Renderer::Update::Execute()
-  AddSnapshot(p_ctx, m_prevSnap);
+  AddSnapshot(*p_ctx, m_prevSnap);
 }
 
 void Pattern::Base::MakeUndoAble(const Cellnta::Snapshot& snap) {
+  CELLNTA_PROFILE;
+
   auto it = snap.MakeWholeIter();
   Cellnta::World& world = p_ctx->GetWorld();
   const Cellnta::Cell* cell = nullptr;
@@ -68,10 +67,11 @@ void Pattern::Base::MakeUndoAble(const Cellnta::Snapshot& snap) {
 void SetMiddlePosition::Execute() {
   CELLNTA_PROFILE;
 
-  // FIXME: Hard coded
-  // TODO: Need provide GetRange() in base world class
+  Cellnta::World& world = p_ctx->GetWorld();
+
+  assert(world.GetDimension() == m_pos.size() && "Dimensions must be a same");
   for (int i = 0; i < m_pos.size(); ++i) {
-    m_pos[i] = 15;
+    m_pos[i] = world.GetAxisSizeFor(i) / 2;
   }
 }
 
@@ -79,24 +79,24 @@ void CreateBlinker::Execute() {
   CELLNTA_PROFILE;
 
   CHECK_DIMENSION("CreateBlinker", 3, m_pos.size());
-  Cellnta::Snapshot blinker;
-  blinker.SetDimension(3);
-  // blinker.SetRule(); // TODO: Add rule setter
 
   int x = m_pos.x();
   int y = m_pos.y();
   int z = m_pos.z();
 
-  blinker.SetCell(Eigen::Vector3i(x, y, z), 1);
-  blinker.SetCell(Eigen::Vector3i(x - 1, y, z), 1);
-  blinker.SetCell(Eigen::Vector3i(x + 1, y, z), 1);
-  blinker.SetCell(Eigen::Vector3i(x, y - 1, z), 1);
-  blinker.SetCell(Eigen::Vector3i(x, y + 1, z), 1);
-  blinker.SetCell(Eigen::Vector3i(x, y, z - 1), 1);
-  blinker.SetCell(Eigen::Vector3i(x, y, z + 1), 1);
+  Cellnta::Snapshot blinker = {
+      {Eigen::Vector3i(x, y, z), 1},
+
+      {Eigen::Vector3i(x - 1, y, z), 1}, {Eigen::Vector3i(x + 1, y, z), 1},
+      {Eigen::Vector3i(x, y - 1, z), 1}, {Eigen::Vector3i(x, y + 1, z), 1},
+      {Eigen::Vector3i(x, y, z - 1), 1}, {Eigen::Vector3i(x, y, z + 1), 1},
+  };
+
+  // TODO: Maybe add a warning message about rule mismatch?
+  // or force rule of current pattern to the world
 
   MakeUndoAble(blinker);
-  if (AddSnapshot(p_ctx, blinker))
+  if (AddSnapshot(*p_ctx, blinker))
     DESKTOP_LOG_ERROR(UNABLE_ADD_SNAPSHOT_MSG("Pattern::CreateBlinker"));
 }
 
@@ -119,53 +119,49 @@ void CreateStair::Execute() {
   stair.SetCell(Eigen::Vector3i(x, y, z + 1), 1);
 
   MakeUndoAble(stair);
-  if (AddSnapshot(p_ctx, stair))
+  if (AddSnapshot(*p_ctx, stair))
     DESKTOP_LOG_ERROR(UNABLE_ADD_SNAPSHOT_MSG("Pattern::CreateStair"));
 }
 
 void Create1dLine::Execute() {
   CELLNTA_PROFILE;
 
-  CHECK_DIMENSION("Create1dLine", 3, m_pos.size());
-
-  Cellnta::Snapshot line;
-  line.SetDimension(3);
-  // line.SetRule(); // TODO: Add rule setter
+  CHECK_DIMENSION("Create1dLine", 1, m_pos.size());
 
   int x = m_pos.x();
-  int y = m_pos.y();
-  int z = m_pos.z();
 
-  line.SetCell(Eigen::Vector3i(x, y, z), 1);
-  line.SetCell(Eigen::Vector3i(x + 1, y, z), 1);
-  line.SetCell(Eigen::Vector3i(x + 2, y, z), 1);
+  // 111
+  Cellnta::Snapshot line = {
+      {Eigen::Vector<int, 1>(x - 1), 1},
+      {Eigen::Vector<int, 1>(x + 0), 1},
+      {Eigen::Vector<int, 1>(x + 1), 1},
+  };
 
   MakeUndoAble(line);
-  if (AddSnapshot(p_ctx, line))
+  if (AddSnapshot(*p_ctx, line))
     DESKTOP_LOG_ERROR(UNABLE_ADD_SNAPSHOT_MSG("Pattern::Create1dLine"));
 }
 
 void Create2dGlider::Execute() {
   CELLNTA_PROFILE;
 
-  CHECK_DIMENSION("Create2dGlider", 3, m_pos.size());
-
-  Cellnta::Snapshot glider;
-  glider.SetDimension(3);  // TODO: Use 2d
-  // glider.SetRule(); // TODO: Add rule setter
+  CHECK_DIMENSION("Create2dGlider", 2, m_pos.size());
 
   int x = m_pos.x();
   int y = m_pos.y();
-  int z = m_pos.z();
 
-  glider.SetCell(Eigen::Vector3i(x, y, z), 1);
-  glider.SetCell(Eigen::Vector3i(x, y, z + 1), 1);
-  glider.SetCell(Eigen::Vector3i(x + 1, y, z + 2), 1);
-  glider.SetCell(Eigen::Vector3i(x + 1, y, z), 1);
-  glider.SetCell(Eigen::Vector3i(x + 2, y, z), 1);
+  // .1.
+  // ..1
+  // 111
+  Cellnta::Snapshot glider = {
+      {Eigen::Vector2i(x + 0, y - 1), 1}, {Eigen::Vector2i(x + 1, y + 0), 1},
+
+      {Eigen::Vector2i(x - 1, y + 1), 1}, {Eigen::Vector2i(x + 0, y + 1), 1},
+      {Eigen::Vector2i(x + 1, y + 1), 1},
+  };
 
   MakeUndoAble(glider);
-  if (AddSnapshot(p_ctx, glider))
+  if (AddSnapshot(*p_ctx, glider))
     DESKTOP_LOG_ERROR(UNABLE_ADD_SNAPSHOT_MSG("Pattern::Create2dGlider"));
 }
 
