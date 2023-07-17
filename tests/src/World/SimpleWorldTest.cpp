@@ -7,13 +7,14 @@
 
 using namespace Cellnta;
 
-static void InitWorld(WorldImplSimple& world, const std::vector<size_t>& size,
+static void InitWorld(WorldImplSimple& world,
+                      const World::AxisSizeList& axisSize,
                       const std::vector<Cell> expected) {
   world.SetDimension(size.size());
-  world.SetSize(size);
+  world.SetAxisSizeList(axisSize);
 
-  ASSERT_EQ(world.GetDimension(), size.size());
-  ASSERT_EQ(world.GetSize(), size);
+  ASSERT_EQ(world.GetDimension(), axisSize.size());
+  ASSERT_EQ(world.GetAxisSizeList(), axisSize);
 
   for (const auto& cell : expected)
     world.SetCell(cell);

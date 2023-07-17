@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "Cellnta/Adjustable.h"
 #include "Cellnta/Area.h"
 #include "Cellnta/World/WorldIter.h"
@@ -14,12 +16,23 @@ enum class WorldType {
 
 class World : public Adjustable {
  public:
+  using AxisId = uint32_t;
+  using AxisSize = int;
+  using AxisSizeList = std::vector<AxisSize>;
+
   World(WorldType type) : m_type(type) {}
   virtual ~World() = default;
 
   virtual void Update() = 0;
   virtual void SetDimension(int dim) = 0;
   virtual size_t GetPopulation() const = 0;
+
+  // TODO: If you wanna to add support for repeatable worlds, you can specify
+  // that axis is repeatable by setting -1 in AxisSize
+  virtual bool SetAxisSizeFor(AxisId axis, AxisSize size) = 0;
+  virtual bool SetAxisSizeList(const AxisSizeList& axisList) = 0;
+  virtual AxisSize GetAxisSizeFor(AxisId axis) const = 0;
+  virtual AxisSizeList GetAxisSizeList() const = 0;
 
   virtual WorldIter MakeWholeIter() const = 0;
   virtual WorldIter MakeAreaIter(const Area& area) const = 0;
@@ -34,10 +47,8 @@ class World : public Adjustable {
   void SetupFrom(const World& left) {
     m_step = left.m_step;
     SetDimension(left.p_dim);
+    SetAxisSizeList(left.GetAxisSizeList());
   }
-
- protected:
-  int p_dim = 0;
 
  private:
   int m_step = 1;

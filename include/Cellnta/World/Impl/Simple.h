@@ -16,22 +16,22 @@ class WorldImplSimple : public World {
   void SetDimension(int dim) override;
   size_t GetPopulation() const override { return m_population; }
 
-  WorldIter MakeWholeIter() const override;
-  WorldIter MakeAreaIter(const Area& area) const override;
-
-  void SetSize(const std::vector<size_t>& size);
-  const std::vector<size_t>& GetSize() const { return m_size; }
-
-  void SetWorldRepeated(bool state) { m_worldRepeated = state; }
-  bool GetWorldRepeated() const { return m_worldRepeated; }
-
   void SetBorn(const boost::dynamic_bitset<>& bitmask) { m_bornMask = bitmask; }
   boost::dynamic_bitset<> GetBorn() const { return m_bornMask; }
 
   void SetSurvive(const boost::dynamic_bitset<>& bitmask) {
     m_surviveMask = bitmask;
   }
+  bool SetAxisSizeFor(AxisId axis, AxisSize size) override;
+  bool SetAxisSizeList(const AxisSizeList& axisList) override;
+  AxisSize GetAxisSizeFor(AxisId axis) const override { return m_size[axis]; }
+  AxisSizeList GetAxisSizeList() const override {
+    return {m_size.begin(), m_size.end()};
+  }
   boost::dynamic_bitset<> GetSurvive() const { return m_surviveMask; }
+
+  WorldIter MakeWholeIter() const override;
+  WorldIter MakeAreaIter(const Area& area) const override;
 
  protected:
   bool OnSetCell(const Cell& cell) override;
@@ -52,6 +52,8 @@ class WorldImplSimple : public World {
 
   // Without any checking, can be return garbage when pos is invalid
   size_t CalculateIdxFromPosRaw(const Cell::Pos& pos) const;
+
+  void OnAxisSizeChanged();
 
   void CreateWorld();
   void DeleteWorld();
@@ -78,7 +80,6 @@ class WorldImplSimple : public World {
   size_t m_population = 0;
 
   bool m_oddGen = false;
-  bool m_worldRepeated = true;
 };
 
 }  // namespace Cellnta

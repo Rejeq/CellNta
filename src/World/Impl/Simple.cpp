@@ -248,6 +248,37 @@ void WorldImplSimple::SetDimension(int dim) {
   SetSize(std::vector<size_t>(p_dim, 30));
 }
 
+bool WorldImplSimple::SetAxisSizeFor(World::AxisId axis, World::AxisSize size) {
+  if (axis < 0 || axis >= p_dim)
+    return 1;
+  if (size <= 0)
+    return true;
+
+  m_totalArea -= m_size[axis] + size;
+  m_size[axis] = size;
+
+  OnAxisSizeChanged();
+  return false;
+}
+
+bool WorldImplSimple::SetAxisSizeList(const World::AxisSizeList& axisList) {
+  if (axisList.size() != p_dim)
+    return 1;
+
+  size_t newArea = 1;
+  for (auto i : axisList) {
+    if (i <= 0)
+      return true;
+    newArea *= i;
+  }
+
+  m_totalArea = newArea;
+  m_size.assign(axisList.begin(), axisList.end());
+
+  OnAxisSizeChanged();
+  return false;
+}
+
 bool WorldImplSimple::OnSetCell(const Cell& cell) {
   CELLNTA_PROFILE;
 
@@ -383,6 +414,11 @@ size_t WorldImplSimple::CalculateIdxFromPosRaw(const Cell::Pos& pos) const {
     idx += size * pos[i];
   }
   return idx;
+}
+
+void WorldImplSimple::OnAxisSizeChanged() {
+  CreateWorld();
+  GenerateNeigbors();
 }
 
 void WorldImplSimple::CreateWorld() {
