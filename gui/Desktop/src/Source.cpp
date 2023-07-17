@@ -119,7 +119,7 @@ bool InitLogging() {
   return false;
 }
 
-bool CreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx) {
+bool InitGlWindow(SDL_Window*& win, SDL_GLContext& glCtx) {
   CELLNTA_PROFILE;
 
 #if defined(CELLNTA_RENDERER_GLES3)
@@ -169,6 +169,23 @@ bool CreateGlWindow(SDL_Window*& win, SDL_GLContext& glCtx) {
   }
 #endif
   SDL_GL_MakeCurrent(win, glCtx);
+
+  SDL_GL_SetSwapInterval(1);  // Enable vsync
+
+  glEnable(GL_DEBUG_OUTPUT);
+  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+  glDebugMessageCallback(GlMessageCallback, nullptr);
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_MULTISAMPLE);
+
+#if defined(CELLNTA_RENDERER_GL)
+  glPointSize(10.0f);
+#else
+#error "Add support for glPointSize"
+#endif
 
   return false;
 }
@@ -220,7 +237,7 @@ void ResetContextLayout(const Ui::Context& ctx) {
   ImGui::DockBuilderFinish(dockId);
 }
 
-bool CreateContextLayout(Ui::Context& ctx) {
+bool InitContext(Ui::Context& ctx) {
   Cellnta::Renderer& ren = ctx.GetRenderer();
   Cellnta::Camera3d* cam3d = ren.GetCamera3d();
   Cellnta::HypercubeStorage* cube = ren.GetHypercube();
@@ -296,7 +313,7 @@ int main(int /*unused*/, char** /*unused*/) {
     return EXIT_FAILURE;
   }
 
-  if (CreateGlWindow(win, glCtx)) {
+  if (InitGlWindow(win, glCtx)) {
     Shutdown(win, glCtx);
     return EXIT_FAILURE;
   }
@@ -306,25 +323,8 @@ int main(int /*unused*/, char** /*unused*/) {
     return EXIT_FAILURE;
   }
 
-  SDL_GL_SetSwapInterval(1);  // Enable vsync
-
-  glEnable(GL_DEBUG_OUTPUT);
-  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-  glDebugMessageCallback(GlMessageCallback, nullptr);
-
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_MULTISAMPLE);
-
-#if defined(CELLNTA_RENDERER_GL)
-  glPointSize(10.0f);
-#else
-#error "Add support for glPointSize"
-#endif
-
   Ui::Context ctx;
-  if (CreateContextLayout(ctx)) {
+  if (InitContext(ctx)) {
     Shutdown(win, glCtx);
     return EXIT_FAILURE;
   }
