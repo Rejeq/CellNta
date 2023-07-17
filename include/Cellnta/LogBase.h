@@ -39,6 +39,7 @@ class LogBase {
       return true;
 
     sink->set_pattern(GetCurrentPattern());
+    sink->set_level((spdlog::level::level_enum)GetCurrentLevel());
     p_logger.sinks().push_back(sink);
     return false;
   }

@@ -50,6 +50,10 @@ LogBase::Level LogBase::GetDefaultLevel() {
   return Level::Info;
 }
 
+LogBase::Level LogBase::GetCurrentLevel() {
+  return (Level)p_logger.level();
+}
+
 spdlog::logger* LogBase::GetLogger() {
   return &p_logger;
 }
