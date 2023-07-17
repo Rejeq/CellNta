@@ -1,5 +1,6 @@
 add_executable(CellntaWorldTests
   ./Main.cpp
+  ./RuleTest.cpp
   ./SimpleWorldTest.cpp
 )
 
