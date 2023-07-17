@@ -118,10 +118,13 @@ void Cellnta::NProject(NCellStorage& cells, int cameraDim,
 
   NCellStorage::Vec pos = NCellStorage::Vec::Zero(cameraDim + 1);
   while (const auto* cell = iter.Next()) {
-    pos = cell->pos;
+    assert((cameraDim + 1 <= cell->pos.size()) &&
+           "Cell position must be homogeneous");
+
+    pos = cell->pos.topRightCorner(cameraDim + 1, 1);
 
     pos = viewProj * pos;
-    const float& div = pos(pos.rows() - divPos);
+    const float div = pos[pos.rows() - divPos];
     pos /= (div == 0.0f) ? FLT_EPSILON : div;
 
     // Overriding existing data its not bug here
