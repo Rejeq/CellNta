@@ -73,35 +73,3 @@ void Widget::CellSelectorHomogeneous(size_t d, Cellnta::Cell& cell) {
   ImGui::PopID();
   // CellSelectorEx(d + 1, cell, true);
 }
-
-bool Widget::RuleMask(const char* label, boost::dynamic_bitset<>& mask) {
-  std::string maskStr;
-
-  for (size_t i = mask.find_first(); i != boost::dynamic_bitset<>::npos;
-       i = mask.find_next(i))
-    maskStr.push_back(i + '0');
-
-  bool changed =
-      ImGui::InputText(label, &maskStr, ImGuiInputTextFlags_CharsDecimal);
-
-  if (changed) {
-    if (maskStr.size() >= mask.size())
-      return false;
-
-    // Strings with the same values but in different order are equal
-    // so we need to exclude false positives
-    boost::dynamic_bitset<> oldMask = mask;
-    mask.reset();
-    // FIXME: Currently only single digits can be entered
-    // For example, we cannot set 12 bits
-    // it will be treated as 1 and 2
-    for (auto ch : maskStr) {
-      if (ch >= '0' && ch <= '9')
-        mask[ch - '0'] = ch - '0';
-    }
-
-    if (mask == oldMask)
-      return false;
-  }
-  return changed;
-}

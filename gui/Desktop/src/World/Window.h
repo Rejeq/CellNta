@@ -45,9 +45,18 @@ class WorldWindow : public Window {
  private:
   void DrawBaseWorldInfo(Cellnta::World*& world);
 
+  void DrawRuleAllStatesSelector(const Cellnta::World& world);
+  void DrawRuleStateDataSelector(const Cellnta::Rule& rule,
+                                 Cellnta::Cell::State state);
+  void DrawRuleNewSpecialStateSelector(const Cellnta::World& world);
+  bool DrawRuleMaskSelector(const Cellnta::Rule& rule,
+                            Cellnta::Rule::Mask& mask);
+
   Cellnta::Cell m_setCell;
   Timer m_timer;
+  Cellnta::Rule::Mask m_newMask = 0;
+  Cellnta::Cell::State m_newBecome = 0;
+  Cellnta::Cell::State m_newState = 0;
 };
 
 }  // namespace Ui
-

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <imgui.h>
 
 #include <Cellnta/Cell.h>
@@ -18,8 +16,6 @@ bool ToggleButton(const char* label, bool& v);
 void PositionSelector(size_t d, Cellnta::Cell::Pos& pos);
 void CellSelector(size_t d, Cellnta::Cell& cell);
 void CellSelectorHomogeneous(size_t d, Cellnta::Cell& cell);
-
-bool RuleMask(const char* label, boost::dynamic_bitset<>& mask);
 
 template <typename T>
 inline bool Drag(const char* label, T* p_data, const float speed = 1.0f,
