@@ -22,7 +22,7 @@ static void InitWorld(WorldImplSimple& world,
 }
 
 TEST(WorldImplSimple, BlinkerGeneration) {
-  int x = 15, y = 15, z = 15;
+  int x = 5, y = 5, z = 5;
 
   // clang-format off
   const std::vector<Cell> step0 = {
@@ -100,7 +100,7 @@ TEST(WorldImplSimple, BlinkerGeneration) {
   // clang-format on
 
   WorldImplSimple world;
-  InitWorld(world, {30, 30, 30}, step0);
+  InitWorld(world, {10, 10, 10}, step0);
   Rule rule = world.GetRule();
 
   rule.SetFallbackState(0, 0);
