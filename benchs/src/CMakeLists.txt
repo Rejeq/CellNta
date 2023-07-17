@@ -1,4 +1,5 @@
 add_executable(CellntaBM
+  ./SimpleWorldBM.cpp
   ./Main.cpp
 )
 
