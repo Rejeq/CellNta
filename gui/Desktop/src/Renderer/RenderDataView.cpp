@@ -13,15 +13,14 @@ void RenderDataView::Draw(Context& ctx, Cellnta::RenderData& data) {
   // TODO: from keyboard input negative number not clamped
   if (Widget::Input("Render distance", &renderDistance, 1,
                     ImGuiInputTextFlags_CharsDecimal))
-    ctx.PushAction(
-        Action::Make(Action::Renderer::SetRenderDistance(renderDistance)));
+    ctx.PushAction<Action::Renderer::SetRenderDistance>(renderDistance);
 
   Widget::CellSelectorHomogeneous(data.GetDimension(), m_selectedCell);
 
   ImGui::Spacing();
 
   if (ImGui::Button("Add cell (Only for renderer)"))
-    ctx.PushAction(Action::Make(Action::Renderer::SetCell(m_selectedCell)));
+    ctx.PushAction<Action::Renderer::SetCell>(m_selectedCell);
 
   ImGui::Spacing();
 

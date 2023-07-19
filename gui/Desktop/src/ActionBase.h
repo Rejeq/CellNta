@@ -8,6 +8,13 @@ namespace Ui {
 
 class Context;
 
+namespace ActionHint {
+  typedef enum : int {
+    None = 0,
+    NoUndo = 1 << 0,
+  } ActionHint_t;
+}
+
 namespace Action {
 
 class Base {
@@ -37,9 +44,9 @@ class UndoBase : public Action::Base {
 
 using BasePtr = std::unique_ptr<Action::Base>;
 
-template <class ActionType>
-inline BasePtr Make(ActionType&& action) {
-  return std::make_unique<ActionType>(std::move(action));
+template <typename ActionType, typename... Args>
+inline BasePtr Make(Args&&... args) {
+  return std::make_unique<ActionType>(std::forward<Args>(args)...);
 }
 
 // FMT_CONSTEVAL used because fmt::format_string can be not a consteval

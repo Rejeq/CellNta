@@ -11,5 +11,5 @@ void WorldRandomView::Draw(Context& ctx, Cellnta::WorldImplRandom& world) {
 
   int seed = world.GetSeed();
   if (ImGui::InputInt("Seed", &seed))
-    ctx.PushAction(Action::Make(Action::RandomWorld::SetSeed(seed)));
+    ctx.PushAction<Action::RandomWorld::SetSeed>(seed);
 }

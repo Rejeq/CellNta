@@ -14,7 +14,7 @@ void HypercubeView::Draw(Context& ctx, Cellnta::HypercubeStorage& cube) {
 
   if (Widget::Input("Cube dimensions", &dim, 1,
                     ImGuiInputTextFlags_CharsDecimal)) {
-    ctx.PushAction(Action::Make(Action::Renderer::SetHypercubeDimension(dim)));
+    ctx.PushAction<Action::Renderer::SetHypercubeDimension>(dim);
   }
 
   static const std::array<ComboData<Cellnta::CubeMode>, 3> CubeModeData = {
@@ -25,6 +25,6 @@ void HypercubeView::Draw(Context& ctx, Cellnta::HypercubeStorage& cube) {
 
   Cellnta::CubeMode res = Cellnta::CubeMode::NONE;
   if (Widget::ComboEnum("Cube mode", cube.GetMode(), CubeModeData, res)) {
-    ctx.PushAction(Action::Make(Action::Renderer::SetHypercubeMode(res)));
+    ctx.PushAction<Action::Renderer::SetHypercubeMode>(res);
   }
 }

@@ -81,14 +81,13 @@ void MenubarWindow::DrawViewMenu() {
 
   ImGui::Separator();
   if (ImGui::MenuItem("Full Screen", "F11"))
-    GetContext()->PushAction(
-        Action::Make(Action::Appearance::ToggleFullscreen()));
+    GetContext()->PushAction<Action::Appearance::ToggleFullscreen>();
   if (ImGui::MenuItem("Zoom in", "Ctrl+=", &opened))
-    GetContext()->PushAction(Action::Make(Action::Appearance::ZoomIn()));
+    GetContext()->PushAction<Action::Appearance::ZoomIn>();
   if (ImGui::MenuItem("Zoom out", "Ctrl+-", &opened))
-    GetContext()->PushAction(Action::Make(Action::Appearance::ZoomOut()));
+    GetContext()->PushAction<Action::Appearance::ZoomOut>();
   if (ImGui::MenuItem("Reset Zoom", nullptr, &opened))
-    GetContext()->PushAction(Action::Make(Action::Appearance::ResetZoom()));
+    GetContext()->PushAction<Action::Appearance::ResetZoom>();
 
   ImGui::Separator();
   ImGui::MenuItem("Toggle All Windows", "F10");

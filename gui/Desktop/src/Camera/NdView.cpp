@@ -39,7 +39,7 @@ void CameraNdView::DrawInstance(Context& ctx, Cellnta::CameraNd& cam, int idx) {
 
   bool skip = cam.WantSkip();
   if (ImGui::Checkbox("Skip", &skip))
-    ctx.PushAction(Action::Make(Action::CameraNd::SetNeedSkip(idx, skip)));
+    ctx.PushAction<Action::CameraNd::SetNeedSkip>(idx, skip);
 
   if (skip)
     ImGui::BeginDisabled();
@@ -48,11 +48,11 @@ void CameraNdView::DrawInstance(Context& ctx, Cellnta::CameraNd& cam, int idx) {
 
   Eigen::VectorXf pos = cam.GetPosition();
   if (Widget::DragN("Position##CameraPos", pos.data(), pos.size(), DragSpeed))
-    ctx.PushAction(Action::Make(Action::CameraNd::SetPosition(idx, pos)));
+    ctx.PushAction<Action::CameraNd::SetPosition>(idx, pos);
 
   Eigen::VectorXf front = cam.GetFront();
   if (Widget::DragN("Target##CameraPos", front.data(), front.size(), DragSpeed))
-    ctx.PushAction(Action::Make(Action::CameraNd::SetFront(idx, front)));
+    ctx.PushAction<Action::CameraNd::SetFront>(idx, front);
 
   ImGui::Spacing();
 
@@ -60,7 +60,7 @@ void CameraNdView::DrawInstance(Context& ctx, Cellnta::CameraNd& cam, int idx) {
   auto pressedType = CameraControllerView::Draw(cam, &pressed);
   switch (pressedType) {
     case CameraControllerView::PressedType::USE_PERSPECTIVE:
-      ctx.PushAction(Action::Make(Action::CameraNd::SetUsePerspective(idx, pressed)));
+      ctx.PushAction<Action::CameraNd::SetUsePerspective>(idx, pressed);
       break;
     case CameraControllerView::PressedType::NONE: break;
   }

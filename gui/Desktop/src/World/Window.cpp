@@ -57,7 +57,7 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
 
   Cellnta::WorldType res = Cellnta::WorldType::COUNT;
   if (Widget::ComboEnum("World type", world->GetType(), WorldTypeData, res)) {
-    ctx->PushAction(Action::Make(Action::World::SetWorldType(res)));
+    ctx->PushAction<Action::World::SetWorldType>(res);
     world = &ctx->GetWorld();  // FIXME: Remove this, when used the Action will
                                // be performed at the next frame
   }
@@ -66,17 +66,17 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
 
   size_t dim = world->GetDimension();
   if (ImGui::DragInt("Dimensions", (int*)&dim, 0.125f, 0, INT_MAX))
-    ctx->PushAction(Action::Make(Action::Rule::SetDimension(dim)));
+    ctx->PushAction<Action::Rule::SetDimension>(dim);
 
   ImGui::Spacing();
 
   int32_t step = world->GetStep();
   if (ImGui::DragInt("Step", (int*)&step, 1.0f, 0, INT32_MAX, nullptr,
                      ImGuiSliderFlags_AlwaysClamp))
-    ctx->PushAction(Action::Make(Action::World::SetStep(step)));
+    ctx->PushAction<Action::World::SetStep>(step);
 
   if (ImGui::Button("Next generation"))
-    ctx->PushAction(Action::Make(Action::World::NextGeneration()));
+    ctx->PushAction<Action::World::NextGeneration>();
 
   ImGui::SameLine();
 
@@ -84,7 +84,7 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
   if (ImGui::Checkbox("Auto", &enabled)) {
     if (enabled)
       m_timer.Start(1.0f, [ctx]() {
-        ctx->PushAction(Action::Make(Action::World::NextGeneration()));
+        ctx->PushAction<Action::World::NextGeneration>();
       });
     else
       m_timer.Stop();
@@ -99,14 +99,14 @@ void WorldWindow::DrawBaseWorldInfo(Cellnta::World*& world) {
   Widget::CellSelector(world->GetDimension(), m_setCell);
 
   if (ImGui::Button("Set cell")) {
-    ctx->PushAction(Action::Make(Action::World::SetCell(m_setCell)));
+    ctx->PushAction<Action::World::SetCell>(m_setCell);
   }
 
   Widget::Separator();
 
   auto axisSize = world->GetAxisSizeList();
   if (Widget::DragN("Axis lengths", axisSize.data(), axisSize.size()))
-    ctx->PushAction(Action::Make(Action::World::SetSize(axisSize)));
+    ctx->PushAction<Action::World::SetSize>(axisSize);
 
   ImGui::Spacing();
 
@@ -131,7 +131,7 @@ void WorldWindow::DrawRuleAllStatesSelector(const Cellnta::World& world) {
   if (Widget::Input("Count Of States", &totalStates, 1,
                     ImGuiInputTextFlags_CharsDecimal)) {
     if (totalStates >= 1)
-      ctx->PushAction(Action::Make(Action::Rule::SetTotalStates(totalStates)));
+      ctx->PushAction<Action::Rule::SetTotalStates>(totalStates);
   }
 
   for (Cellnta::Cell::State state = 0; state < rule.GetTotalStates(); state++) {
@@ -150,8 +150,7 @@ void WorldWindow::DrawRuleStateDataSelector(const Cellnta::Rule& rule,
   Cellnta::Cell::State fallback = rule.GetFallbackState(state);
   if (Widget::Input("Fallback", &fallback, 1,
                     ImGuiInputTextFlags_CharsDecimal)) {
-    ctx->PushAction(
-        Action::Make(Action::Rule::SetFallbackState(state, fallback)));
+    ctx->PushAction<Action::Rule::SetFallbackState>(state, fallback);
   }
 
   auto iter = rule.MakeSpecialStatesIter(state);
@@ -168,12 +167,12 @@ void WorldWindow::DrawRuleStateDataSelector(const Cellnta::Rule& rule,
 
     if (DrawRuleMaskSelector(rule, mask)) {
       changes.emplace_back(
-          Action::Make(Action::Rule::ReplaceState(state, data->mask, mask)));
+          Action::Make<Action::Rule::ReplaceState>(state, data->mask, mask));
     }
 
     if (Widget::Input("Become", &become, 1, ImGuiInputTextFlags_CharsDecimal)) {
       changes.emplace_back(
-          Action::Make(Action::Rule::SetState(state, mask, become)));
+          Action::Make<Action::Rule::SetState>(state, mask, become));
     }
   }
 
@@ -192,8 +191,7 @@ void WorldWindow::DrawRuleNewSpecialStateSelector(const Cellnta::World& world) {
   Widget::Input("Become", &m_newBecome, 1, ImGuiInputTextFlags_CharsDecimal);
 
   if (ImGui::Button("Add")) {
-    ctx->PushAction(Action::Make(
-        Action::Rule::SetState(m_newState, m_newMask, m_newBecome)));
+    ctx->PushAction<Action::Rule::SetState>(m_newState, m_newMask, m_newBecome);
   }
 }
 

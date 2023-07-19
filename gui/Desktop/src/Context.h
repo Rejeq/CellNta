@@ -12,9 +12,9 @@
 #include <Cellnta/Renderer/Renderer.h>
 
 #include "ActionBase.h"
-#include "WindowBase.h"
-#include "UndoRedo.h"
 #include "Keybind.h"
+#include "UndoRedo.h"
+#include "WindowBase.h"
 
 namespace Cellnta {
 
@@ -34,7 +34,42 @@ class Context {
   void AddWindow(std::unique_ptr<Window>&& window);
   void SetDimension(int dim);
 
-  void PushAction(Action::BasePtr&& action);
+  template <typename ActionType, typename... Args>
+  Action::BasePtr MakeAction(Args&&... args) {
+    auto action = Action::Make<ActionType>(std::forward<Args>(args)...);
+    action->SetContext(this);
+    return action;
+  }
+
+  template <int Hint = ActionHint::None>
+  void PushAction(Action::BasePtr&& action) {
+    action->SetContext(this);
+    action->Execute();
+
+    if (action->CanUndo() && !(Hint & ActionHint::NoUndo)) {
+      m_undoRedo.PushAction(std::move(action));
+    }
+  }
+
+  template <typename ActionType, int Hint = ActionHint::None, typename... Args>
+  void PushAction(Args&&... args) {
+    constexpr bool IsUndoable = std::is_base_of_v<Action::UndoBase, ActionType>;
+
+    auto ExecuteAction = [&](Action::Base& action) {
+      action.SetContext(this);
+      action.Execute();
+    };
+
+    if constexpr (!IsUndoable || (Hint & ActionHint::NoUndo)) {
+      ActionType tmpAction(std::forward<Args>(args)...);
+      ExecuteAction(tmpAction);
+    } else {
+      Action::BasePtr action =
+          Action::Make<ActionType>(std::forward<Args>(args)...);
+      ExecuteAction(*action);
+      m_undoRedo.PushAction(std::move(action));
+    }
+  }
 
   void Update();
   void Draw();

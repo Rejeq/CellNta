@@ -12,11 +12,11 @@ void Camera3dView::DrawOptions(Context& ctx, Cellnta::Camera3d& cam) {
 
   float mouseSpeed = cam.GetMouseSpeed();
   if (ImGui::DragFloat("Mouse sensitivity", &mouseSpeed, 0.001f, 0.0f, 100.0f))
-    ctx.PushAction(Action::Make(Action::Camera3d::SetMouseSpeed(mouseSpeed)));
+    ctx.PushAction<Action::Camera3d::SetMouseSpeed>(mouseSpeed);
 
   float moveSpeed = cam.GetMoveSpeed();
   if (ImGui::DragFloat("Move speed", &moveSpeed, 0.001f, 0.0f, 100.0f))
-    ctx.PushAction(Action::Make(Action::Camera3d::SetMoveSpeed(moveSpeed)));
+    ctx.PushAction<Action::Camera3d::SetMoveSpeed>(moveSpeed);
 }
 
 void Camera3dView::Draw(Context& ctx, Cellnta::Camera3d& cam) {
@@ -26,7 +26,7 @@ void Camera3dView::Draw(Context& ctx, Cellnta::Camera3d& cam) {
 
   Eigen::VectorXf pos = cam.GetPosition();
   if (ImGui::DragFloat3("Position##CameraPos", pos.data(), 0.01f))
-    ctx.PushAction(Action::Make(Action::Camera3d::SetPosition(pos)));
+    ctx.PushAction<Action::Camera3d::SetPosition>(pos);
 
   constexpr float ItemWidth = 75.0f;
   constexpr float DragRotateSpeed = 0.002f;
@@ -34,14 +34,14 @@ void Camera3dView::Draw(Context& ctx, Cellnta::Camera3d& cam) {
   float yaw = cam.GetYaw();
   ImGui::SetNextItemWidth(ItemWidth);
   if (ImGui::DragFloat("Yaw##Camera", &yaw, DragRotateSpeed))
-    ctx.PushAction(Action::Make(Action::Camera3d::SetYaw(yaw)));
+    ctx.PushAction<Action::Camera3d::SetYaw>(yaw);
 
   ImGui::SameLine();
 
   float pitch = cam.GetPitch();
   ImGui::SetNextItemWidth(ItemWidth);
   if (ImGui::DragFloat("Pitch##Camera", &pitch, DragRotateSpeed))
-    ctx.PushAction(Action::Make(Action::Camera3d::SetPitch(pitch)));
+    ctx.PushAction<Action::Camera3d::SetPitch>(pitch);
 
   ImGui::Spacing();
 
@@ -49,7 +49,7 @@ void Camera3dView::Draw(Context& ctx, Cellnta::Camera3d& cam) {
   auto pressedType = CameraControllerView::Draw(cam, &pressed);
   switch (pressedType) {
     case CameraControllerView::PressedType::USE_PERSPECTIVE:
-      ctx.PushAction(Action::Make(Action::Camera3d::SetUsePerspective(pressed)));
+      ctx.PushAction<Action::Camera3d::SetUsePerspective>(pressed);
       break;
     case CameraControllerView::PressedType::NONE: break;
   }

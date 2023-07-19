@@ -40,7 +40,7 @@ static bool AddSnapshot(Context& ctx, const Cellnta::Snapshot& snapshot) {
   // world.SetCell(snapshot.MakeResizedWholeIter(world.GetDimension()));
 
   world.SetCell(snapshot.MakeWholeIter());
-  ctx.PushAction(Action::Make(Action::Renderer::Update()));
+  ctx.PushAction<Action::Renderer::Update>();
   return false;
 }
 

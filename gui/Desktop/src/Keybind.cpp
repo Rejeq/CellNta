@@ -35,7 +35,7 @@ void KeybindMap::SetupDefault() {
   };
 
   Add(ImGuiKey_F11, [](Context& ctx) {
-    ctx.PushAction(Action::Make(Action::Appearance::ToggleFullscreen()));
+    ctx.PushAction<Action::Appearance::ToggleFullscreen>();
   });
 
   Add(Keymap(ImGuiKey_Z, ImGuiMod_Ctrl), [](Context& ctx) {

@@ -20,27 +20,27 @@ void PatternWindow::Draw() {
     }
 
     if (ImGui::Button("Blinker")) {
-      ctx->PushAction(Action::Make(Action::Pattern::CreateBlinker(m_pos)));
+      ctx->PushAction<Action::Pattern::CreateBlinker>(m_pos);
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Stair")) {
-      ctx->PushAction(Action::Make(Action::Pattern::CreateStair(m_pos)));
+      ctx->PushAction<Action::Pattern::CreateStair>(m_pos);
     }
 
     ImGui::SameLine();
     if (ImGui::Button("1D Line")) {
-      ctx->PushAction(Action::Make(Action::Pattern::Create1dLine(m_pos)));
+      ctx->PushAction<Action::Pattern::Create1dLine>(m_pos);
     }
 
     ImGui::SameLine();
     if (ImGui::Button("2D Glider")) {
-      ctx->PushAction(Action::Make(Action::Pattern::Create2dGlider(m_pos)));
+      ctx->PushAction<Action::Pattern::Create2dGlider>(m_pos);
     }
 
     ImGui::SameLine();
     if (ImGui::Button("Diod")) {
-      ctx->PushAction(Action::Make(Action::Pattern::Create2dDiod(m_pos)));
+      ctx->PushAction<Action::Pattern::Create2dDiod>(m_pos);
     }
   }
 

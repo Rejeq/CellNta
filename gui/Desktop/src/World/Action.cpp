@@ -12,7 +12,7 @@ void NextGeneration::Execute() {
 
   world.Update();
 
-  p_ctx->PushAction(Action::Make(Action::Renderer::Update()));
+  p_ctx->PushAction<Action::Renderer::Update>();
 }
 
 void SetWorldType::Execute() {
@@ -79,10 +79,8 @@ void SetCell::Execute() {
 
   // m_renAction is executed manually because othrwise when undo happens this
   // action will be split to 2 different actions inside Context()->PushAction
-  if (!m_renAction) {
-    m_renAction = Action::Make(Action::Renderer::SetCell(m_cell));
-    m_renAction->SetContext(p_ctx);
-  }
+  if (!m_renAction)
+    m_renAction = p_ctx->MakeAction<Action::Renderer::SetCell>(m_cell);
 
   m_renAction->Execute();
 }
