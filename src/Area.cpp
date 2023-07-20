@@ -52,37 +52,39 @@ std::vector<Area> Area::InverseClip(const Area& clipper, const Area& subject) {
   std::vector<Area> out;
   Area tmp;
 
-  // Front area
+  // Front (+x) area
   tmp =
       Area({inter.m_max.x(), inter.m_min.y(), inter.m_min.z()}, clipper.m_max);
   if (tmp.Valid())
     out.push_back(tmp);
 
-  // Behind area
+  // Behind (-x) area
   tmp =
       Area(clipper.m_min, {inter.m_min.x(), inter.m_max.y(), inter.m_max.z()});
   if (tmp.Valid())
     out.push_back(tmp);
 
-  // Right area
-  tmp = Area({inter.m_min.x(), inter.m_min.y(), inter.m_max.z()}, clipper.m_max);
+  // Right (+z) area
+  tmp =
+      Area({inter.m_min.x(), inter.m_min.y(), inter.m_max.z()}, clipper.m_max);
   if (tmp.Valid())
     out.push_back(tmp);
 
-  // Left area
-  tmp = Area(clipper.m_min, {inter.m_max.x(), inter.m_min.y(), inter.m_max.z()});
+  // Left (-z) area
+  tmp =
+      Area(clipper.m_min, {inter.m_max.x(), inter.m_max.y(), inter.m_min.z()});
   if (tmp.Valid())
     out.push_back(tmp);
 
-  // Top area
+  // Top (+y) area
   tmp =
       Area({inter.m_min.x(), inter.m_max.y(), inter.m_min.z()}, clipper.m_max);
   if (tmp.Valid())
     out.push_back(tmp);
 
-  // Bottom area
+  // Bottom (-y) area
   tmp =
-      Area(clipper.m_min, {inter.m_max.x(), inter.m_max.y(), inter.m_min.z()});
+      Area(clipper.m_min, {inter.m_max.x(), inter.m_min.y(), inter.m_max.z()});
   if (tmp.Valid())
     out.push_back(tmp);
 

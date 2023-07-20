@@ -76,50 +76,48 @@ TEST(Area, Intersection) {
   CheckValidIntersection(Area(0, 0), Area(0, 0), false);
   CheckValidIntersection(Area(0, 10), Area(20, 30), false);
 
-  CheckValidIntersection(
-      Area({0, 0, 0}, {10, 0, 0}), Area({5, 0, 0}, {15, 0, 0}), false);
+  CheckValidIntersection(Area({0, 0, 0}, {10, 0, 0}),
+                         Area({5, 0, 0}, {15, 0, 0}), false);
 }
 
-TEST(AreaTest, InverseClip) {
-  Area expected;
-  Area clipper;
-  Area subject;
-  std::vector<Area> result;
+TEST(AreaTest, InverseClip_ReturnsNothingWhenSubjectBiggset) {
+  const Area clipper = Area(0, 0);
+  const Area subject = Area(0, 10);
 
-  clipper = Area(0, 0);
-  subject = Area(0, 10);
-  result = Area::InverseClip(clipper, subject);
+  std::vector<Area> result = Area::InverseClip(clipper, subject);
+
   ASSERT_EQ(result.size(), 0);
+}
 
-  result = Area::InverseClip(subject, clipper);
+TEST(AreaTest, InverseClip_ReturnsSubjectWhenCliipperBiggest) {
+  const Area clipper = Area(0, 10);
+  const Area subject = Area(0, 0);
+
+  std::vector<Area> result = Area::InverseClip(clipper, subject);
+
   ASSERT_EQ(result.size(), 1);
   EXPECT_EQ(result[0], Area(0, 10));
-
-  // FIXME: For this case it gives wrong results - 4 corners are not handled
-  // Its easy to fix, but I'm not sure that fixing it won't break other
-  // conditions
-  clipper = Area(0, 10);
-  subject = Area(1, 9);
-  result = Area::InverseClip(clipper, subject);
-  ASSERT_EQ(result.size(), 6);
-
-  Area front = Area({9, 1, 1}, {10, 10, 10});
-  EXPECT_EQ(result[0], front) << result[0].Min() << ", " << result[0].Max();
-
-  // FIXME: Must be Area({0, 0, 0}, {1, 10, 10})
-  Area behind = Area({0, 0, 0}, {1, 9, 9});
-  EXPECT_EQ(result[1], behind) << result[1].Min() << ", " << result[1].Max();
-
-  Area right = Area({1, 1, 9}, {10, 10, 10});
-  EXPECT_EQ(result[2], right) << result[2].Min() << ", " << result[2].Max();
-
-  Area left = Area({0, 0, 0}, {9, 1, 9});
-  EXPECT_EQ(result[3], left) << result[3].Min() << ", " << result[3].Max();
-
-  Area top = Area({1, 9, 1}, {10, 10, 10});
-  EXPECT_EQ(result[4], top)<< result[4].Min() << ", " << result[4].Max();
-
-  Area bottom = Area({0, 0, 0}, {9, 9, 1});
-  EXPECT_EQ(result[5], bottom)<< result[5].Min() << ", " << result[5].Max();
 }
 
+TEST(AreaTest, InverseClip_ReturnsCorrectAreas) {
+  const Area clipper = Area(0, 10);
+  const Area subject = Area(1, 9);
+
+  std::vector<Area> expected = {
+      Area({9, 1, 1}, {10, 10, 10}),  // Front
+      Area({0, 0, 0}, {1, 9, 9}),     // Behind
+      Area({1, 1, 9}, {10, 10, 10}),  // Right
+      Area({0, 0, 0}, {9, 9, 1}),     // Left
+      Area({1, 9, 1}, {10, 10, 10}),  // Top
+      Area({0, 0, 0}, {9, 1, 9}),     // Bottom
+  };
+
+  std::vector<Area> result = Area::InverseClip(clipper, subject);
+
+  ASSERT_EQ(result.size(), expected.size());
+  for (auto& area : result) {
+    auto res = std::find(expected.begin(), expected.end(), area);
+    ASSERT_TRUE(res != expected.end()) << area.Min() << ", " << area.Max();
+    expected.erase(res);
+  }
+}
