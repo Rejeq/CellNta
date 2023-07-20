@@ -92,11 +92,20 @@ class CellForest {
     return state;
   }
 
-  void EraseArea(const Area& area) {
+  // Returns true if some data within area is erased
+  // Otherwise return false
+  bool EraseArea(const Area& area) {
     CELLNTA_PROFILE;
 
+    // TODO: Add optimization that detects totally mismatch in area
+    // For example:
+    // Exist area within (1, 1, 1024) and (100, 150, 2048)
+    // And CellForest contain a lot of cells within (1, 1, 1) and (100, 100, 10)
+    // But cells stored only in 3d space, so all traverses are useless,
+    // since we need to find z-coordinate larger than we have
+
     if (IsAreaInvalid(area))
-      return;
+      return false;
 
     std::stack<std::pair<Map*, IterRange<MapIter>>> stack;
 
@@ -120,6 +129,7 @@ class CellForest {
           &cont, IterRange<MapIter>(std::move(minRoot), std::move(maxRoot))));
     };
 
+    bool someErased = false;
     PushToStack(m_roots, 0);
     while (!stack.empty()) {
       auto& currStack = stack.top();
@@ -141,7 +151,10 @@ class CellForest {
       }
 
       curr.it = DeleteNode(currCont, curr.it);
+      someErased = true;
     }
+
+    return someErased;
   }
 
   // Move state from one position to another

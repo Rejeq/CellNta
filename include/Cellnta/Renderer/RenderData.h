@@ -17,9 +17,11 @@ class World;
 class RenderData {
  public:
   RenderData() = default;
-  RenderData(int dim): m_d(dim) {}
+  RenderData(int dim) : m_d(dim) {}
 
-  void Update(const World& world);
+  void UpdateArea(const World& world, const Area& area);
+  void UpdateDesired(const World& world);
+  void UpdateVisible(const World& world);
 
   void SetCell(const Cell& cell);
   void Clear();

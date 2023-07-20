@@ -83,7 +83,7 @@ void Context::Update() {
       DESKTOP_LOG_ERROR(
           "Unable to update world in RenderData: m_world was nullptr");
     else
-      data->Update(*m_world);
+     data->UpdateDesired(*m_world);
     data->DesireAreaProcessed();
   }
 

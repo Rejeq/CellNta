@@ -9,26 +9,49 @@
 
 using namespace Cellnta;
 
-void RenderData::Update(const World& world) {
+void RenderData::UpdateArea(const World& world, const Area& area) {
   CELLNTA_PROFILE;
 
-  CELLNTA_LOG_TRACE("Updating RenderData");
+  CELLNTA_LOG_TRACE("Updating area in RenderData");
 
   auto start = std::chrono::steady_clock::now();
 
-  NCellStorage::VecList& rawCells = m_cells.GetRaw();
-  Area area = GetVisibleArea();
+  m_cells.EraseArea(area);
 
-  rawCells.EraseArea(area);
-
-  auto iter = world.MakeAreaIter(GetVisibleArea());
+  auto iter = world.MakeAreaIter(area);
   while (const Cell* cell = iter.Next()) {
     ForceSetCell(*cell);
   }
 
   auto end = std::chrono::steady_clock::now();
   auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-  CELLNTA_LOG_INFO("RenderData update time: {}", dur);
+  CELLNTA_LOG_INFO("RenderData::UpdateArea time: {}", dur);
+}
+
+void RenderData::UpdateDesired(const World& world) {
+  CELLNTA_PROFILE;
+
+  if (!DesireArea())
+    return;
+
+  CELLNTA_LOG_TRACE("Updating desired area in RenderData");
+  auto start = std::chrono::steady_clock::now();
+
+  for (auto& area : m_desiredArea)
+    UpdateArea(world, area);
+
+  auto end = std::chrono::steady_clock::now();
+  auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  if (m_desiredArea.size() > 1)
+    CELLNTA_LOG_INFO("RenderData::UpdateDesired time: {}", dur);
+}
+
+void RenderData::UpdateVisible(const World& world) {
+  CELLNTA_PROFILE;
+
+  CELLNTA_LOG_TRACE("Updating visible area in RenderData");
+
+  UpdateArea(world, GetVisibleArea());
 }
 
 void RenderData::SetDimension(int dim) {

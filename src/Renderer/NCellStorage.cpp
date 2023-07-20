@@ -77,7 +77,8 @@ void NCellStorage::Erase(const Vec& pos) {
 void NCellStorage::EraseArea(const Area& area) {
   CELLNTA_PROFILE;
 
-  m_cells.EraseArea(area);
+  if (m_cells.EraseArea(area))
+    m_needUpdate = true;
 }
 
 void NCellStorage::EraseHomogeneous(const Vec& pos) {
