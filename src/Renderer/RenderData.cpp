@@ -92,9 +92,9 @@ void RenderData::SetDistance(int distance) {
 
   m_distance = distance;
   m_cells.Clear();
-  EraseUnvisibleArea(m_pos);
+  EraseInvisibleArea(m_pos);
 
-  UpdateVisibleArea();
+  SyncVisibleAreaWithPos();
   m_desiredArea.emplace_back(GetVisibleArea());
 }
 
@@ -110,9 +110,9 @@ void RenderData::SetPosition(Eigen::Vector3i pos) {
   CELLNTA_LOG_TRACE("Updating position from ({}) to ({})", m_pos.transpose(),
                     pos.transpose());
   AddVisibleArea(pos);
-  EraseUnvisibleArea(pos);
+  EraseInvisibleArea(pos);
   m_pos = pos;
-  UpdateVisibleArea();
+  SyncVisibleAreaWithPos();
 }
 
 void RenderData::AddVisibleArea(const Eigen::Vector3i& newPos) {
@@ -128,20 +128,17 @@ void RenderData::AddVisibleArea(const Eigen::Vector3i& newPos) {
                       m_desiredArea[i].Max().transpose());
 }
 
-void RenderData::EraseUnvisibleArea(const Eigen::Vector3i& newPos) {
+void RenderData::EraseInvisibleArea(const Eigen::Vector3i& newPos) {
   CELLNTA_PROFILE;
 
   const Area oldArea = GetVisibleArea();
   const Area newArea = GetArea() + newPos;
   std::vector<Area> eraseList = Area::InverseClip(oldArea, newArea);
 
-  NCellStorage::VecList& rawCells = m_cells.GetRaw();
-  Eigen::Vector3i pos;
-
   for (const auto& area : eraseList) {
-    rawCells.EraseArea(area);
+    m_cells.EraseArea(area);
 
-    CELLNTA_LOG_TRACE("Erase unvisible area from: ({}) to: ({})",
+    CELLNTA_LOG_TRACE("Erase invisible area from: ({}) to: ({})",
                       area.Min().transpose(),
                       area.Max().transpose());
   }

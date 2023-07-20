@@ -46,9 +46,9 @@ class RenderData {
   void ForceSetCell(const Cell& cell);
 
   void AddVisibleArea(const Eigen::Vector3i& newPos);
-  void EraseUnvisibleArea(const Eigen::Vector3i& newPos);
+  void EraseInvisibleArea(const Eigen::Vector3i& newPos);
 
-  void UpdateVisibleArea() { m_visibleArea = GetArea() + m_pos; }
+  void SyncVisibleAreaWithPos() { m_visibleArea = GetArea() + m_pos; }
 
   Area GetArea() const { return {-m_distance, m_distance}; }
   const Area& GetVisibleArea() const { return m_visibleArea; }
@@ -63,8 +63,9 @@ class RenderData {
 
   std::vector<Area> m_desiredArea;
 
-  constexpr static int PositionDivider =
-      16;  // Visible area will be updated after the given length
+  // m_pos will be updated every time when integer part of the real position
+  // changes after division by a number
+  constexpr static int PositionDivider = 16;
 };
 
 }  // namespace Cellnta
