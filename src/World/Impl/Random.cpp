@@ -98,7 +98,7 @@ bool WorldImplRandom::SetRule(const Rule& rule) {
 
   const int oldDim = m_rule.GetDimension();
   const int newDim = rule.GetDimension();
-  if (oldDim != newDim) {
+  if (oldDim != newDim && !m_max.empty()) {
     m_min = AxisSizeList(newDim, 0);
     m_max.resize(newDim, m_max.back());
     m_data.clear();
@@ -126,6 +126,7 @@ bool WorldImplRandom::SetAxisSizeList(const World::AxisSizeList& axisList) {
                   [](AxisSize size) { return size < 0; }))
     return true;
 
+  m_min = AxisSizeList(axisList.size(), 0);
   m_max = axisList;
   return false;
 }
