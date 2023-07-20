@@ -82,26 +82,31 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
       auto& minPoint = m_area.Min()[i];
       auto& maxPoint = m_area.Max()[i];
 
+      if (minPoint >= (int)m_world.m_size[i]) {
+        CELLNTA_LOG_TRACE(
+            "Unable to create AreaIterator: "
+            "area.min cannot be >= worldSize, but actual area.min[{0}] = '{1}' "
+            "is greater than worldSize[{0}] = '{2}'",
+            i, minPoint, m_world.m_size[i]);
+        m_firstIter = -1;
+        return;
+      }
+
+      if (maxPoint <= 0) {
+        CELLNTA_LOG_TRACE(
+            "Unable to create AreaIterator: "
+            "area.max cannot be <= 0, but actual area.max[{0}] = '{1}'"
+            "is less than zero",
+            i, maxPoint);
+        m_firstIter = -1;
+        return;
+      }
+
       if (minPoint < 0)
         minPoint = 0;
 
-      if (maxPoint <= 0) {
-        m_firstIter = -1;
-        CELLNTA_LOG_ERROR(
-            "Unable to create AreaIterator: area.max has negative coordinates");
-        return;
-      }
-
-      if (minPoint >= (int)m_world.m_size[i]) {
-        m_firstIter = -1;
-        CELLNTA_LOG_ERROR(
-            "Unable to create AreaIterator: area.min has to large coordinates");
-        return;
-      }
-
-      if (maxPoint > (int)m_world.m_size[i]) {
+      if (maxPoint > (int)m_world.m_size[i])
         maxPoint = m_world.m_size[i];
-      }
     }
 
     m_curr.pos = Cell::Pos::Zero(m_world.GetDimension());
@@ -117,11 +122,8 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
       return;
     }
 
-    if (m_idx == 0) {
-      // Its needed because IteratorNextPosition will be called before m_idx + 1
-      m_curr.pos[m_curr.pos.size() - 1] = -1;
-    } else {
-      IteratorSetPosition(m_world.m_size.data(), m_idx - 1, m_curr.pos);
+    if (m_idx != 0) {
+      IteratorSetPosition(m_world.m_size.data(), m_idx, m_curr.pos);
     }
   }
 
@@ -136,8 +138,10 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
     if (m_firstIter == -1)
       return nullptr;
 
-    while (true) {
+    if (!m_firstIter)
       IncrementPosition();
+
+    while (true) {
       assert(m_area.PosValid(m_curr.pos) &&
              "m_curr.pos in AreaIterator must be always valid");
 
@@ -147,9 +151,13 @@ class WorldImplSimple::AreaIter : public IterBase::CellForward {
 
       if (data[m_idx] != 0) {
         m_curr.state = data[m_idx];
+
         return &m_curr;
       }
+
+      IncrementPosition();
     }
+
     return nullptr;
   }
 
@@ -258,8 +266,7 @@ bool WorldImplSimple::SetRule(const Rule& rule) {
 
     if (newDim < currDim) {
       newSize.insert(newSize.end(), m_size.begin(), m_size.begin() + newDim);
-    }
-    else {
+    } else {
       newSize.insert(newSize.end(), m_size.begin(), m_size.end());
       newSize.insert(newSize.end(), newDim - currDim, m_size.back());
     }

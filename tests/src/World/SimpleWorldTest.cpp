@@ -21,7 +21,7 @@ static void InitWorld(WorldImplSimple& world,
     world.SetCell(cell);
 }
 
-TEST(WorldImplSimple, BlinkerGeneration) {
+TEST(WorldImplSimple, Update_BlinkerCorrectness) {
   int x = 5, y = 5, z = 5;
 
   // clang-format off
@@ -140,7 +140,7 @@ TEST(WorldImplSimple, BlinkerGeneration) {
   }
 }
 
-TEST(WorldImplSimple, SetCell) {
+TEST(WorldImplSimple, SetCell_CanBeReaded) {
   WorldImplSimple world;
   InitWorld(world, {10, 10, 10}, {});
 
@@ -153,20 +153,20 @@ TEST(WorldImplSimple, SetCell) {
   ASSERT_EQ(world.GetCell(cell.pos), cell.state);
 }
 
-TEST(WorldImplSimple, SetCellTwice) {
+TEST(WorldImplSimple, SetCell_OverridesPreviousCell) {
+  const Cell::Pos Pos = Eigen::Vector3i(1, 1, 1);
+
   WorldImplSimple world;
   InitWorld(world, {10, 10, 10}, {});
 
-  Cell cell = Cell(Eigen::Vector3i(1, 1, 1), 1);
-  world.SetCell(cell);
-  ASSERT_EQ(world.GetCell(cell.pos), cell.state);
+  world.SetCell({Pos, 1});
+  world.SetCell({Pos, 2});
+  Cell::State state = world.GetCell(Pos);
 
-  cell = Cell(Eigen::Vector3i(1, 1, 1), 2);
-  world.SetCell(cell);
-  ASSERT_EQ(world.GetCell(cell.pos), cell.state);
+  ASSERT_EQ(state, 2);
 }
 
-TEST(WorldImplSimple, SetInvalidCell) {
+TEST(WorldImplSimple, SetCell_IncorrectCellCannotBeReaded) {
   WorldImplSimple world;
   InitWorld(world, {10, 10, 10}, {});
 
@@ -174,87 +174,133 @@ TEST(WorldImplSimple, SetInvalidCell) {
   world.SetCell(cell);
   ASSERT_FALSE(world.GetCell(cell.pos));
 
-  cell = Cell(Eigen::Vector3i(11, 11, 11), 11);
+  cell = Cell(Eigen::Vector3i(11, 11, 11), 1);
   world.SetCell(cell);
   ASSERT_FALSE(world.GetCell(cell.pos));
 }
 
-static void CheckAndDeleteCell(const Cell& cell, int min, int max,
-                               std::vector<Cell>& expCells) {
-  ASSERT_TRUE(Axis::WithinBound(min, max, cell.state))
-      << "Cell is not in range: expcted [" << min << ", " << max << "] "
-      << "but actual: " << cell.state;
+TEST(WorldImplSimple, SetCell_IncorrectStateMustBeReaded) {
+  WorldImplSimple world;
+  InitWorld(world, {10, 10, 10}, {});
 
-  auto res = std::find(expCells.begin(), expCells.end(), cell);
-  ASSERT_TRUE(res != expCells.end());
-  expCells.erase(res);
+  // World has only 2 total states
+  Cell cell = Cell(Eigen::Vector3i(5, 5, 5), 7);
+  world.SetCell(cell);
+
+  ASSERT_EQ(world.GetCell(cell.pos), 7);
 }
 
-TEST(WorldImplSimple, Iterator) {
-  WorldImplSimple world;
-  const Area area = Area(1, 10);
-  auto expCells = GenerateCellList(area);
+#define CHECK_AND_DELETE_CELL(cell, expCells)                           \
+  do {                                                                  \
+    auto res = std::find((expCells).begin(), (expCells).end(), (cell)); \
+    ASSERT_TRUE(res != (expCells).end());                               \
+                                                                        \
+    /* Erase is requred here because cell should only occur once */     \
+    (expCells).erase(res);                                              \
+  } while (false)
 
+TEST(WorldImplSimple, MakeWholeIter_BypassesAllCells) {
+  const Area GenerateArea = Area(1, 10);
+
+  auto expCells = GenerateCellList(GenerateArea);
+
+  WorldImplSimple world;
   InitWorld(world, {10, 10, 10}, expCells);
+
   auto iter = world.MakeWholeIter();
 
   while (const Cell* cell = iter.Next()) {
-    CheckAndDeleteCell(*cell, area.MinAxis(0), area.MaxAxis(0), expCells);
+    CHECK_AND_DELETE_CELL(*cell, expCells);
   }
 
   ASSERT_TRUE(expCells.empty()) << "Iterator did not go through all the values";
 }
 
-TEST(WorldImplSimple, ValidAreaIter) {
-  WorldImplSimple world;
-  const Area area = Area(4, 7);
-  const auto cells = GenerateCellList(Area(1, 10));
-  auto expCells = GenerateCellList(area);
+TEST(WorldImplSimple, MakeAreaIter_BypassesAllCellsWithinArea) {
+  const Area BypassArea = Area(4, 7);
+  const Area WorldArea = Area(1, 10);
 
+  const auto cells = GenerateCellList(WorldArea);
+  auto expCells = GenerateCellList(BypassArea);
+
+  WorldImplSimple world;
   InitWorld(world, {10, 10, 10}, cells);
-  auto iter = world.MakeAreaIter(area);
+
+  auto iter = world.MakeAreaIter(BypassArea);
 
   while (const Cell* cell = iter.Next()) {
-    CheckAndDeleteCell(*cell, area.MinAxis(0), area.MaxAxis(0), expCells);
+    CHECK_AND_DELETE_CELL(*cell, expCells);
   }
 
   ASSERT_TRUE(expCells.empty()) << "Iterator did not go through all the values";
 }
 
-TEST(WorldImplSimple, OutOfRangeAreaIter) {
+TEST(WorldImplSimple, MakeAreaIter_BypassesAllCellsWithinDifferentAxisArea) {
+  const Area BypassArea =
+      Area(Eigen::Vector3i(6, -32, -32), Eigen::Vector3i(12, 32, 32));
+
+  std::vector<Cell> cells = {
+      {Eigen::Vector3i(6, 6, 6), 1},
+      {Eigen::Vector3i(6, 7, 7), 1},
+      {Eigen::Vector3i(7, 7, 7), 1},
+      {Eigen::Vector3i(6, 0, 1), 1},
+  };
+
   WorldImplSimple world;
-  const Area area = Area(-1234, 1234);
-  const auto cells = GenerateCellList(Area(1, 10));
+  InitWorld(world, {10, 10, 10}, cells);
+
+  auto iter = world.MakeAreaIter(BypassArea);
+
+  while (const Cell* cell = iter.Next()) {
+    CHECK_AND_DELETE_CELL(*cell, cells);
+  }
+
+  ASSERT_TRUE(cells.empty()) << "Iterator did not go through all the values";
+}
+
+TEST(WorldImplSimple, MakeAreaIter_TooLargeAreaBypassesAllCellsWithinWorld) {
+  const Area LargeArea = Area(-1234, 1234);
+  const Area WorldArea = Area(1, 10);
+
+  const auto cells = GenerateCellList(WorldArea);
   auto expCells = cells;
 
+  WorldImplSimple world;
   InitWorld(world, {10, 10, 10}, cells);
-  auto iter = world.MakeAreaIter(area);
+
+  auto iter = world.MakeAreaIter(LargeArea);
 
   while (const Cell* cell = iter.Next()) {
-    CheckAndDeleteCell(*cell, area.MinAxis(0), area.MaxAxis(0), expCells);
+    CHECK_AND_DELETE_CELL(*cell, expCells);
   }
 
   ASSERT_TRUE(expCells.empty()) << "Iterator did not go through all the values";
 }
 
-TEST(WorldImplSimple, InvalidAreaIterator) {
-  WorldImplSimple world;
-  const Area area = Area(4321, -128);
-  const auto cells = GenerateCellList(Area(1, 10));
+TEST(WorldImplSimple, MakeAreaIter_InvalidAreaMustNotContainAnyCells) {
+  const Area InvalidArea = Area(4321, -128);
+  const Area WorldArea = Area(1, 10);
 
+  const auto cells = GenerateCellList(WorldArea);
+
+  WorldImplSimple world;
   InitWorld(world, {10, 10, 10}, cells);
-  auto iter = world.MakeAreaIter(area);
+
+  auto iter = world.MakeAreaIter(InvalidArea);
 
   ASSERT_FALSE(iter.Next()) << "Iterator contain value, but area is invalid";
 }
 
-TEST(WorldImplSimple, NegativeAreaIter) {
-  WorldImplSimple world;
-  const Area area = Area(-256, 0);
-  const auto cells = GenerateCellList(Area(1, 10));
+TEST(WorldImplSimple, MakeAreaIter_NegativeAreaMustNotContainAnyCells) {
+  const Area NegativeArea = Area(-256, 0);
+  const Area WorldArea = Area(1, 10);
 
+  const auto cells = GenerateCellList(WorldArea);
+
+  WorldImplSimple world;
   InitWorld(world, {10, 10, 10}, cells);
-  auto iter = world.MakeAreaIter(area);
+
+  auto iter = world.MakeAreaIter(NegativeArea);
 
   ASSERT_FALSE(iter.Next()) << "Iterator contain value, but area is invalid";
 }
