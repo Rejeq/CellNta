@@ -16,8 +16,10 @@ void NCellDrawerGL::Update(const NCellStorage& cells) {
   CELLNTA_LOG_TRACE("Updating NCellDrawerGL");
 
   const NCellStorage::VecList& rawCells = cells.GetVisibleRaw();
-  if (rawCells.Empty())
+  if (rawCells.Empty()) {
+    m_size = 0;
     return;
+  }
 
   int pointsCount = rawCells.Size() * 3;
   size_t capacity = rawCells.Capacity();
