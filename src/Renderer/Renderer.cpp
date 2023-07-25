@@ -32,7 +32,7 @@ void Renderer::Update() {
   UpdateCamera();
 
   if (m_cube != nullptr) {
-    if (m_cube->NeedUpdatePoints()) {
+    if (m_cube->NeedUpdatePoints() || NeedForceUpdateCubePoints()) {
       ProjectBuffers(true, false);
       m_wantDraw = true;
       m_cube->PointsHandled();
@@ -54,12 +54,15 @@ void Renderer::Update() {
 
   if (m_data != nullptr) {
     NCellStorage& cells = m_data->GetCells();
-    if (cells.NeedUpdate()) {
+    if (cells.NeedUpdate() || NeedForceUpdateCells()) {
       ProjectBuffers(false, true);
       m_wantDraw = true;
       cells.Handled();
     }
   }
+
+  m_prevIgnCubeProj = m_ignCubeProj;
+  m_prevIgnCellProj = m_ignCellProj;
 }
 
 void Renderer::DrawGrid() {
@@ -156,9 +159,10 @@ void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
     const int dim = camera.GetDimensions();
     const bool usePerspective = camera.GetUsePerspective();
 
-    if (projectCube)
+    if (projectCube && !m_ignCubeProj)
       NProject(*m_cube, dim, viewProj, usePerspective);
-    if (projectCells)
+
+    if (projectCells && !m_ignCellProj)
       NProject(cells, dim, viewProj, usePerspective);
   }
 
@@ -179,6 +183,16 @@ void Renderer::SetData(const std::shared_ptr<RenderData>& data) {
   CELLNTA_PROFILE;
 
   m_data = data;
+}
+
+void Renderer::SetIgnoreCubeProject(bool newState) {
+  m_prevIgnCubeProj = m_ignCubeProj;
+  m_ignCubeProj = newState;
+}
+
+void Renderer::SetIgnoreCellProject(bool newState) {
+  m_prevIgnCellProj = m_ignCellProj;
+  m_ignCellProj = newState;
 }
 
 void Renderer::UpdateCameraUniform() {
@@ -230,4 +244,12 @@ void Renderer::UpdateCameraNd() {
   if (camUpdated) {
     ProjectBuffers();
   }
+}
+
+bool Renderer::NeedForceUpdateCubePoints() const {
+  return m_ignCubeProj != m_prevIgnCubeProj;
+}
+
+bool Renderer::NeedForceUpdateCells() const {
+  return m_ignCellProj != m_prevIgnCellProj;
 }

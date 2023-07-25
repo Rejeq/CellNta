@@ -55,6 +55,12 @@ class Renderer {
   const RenderData* GetData() const { return m_data.get(); }
   RenderData* GetData() { return m_data.get(); }
 
+  void SetIgnoreCubeProject(bool newState);
+  bool GetIgnoreCubeProject() const { return m_ignCubeProj; }
+
+  void SetIgnoreCellProject(bool newState);
+  bool GetIgnoreCellProject() const { return m_ignCellProj; }
+
  private:
   void UpdateCameraUniform();
   void UpdateRenderDistanceUniform();
@@ -63,6 +69,8 @@ class Renderer {
   void UpdateCamera3d();
   void UpdateCameraNd();
 
+  bool NeedForceUpdateCubePoints() const;
+  bool NeedForceUpdateCells() const;
 
   std::shared_ptr<Camera3d> m_camera3d;
   std::shared_ptr<CameraNdList> m_cameraNd;
@@ -71,8 +79,12 @@ class Renderer {
 
   std::unique_ptr<SceneDrawer> m_sceneDrawer;
 
-  bool m_wantDraw = false;
   int m_d = 0;
+  bool m_wantDraw = false;
+  bool m_ignCubeProj = false;
+  bool m_ignCellProj = false;
+  bool m_prevIgnCubeProj = false;
+  bool m_prevIgnCellProj = false;
 };
 
 }  // namespace Cellnta

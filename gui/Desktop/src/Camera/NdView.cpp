@@ -7,12 +7,23 @@
 #include "Camera/ControllerView.h"
 #include "Camera/NdAction.h"
 #include "Context.h"
+#include "Renderer/ProjectionAction.h"
 #include "Widgets/Utils.h"
 
 using namespace Ui;
 
 void CameraNdView::Draw(Context& ctx, Cellnta::CameraNdList& camList) {
   CELLNTA_PROFILE;
+
+  Cellnta::Renderer& ren = ctx.GetRenderer();
+
+  bool ignCube = ren.GetIgnoreCubeProject();
+  if (ImGui::Checkbox("Ignore cube projections", &ignCube))
+    ctx.PushAction<Action::Renderer::SetIgnoreCubeProject>(ignCube);
+
+  bool ignCell = ren.GetIgnoreCellProject();
+  if (ImGui::Checkbox("Ignore cell projections", &ignCell))
+    ctx.PushAction<Action::Renderer::SetIgnoreCellProject>(ignCell);
 
   for (size_t i = 0; i < camList.size(); ++i) {
     Cellnta::CameraNd& cam = camList[i];

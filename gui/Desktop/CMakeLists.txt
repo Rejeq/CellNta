@@ -30,6 +30,7 @@ add_executable(CellntaDesktop
 
   ./src/Renderer/HypercubeAction.cpp
   ./src/Renderer/HypercubeView.cpp
+  ./src/Renderer/ProjectionAction.cpp
   ./src/Renderer/RenderDataAction.cpp
   ./src/Renderer/RenderDataView.cpp
   ./src/Renderer/Window.cpp
