@@ -59,8 +59,8 @@ void RenderDataView::DrawLoadedCells(const Cellnta::NCellStorage& cells) {
     ImGui::TableSetupColumn("Visible", ImGuiTableColumnFlags_NoResize);
     ImGui::TableSetupScrollFreeze(1, 1);
 
-    auto rawCells = cells.GetRaw().MakeWholeIter();
-    auto rawVisibleCells = cells.GetVisibleRaw().MakeWholeIter();
+    auto rawCells = cells.MakeIter();
+    auto rawVisibleCells = cells.MakeVisibleIter();
     ImGui::TableHeadersRow();
 
     const ImU32 cellBg =
@@ -71,9 +71,16 @@ void RenderDataView::DrawLoadedCells(const Cellnta::NCellStorage& cells) {
 
     ImGuiListClipper clipper;
 
+    int processedCount = 0;
     clipper.Begin(cells.Size());
     while (clipper.Step()) {
+      if (clipper.DisplayStart != processedCount) {
+        rawCells.Nth(clipper.DisplayStart - processedCount);
+        rawVisibleCells.Nth(clipper.DisplayStart - processedCount);
+      }
+
       for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
+
         ImGui::PushID(i);
 
         ImGui::TableNextColumn();
@@ -98,6 +105,7 @@ void RenderDataView::DrawLoadedCells(const Cellnta::NCellStorage& cells) {
         Widget::TextMatrix(visibleCell->pos.transpose());
 
         ImGui::PopID();
+        processedCount++;
       }
     }
     clipper.End();
