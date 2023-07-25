@@ -14,7 +14,7 @@ Currently project contain a lot of bugs and most of the features still not imple
 git clone https://github.com/Rejeq/CellNta
 cd CellNta
 mkdir build && cd build
-cmake ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 cmake --build . -j 4
 ```
 
