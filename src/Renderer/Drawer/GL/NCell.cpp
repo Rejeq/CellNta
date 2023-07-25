@@ -15,14 +15,13 @@ void NCellDrawerGL::Update(const NCellStorage& cells) {
 
   CELLNTA_LOG_TRACE("Updating NCellDrawerGL");
 
-  const NCellStorage::VecList& rawCells = cells.GetVisibleRaw();
-  if (rawCells.Empty()) {
+  if (cells.Size() == 0) {
     m_size = 0;
     return;
   }
 
-  int pointsCount = rawCells.Size() * 3;
-  size_t capacity = rawCells.Capacity();
+  int pointsCount = cells.Size() * 3;
+  size_t capacity = cells.Capacity();
 
   glBindBuffer(GL_ARRAY_BUFFER, m_buffer);
 
@@ -39,7 +38,7 @@ void NCellDrawerGL::Update(const NCellStorage& cells) {
 
   const float* end = dst + pointsCount;
 
-  auto iter = rawCells.MakeWholeIter();
+  auto iter = cells.MakeVisibleIter();
   const NCellStorage::Cell* cell = nullptr;
 
   while (dst < end) {
@@ -54,5 +53,5 @@ void NCellDrawerGL::Update(const NCellStorage& cells) {
   assert(dst >= end && iter.Next() == nullptr && "Not all cells are moved to video memory");
 
   EndArrayBufferSource();
-  m_size = rawCells.Size();
+  m_size = cells.Size();
 }

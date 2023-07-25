@@ -37,8 +37,6 @@ Result:
 template <typename Cell = Cellnta::Cell>
 class CellForest {
   struct Node;
-  class WholeIter;
-  class AreaIter;
 
   using CellState = typename Cell::State;
   using Pos = typename Cell::Pos;
@@ -49,6 +47,9 @@ class CellForest {
   using MapIter = typename Map::iterator;
 
  public:
+  class WholeIter;
+  class AreaIter;
+
   void Set(const Pos& pos, CellState state) {
     CELLNTA_PROFILE;
 
@@ -399,6 +400,7 @@ class CellForest {
     }
   };
 
+ public:
   class WholeIter : public IterBase::CellForwardEx<Cell>,
                     protected IterCommon<WholeIter, DetermineWholeIterRange> {
     using ItCommon = IterCommon<WholeIter, DetermineWholeIterRange>;
@@ -447,6 +449,7 @@ class CellForest {
     Area m_area;
   };
 
+ private:
   struct Node {
     CellState state = 0;
     Map child;  // TODO: Maybe use cache friendly approach?
