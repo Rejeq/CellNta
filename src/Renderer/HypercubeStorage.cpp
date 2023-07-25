@@ -3,7 +3,7 @@
 #include "Cellnta/Config.h"
 #include "Cellnta/Log.h"
 
-#define HYPERCUBE_DEBUG_PRINT
+// #define HYPERCUBE_DEBUG_PRINT
 
 #define CHECK_POLYGON_INDEXES_IN_RANGE(pol, min, max)                          \
   do {                                                                         \
@@ -185,7 +185,7 @@ void HypercubeStorage::GenerateIndicesPolygon() {
   // m_ind.clear();
   m_ind.resize(GetFacesCount() * 6, 0);
   const Ind* dataStart = m_ind.data();
-  const Ind* dataEnd = m_ind.data() + m_ind.size();
+  [[maybe_unused]] const Ind* dataEnd = m_ind.data() + m_ind.size();
   Ind* data = m_ind.data();
 
   for (int currDim = 2; currDim <= m_d; ++currDim) {
