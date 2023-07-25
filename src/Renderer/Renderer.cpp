@@ -148,8 +148,11 @@ void Renderer::ProjectBuffers(bool projectCube, bool projectCells) {
 
   NCellStorage& cells = m_data->GetCells();
 
-  m_cube->Restore();
-  cells.Restore();
+  if (projectCube)
+    m_cube->Restore();
+
+  if (projectCells)
+    cells.RestoreVisible();
 
   for (auto& camera : *m_cameraNd) {
     if (camera.WantSkip())
