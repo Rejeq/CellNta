@@ -6,7 +6,7 @@ endif()
 # So if llvm features are supported (version >= 2019), trying to use it
 if(MSVC_TOOLSET_VERSION GREATER_EQUAL 142)
   set(OpenMP_CXX_FLAGS "/openmp:llvm")
-  target_compile_definitions(CellntaWorld PUBLIC -DCELLNTA_OPENMP_MSVC_LLVM=1)
+  set(OpenMP_LLVM_FLAG_ENABLED ON)
   message(STATUS "Used OpenMP:LLVM flag")
 endif()
 
@@ -18,6 +18,10 @@ if(NOT OpenMP_FOUND)
   message(WARNING "Not found OpenMP support in your compiler, disabling")
   set(CELLNTA_OPENMP OFF)
 else()
+  if(OpenMP_LLVM_FLAG_ENABLED)
+    target_compile_definitions(OpenMP::OpenMP_CXX INTERFACE -DCELLNTA_OPENMP_MSVC_LLVM=1)
+  endif()
+
   # Workaround for: https://gitlab.kitware.com/cmake/cmake/-/issues/21818
   if(NOT MSVC)
     get_property(OpenMP_LINK_OPTS

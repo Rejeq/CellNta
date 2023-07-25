@@ -32,6 +32,11 @@ if(COMMAND target_precompile_headers AND CELLNTA_PCH)
   message(STATUS "Precompiled header enabled")
 endif()
 
+find_package(OpenMP)
+if(OpenMP_FOUND)
+  target_link_libraries(CellntaBase PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
 if(CELLNTA_PROFILING)
   find_package(Tracy REQUIRED)
 

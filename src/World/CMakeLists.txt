@@ -10,8 +10,3 @@ add_library(Cellnta::World ALIAS CellntaWorld)
 target_link_libraries(CellntaWorld PUBLIC
   Cellnta::Base
 )
-
-find_package(OpenMP)
-if(OpenMP_FOUND)
-  target_link_libraries(CellntaWorld PUBLIC OpenMP::OpenMP_CXX)
-endif()
