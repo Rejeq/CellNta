@@ -31,8 +31,8 @@ class Renderer {
   void ProjectBuffers(bool projectCube = true, bool projectCells = true);
 
   void SetRenderDistance(uint32_t distance);
-  void SetDimension(uint32_t D);
 
+  void SetDimension(uint32_t D);
   int GetDimensions() const { return m_d; }
 
   void SetCamera3d(const std::shared_ptr<Camera3d>& camera) {

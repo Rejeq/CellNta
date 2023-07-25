@@ -2,6 +2,8 @@
 
 #include <cfloat>
 
+#include <Eigen/LU>
+
 #include "Cellnta/Config.h"
 #include "Cellnta/Renderer/HypercubeStorage.h"
 #include "Cellnta/Renderer/NCellStorage.h"

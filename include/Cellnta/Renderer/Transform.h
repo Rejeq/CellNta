@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Eigen/LU>
+#include <Eigen/Core>
 
 namespace Cellnta {
 
