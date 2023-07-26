@@ -33,6 +33,8 @@ add_executable(CellntaDesktop
   ./src/Renderer/ProjectionAction.cpp
   ./src/Renderer/RenderDataAction.cpp
   ./src/Renderer/RenderDataView.cpp
+  ./src/Renderer/ShuffleAction.cpp
+  ./src/Renderer/ShuffleView.cpp
   ./src/Renderer/Window.cpp
 
   ./src/Scene/FocusAction.cpp

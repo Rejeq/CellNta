@@ -38,7 +38,9 @@ void NCellDrawerGL::Update(const NCellStorage& cells) {
 
   const float* end = dst + pointsCount;
 
-  auto iter = cells.MakeVisibleIter();
+  NCellStorage::IterVisible iter = (cells.NeedShuffleOnDraw())
+                                       ? cells.MakeVisibleIter()
+                                       : cells.MakeNoShuffleVisibleIter();
   const NCellStorage::Cell* cell = nullptr;
 
   while (dst < end) {
@@ -50,7 +52,8 @@ void NCellDrawerGL::Update(const NCellStorage& cells) {
     dst[2] = cell->pos[2];
     dst += 3;
   }
-  assert(dst >= end && iter.Next() == nullptr && "Not all cells are moved to video memory");
+  assert(dst >= end && iter.Next() == nullptr &&
+         "Not all cells are moved to video memory");
 
   EndArrayBufferSource();
   m_size = cells.Size();

@@ -10,6 +10,7 @@ add_library(CellntaRenderer STATIC
   ./NCellStorage.cpp
   ./RenderData.cpp
   ./Renderer.cpp
+  ./ShuffleAxisStorage.cpp
   ./Transform.cpp
 )
 add_library(Cellnta::Renderer ALIAS CellntaRenderer)

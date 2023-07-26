@@ -5,6 +5,7 @@
 #include "Context.h"
 #include "Renderer/HypercubeView.h"
 #include "Renderer/RenderDataView.h"
+#include "Renderer/ShuffleView.h"
 #include "Widgets/Utils.h"
 
 using namespace Ui;
@@ -29,6 +30,11 @@ void RendererWindow::Draw() {
     auto* data = ren.GetData();
     if (data != nullptr)
       RenderDataView::Draw(*ctx, *data);
+
+    Widget::Separator();
+    if (data != nullptr) {
+      ShuffleView::DrawWithTreeNode(*ctx, data->GetCells());
+    }
   }
 
   ImGui::End();
